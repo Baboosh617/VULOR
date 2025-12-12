@@ -173,20 +173,40 @@ class Product(models.Model):
         if self.rise_measurements:
             measurements['Rise'] = self.rise_measurements
         return measurements
-class Review(models.Model): 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) 
-    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="reviews")
-
-    rating = models.IntegerField( validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Rating from 1 to 5 stars" ) 
-    comment = models.TextField(max_length=500) 
-    created_at = models.DateTimeField(auto_now_add=True) 
-    approved = models.BooleanField(default=False) 
-    class Meta: ordering = ['-created_at'] 
-    def __str__(self): 
-            return f"Review by {self.user.username} - {self.rating} stars" 
-    def get_star_rating(self): return range(self.rating) 
-    def get_empty_stars(self): return range(5 - self.rating)
-
+class Review(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        "products.Product", 
+        on_delete=models.CASCADE, 
+        related_name="reviews",
+        null=True,      # Allows NULL in the database
+        blank=True      # Allows blank in forms/admin
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)], 
+        help_text="Rating from 1 to 5 stars"
+    )
+    comment = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        if self.product:
+            return f"Review by {self.user.username} for {self.product.name} - {self.rating} stars"
+        return f"Store Review by {self.user.username} - {self.rating} stars"
+    
+    def get_star_rating(self):
+        return range(self.rating)
+    
+    def get_empty_stars(self):
+        return range(5 - self.rating)
+    
+    # Helper method to check if it's a store review
+    def is_store_review(self):
+        return self.product is None
 
 class Category(models.Model):
     name = models.CharField(max_length=100)

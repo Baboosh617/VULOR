@@ -153,22 +153,150 @@
         </div>
 
         <!-- Review Form -->
-        <div class="bg-gray-700 rounded-2xl p-8 border border-gray-600">
-            <h3 class="text-2xl font-bold text-white mb-6 text-center">Write a Review</h3>
+       <div class="bg-gray-800 rounded-3xl p-6 md:p-8 my-8">
+    <h2 class="text-3xl font-bold text-white mb-8 text-center">Customer Reviews</h2>
+    
+    <!-- Reviews Stats (Optional) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-gray-700 p-6 rounded-2xl text-center">
+            <div class="text-4xl font-bold text-yellow-400 mb-2">
+                {{ avg_rating|default:"5.0" }}/5
+            </div>
+            <div class="text-gray-300">
+                <div class="flex justify-center mb-1">
+                    {% for i in "12345" %}
+                        <span class="text-yellow-400">★</span>
+                    {% endfor %}
+                </div>
+                Average Rating
+            </div>
+        </div>
+        
+        <div class="bg-gray-700 p-6 rounded-2xl text-center">
+            <div class="text-4xl font-bold text-white mb-2">{{ total_reviews }}</div>
+            <div class="text-gray-300">Total Reviews</div>
+        </div>
+        
+        <div class="bg-gray-700 p-6 rounded-2xl text-center">
+            <div class="text-4xl font-bold text-white mb-2">{{ store_reviews.count }}</div>
+            <div class="text-gray-300">Store Reviews</div>
+        </div>
+    </div>
+    
+    <!-- Reviews Display Section -->
+    <div class="mb-12">
+        <h3 class="text-2xl font-bold text-white mb-6">What Our Customers Say</h3>
+        
+        {% if store_reviews %}
+            <!-- Store Reviews -->
+            <div class="space-y-6">
+                {% for review in store_reviews %}
+                    <div class="bg-gray-700 rounded-xl p-6 border border-gray-600 hover:border-purple-500 transition-all duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <div class="flex items-center mb-2">
+                                    <div class="flex text-yellow-400 mr-3">
+                                        {% for i in review.get_star_rating %}
+                                            <span class="text-xl">★</span>
+                                        {% endfor %}
+                                        {% for i in review.get_empty_stars %}
+                                            <span class="text-xl text-gray-500">☆</span>
+                                        {% endfor %}
+                                    </div>
+                                    <span class="text-gray-300">{{ review.rating }}.0</span>
+                                </div>
+                                <h4 class="text-white font-semibold">
+                                    {% if review.user.first_name and review.user.last_name %}
+                                        {{ review.user.first_name }} {{ review.user.last_name }}
+                                    {% else %}
+                                        {{ review.user.username }}
+                                    {% endif %}
+                                </h4>
+                            </div>
+                            <span class="text-gray-400 text-sm">
+                                {{ review.created_at|timesince }} ago
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-300 mb-4">{{ review.comment }}</p>
+                        
+                        {% if not review.product %}
+                            <span class="inline-block bg-purple-900 text-purple-200 text-xs px-3 py-1 rounded-full">
+                                Store Review
+                            </span>
+                        {% else %}
+                            <span class="inline-block bg-blue-900 text-blue-200 text-xs px-3 py-1 rounded-full">
+                                Product: {{ review.product.name }}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
             
-            {% if user.is_authenticated %}
-            <form method="POST" action="{% url 'submit_review' %}" class="space-y-6">
+            <!-- View All Reviews Link (if you have a dedicated reviews page) -->
+            {% if store_reviews.count > 3 %}
+                <div class="text-center mt-8">
+                    <a href="{% url 'review_list' %}" 
+                       class="inline-block text-purple-400 hover:text-purple-300 transition-colors">
+                        View All Reviews →
+                    </a>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- No Reviews Yet -->
+            <div class="text-center py-12 bg-gray-700 rounded-2xl">
+                <div class="text-6xl mb-4">📝</div>
+                <h4 class="text-xl font-semibold text-white mb-2">No Reviews Yet</h4>
+                <p class="text-gray-400 mb-6">Be the first to share your experience!</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Review Form -->
+    <div class="bg-gray-700 rounded-2xl p-8 border border-gray-600">
+        <h3 class="text-2xl font-bold text-white mb-6 text-center">Write a Review</h3>
+        
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'submit_review' %}" class="space-y-6" id="reviewForm">
                 {% csrf_token %}
-                <input type="hidden" name="submit_review" value="true">
+                
+                <!-- Review Type Selection (Optional) -->
+                <div class="flex space-x-4 mb-4">
+                    <button type="button" 
+                            id="storeReviewBtn" 
+                            class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-medium transition-colors">
+                        ✨ Store Review
+                    </button>
+                    <button type="button" 
+                            id="productReviewBtn" 
+                            class="flex-1 bg-gray-600 text-gray-300 py-2 rounded-lg font-medium transition-colors">
+                        📦 Product Review
+                    </button>
+                </div>
+                
+                <!-- Product Selection (Hidden by default) -->
+                <div id="productSelection" class="hidden">
+                    <label class="block text-white text-sm font-medium mb-2">Select Product</label>
+                    <select name="product_id" class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
+                        <option value="">-- Select a Product (Optional) --</option>
+                        {% for product in recent_products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-gray-400 text-sm mt-1">
+                        Leave empty for general store review
+                    </p>
+                </div>
                 
                 <!-- Star Rating -->
                 <div class="text-center">
                     <label class="block text-white text-lg font-semibold mb-4">How would you rate us?</label>
                     <div class="flex justify-center space-x-2 mb-2" id="star-rating">
                         {% for i in "54321" %}
-                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
-                               {% if forloop.first %}checked{% endif %}>
-                        <label for="star{{ i }}" class="text-3xl cursor-pointer text-gray-500 hover:text-yellow-400 transition-colors star-label" data-rating="{{ i }}">★</label>
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
+                                   {% if forloop.first %}checked{% endif %}>
+                            <label for="star{{ i }}" class="text-3xl cursor-pointer text-gray-500 hover:text-yellow-400 transition-colors star-label" data-rating="{{ i }}">★</label>
                         {% endfor %}
                     </div>
                     <div id="rating-text" class="text-gray-400 text-sm">Excellent</div>
@@ -180,15 +308,22 @@
                     <textarea name="comment" required 
                               class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 resize-none"
                               rows="4"
-                              placeholder="Share your experience with our products and service..."></textarea>
+                              placeholder="Share your experience with our products and service..."
+                              minlength="10"
+                              maxlength="500"></textarea>
+                    <div class="text-right text-gray-400 text-sm mt-1">
+                        <span id="charCount">0</span>/500 characters
+                    </div>
                 </div>
 
                 <button type="submit" 
-                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors">
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors duration-300 transform hover:scale-[1.02]">
                     Submit Review
                 </button>
             </form>
-            {% else %}
+            
+        {% else %}
+            <!-- Not Logged In -->
             <div class="text-center py-8">
                 <p class="text-gray-400 mb-4">Please log in to write a review</p>
                 <a href="{% url 'login' %}" 
@@ -196,12 +331,14 @@
                     Login to Review
                 </a>
             </div>
-            {% endif %}
-        </div>
+        {% endif %}
+    </div>
+</div>
+
     </div>
 </section>
 
-<style>
+<!-- <style>
 .star-label:hover,
 .star-label:hover ~ .star-label {
     color: #fbbf24 !important; 
@@ -215,8 +352,18 @@
 .star-input:checked ~ .star-label {
     color: #fbbf24 !important;
 }
+</style> -->
+<style>
+/* Additional CSS for star rating */
+.star-label {
+    transition: all 0.2s ease;
+}
+.star-label:hover ~ .star-label,
+.star-input:checked ~ .star-label {
+    color: #fbbf24; /* yellow-400 */
+}
 </style>
-
+<!-- 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const starInputs = document.querySelectorAll('.star-input');
@@ -254,6 +401,86 @@ document.addEventListener('DOMContentLoaded', function() {
         checkedInput.dispatchEvent(new Event('change'));
     }
 });
+</script> -->
+<!-- JavaScript for Enhanced Review Form -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star Rating Logic
+    const starInputs = document.querySelectorAll('.star-input');
+    const starLabels = document.querySelectorAll('.star-label');
+    const ratingText = document.getElementById('rating-text');
+    
+    const ratingTexts = {
+        '5': 'Excellent',
+        '4': 'Good',
+        '3': 'Average',
+        '2': 'Fair',
+        '1': 'Poor'
+    };
+    
+    starLabels.forEach(label => {
+        label.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingText.textContent = ratingTexts[rating];
+            
+            // Update star colors
+            starLabels.forEach(l => {
+                if (l.getAttribute('data-rating') <= rating) {
+                    l.classList.remove('text-gray-500');
+                    l.classList.add('text-yellow-400');
+                } else {
+                    l.classList.remove('text-yellow-400');
+                    l.classList.add('text-gray-500');
+                }
+            });
+        });
+    });
+    
+    // Character Counter
+    const textarea = document.querySelector('textarea[name="comment"]');
+    const charCount = document.getElementById('charCount');
+    
+    textarea.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+    
+    // Review Type Toggle
+    const storeReviewBtn = document.getElementById('storeReviewBtn');
+    const productReviewBtn = document.getElementById('productReviewBtn');
+    const productSelection = document.getElementById('productSelection');
+    
+    storeReviewBtn.addEventListener('click', function() {
+        storeReviewBtn.classList.add('bg-purple-600', 'text-white');
+        storeReviewBtn.classList.remove('bg-gray-600', 'text-gray-300');
+        
+        productReviewBtn.classList.remove('bg-purple-600', 'text-white');
+        productReviewBtn.classList.add('bg-gray-600', 'text-gray-300');
+        
+        productSelection.classList.add('hidden');
+    });
+    
+    productReviewBtn.addEventListener('click', function() {
+        productReviewBtn.classList.add('bg-purple-600', 'text-white');
+        productReviewBtn.classList.remove('bg-gray-600', 'text-gray-300');
+        
+        storeReviewBtn.classList.remove('bg-purple-600', 'text-white');
+        storeReviewBtn.classList.add('bg-gray-600', 'text-gray-300');
+        
+        productSelection.classList.remove('hidden');
+    });
+    
+    // Form Submission Alert
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            const comment = textarea.value.trim();
+            if (comment.length < 10) {
+                e.preventDefault();
+                alert('Please write at least 10 characters for your review.');
+                textarea.focus();
+            }
+        });
+    }
+});
 </script>
-
 {% endblock %}

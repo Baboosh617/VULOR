@@ -9,6 +9,8 @@ from .models import Review
 from .forms import ReviewForm
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.db.models import Avg
+
 
 def home(request):
 
@@ -24,6 +26,17 @@ def home(request):
     
     # Initialize form
     form = ReviewForm()
+
+    store_reviews = Review.objects.filter(
+        approved=True,
+        product__isnull=True  # Only store reviews
+    ).order_by('-created_at')[:10]  # Show 10 most recent
+
+    avg_rating = store_reviews.aggregate(Avg('rating'))['rating__avg']
+    
+    total_reviews = Review.objects.filter(approved=True).count()
+
+    recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
 
     if request.method == 'POST':
         # Check if this is a review submission
@@ -42,6 +55,10 @@ def home(request):
                 return redirect('home')
     
     context = {
+        'store_reviews': store_reviews,
+        'avg_rating': round(avg_rating, 1) if avg_rating else None,
+        'total_reviews': total_reviews,
+        'recent_products': recent_products,
         'new_arrivals': new_arrivals,
         'reviews': reviews,
         'review_form': form,
@@ -113,8 +130,17 @@ def submit_review(request):
         if form.is_valid():
             review = form.save(commit=False)
             review.user = request.user
+            
+            # Get the product if it exists
+            product_id = request.POST.get('product_id')
+            if product_id:
+                try:
+                    product = Product.objects.get(id=product_id)
+                    review.product = product
+                except Product.DoesNotExist:
+                    pass  # Leave as store review if product not found
+            
             review.save()
             messages.success(request, 'Thank you for your review! It will be visible after approval.')
     
-    # Always redirect back to home
     return redirect('home')
