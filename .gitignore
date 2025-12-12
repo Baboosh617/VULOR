@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+static/
+
+# Secrets
+.env
+*.env
+.env.*
+
+# Node / Tailwind
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# Editor Junk
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Cache
+*.tmp
+*.cache
