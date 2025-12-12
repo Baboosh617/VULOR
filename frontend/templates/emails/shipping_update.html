@@ -1,0 +1,17 @@
+{% load static %}
+<html>
+  <body style="font-family: system-ui, sans-serif; background-color: #f9fafb; margin:0; padding:0;">
+    <div style="max-width:600px; margin:auto; background-color:#fff; padding:20px; border-radius:8px;">
+      <img src="{% static 'vulor_logo.png' %}" style="height:50px; margin-bottom:20px;" alt="VULOR Logo" />
+      <h1 style="font-size:24px; font-weight:bold; color:#111827;">Your order is on its way!</h1>
+      <p style="font-size:16px; color:#374151;">Hi {{ user.first_name }}, your order <strong>#{{ order.id }}</strong> has been shipped.</p>
+
+      <p style="margin-top:20px; font-size:16px; color:#374151;">
+        Courier: {{ order.courier_name }}<br>
+        Tracking Number: {{ order.tracking_number }}
+      </p>
+
+      <a href="http://localhost:8000/orders/{{ order.id }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">Track Your Order</a>
+    </div>
+  </body>
+</html>

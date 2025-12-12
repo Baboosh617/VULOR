@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Failed - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </div>
+        <h1 class="text-4xl font-bold text-white mb-2">Payment Failed</h1>
+        <p class="text-gray-400 text-lg">We couldn't process your payment. Please try again.</p>
+    </div>
+
+    <div class="bg-gray-800 rounded-2xl p-6 mb-6">
+        <div class="space-y-3">
+            <h3 class="text-xl font-bold text-white">Order Information</h3>
+            <div class="space-y-2 text-gray-300">
+                <div class="flex justify-between">
+                    <span>Order Number:</span>
+                    <span class="font-mono text-white">{{ order.order_number }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Amount:</span>
+                    <span class="text-white font-bold">₦{{ order.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center space-y-3">
+        <a href="{% url 'payments:initiate_payment' order.id %}" 
+           class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-full transition duration-200 text-center">
+            Try Payment Again
+        </a>
+        
+        <a href="{% url 'cart:view_cart' %}" 
+           class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full transition duration-200 text-center">
+            Back to Cart
+        </a>
+        
+        <a href="{% url 'home' %}" 
+           class="block w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-full transition duration-200 text-center">
+            Continue Shopping
+        </a>
+    </div>
+
+    <!-- Support Info -->
+    <div class="text-center mt-8 pt-6 border-t border-gray-700">
+        <p class="text-sm text-gray-400">
+            Need help? <a href="mailto:support@vulor.com" class="text-purple-400 hover:text-purple-300">Contact our support team</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

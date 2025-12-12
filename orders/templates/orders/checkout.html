@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Shipping Form -->
+        <div class="bg-gray-800 rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-white">Shipping Information</h2>
+            
+            <form method="POST" id="paymentForm" action="{% url 'orders:checkout' %}">
+                         {% csrf_token %}
+    
+                    <div class="space-y-4">
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-white">Shipping Address</label>
+                            <input type="text" name="shipping_address" required 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
+                                placeholder="123 Main St">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-white">City</label>
+                                <input type="text" name="shipping_city" required 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
+                                    placeholder="Lagos">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-white">State</label>
+                                <input type="text" name="shipping_state" required 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
+                                    placeholder="Lagos State">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-white">ZIP Code</label>
+                                <input type="text" name="shipping_zipcode" required 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
+                                    placeholder="100001">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-white">Country</label>
+                                <select name="shipping_country" 
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                                    <option value="Nigeria" selected>Nigeria</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-white">Phone Number</label>
+                            <input type="tel" name="customer_phone" required 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
+                                placeholder="+234 812 345 6789">
+                        </div>
+
+                    </div>
+
+                    <button type="submit" id="paystack-button" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-full font-semibold mt-6">
+                        Proceed to Paystack Payment
+                    </button>
+            </form>
+
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-gray-800 rounded-2xl p-6 h-fit sticky top-8">
+            <h2 class="text-2xl font-bold mb-6 text-white">Order Summary</h2>
+            
+            <div class="space-y-4 mb-6">
+                {% for item in cart.items.all %}
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-12 h-12 object-cover rounded">
+                        <div>
+                            <p class="font-semibold text-white">{{ item.product.name }}</p>
+                            <p class="text-sm text-gray-400">
+                                {% if item.size %}Size: {{ item.size }}{% endif %}
+                                {% if item.color %} | Color: {{ item.color }}{% endif %}
+                            </p>
+                            <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    <p class="font-semibold text-white">₦{{ item.total_price }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="border-t border-gray-700 pt-4 space-y-2">
+                <div class="flex justify-between text-white">
+                    <span>Subtotal</span>
+                    <span>₦{{ cart.total_price }}</span>
+                </div>
+                <!-- <div class="flex justify-between text-white">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div> -->
+                <div class="flex justify-between text-lg font-bold text-white">
+                    <span>Total</span>
+                    <span>₦{{ cart.total_price }}</span>
+                </div>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-400">
+                <p>Secured by <strong>Paystack</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

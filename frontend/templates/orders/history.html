@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Order History - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Order History</h1>
+    
+    {% if orders %}
+    <div class="space-y-6">
+        {% for order in orders %}
+        <div class="bg-gray-800 rounded-2xl p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold">Order #{{ order.order_number }}</h2>
+                    <p class="text-gray-400">{{ order.created_at|date:"F j, Y" }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-bold">₦{{ order.total_amount }}</p>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium 
+                        {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
+                        {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
+                        {% elif order.status == 'processing' %}bg-yellow-500/20 text-yellow-500
+                        {% else %}bg-gray-500/20 text-gray-500{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-4">
+                <h3 class="font-semibold mb-2">Items:</h3>
+                <div class="space-y-2">
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between">
+                        <span>{{ item.quantity }} x {{ item.product.name }}</span>
+                        <span>${{ item.total_price }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'orders:order_detail' order.order_number %}" 
+                   class="text-purple-500 hover:text-purple-400 font-semibold">
+                    View Order Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <p class="text-gray-400 text-xl">You haven't placed any orders yet.</p>
+        <a href="{% url 'product_list' %}" class="text-purple-500 hover:text-purple-400 mt-4 inline-block">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

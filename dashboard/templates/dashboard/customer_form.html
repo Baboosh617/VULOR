@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Edit Customer: {{ user.username }}</h1>
+
+<form method="post" class="bg-white shadow rounded p-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Save</button>
+</form>
+
+<a href="{% url 'dashboard:customer_list' %}" class="text-gray-500 hover:underline mt-4 inline-block">← Back to customers</a>
+{% endblock %}

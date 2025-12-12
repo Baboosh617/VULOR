@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="min-h-screen flex items-center justify-center" style="background: linear-gradient(to right, #1C2A3A, #2E4057);">
+    <div class="text-center">
+        <h1 class="text-6xl md:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+            VULOR
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mb-12">
+            Guided by vision, driven by style.
+        </p>
+        <a href="{% url 'product_list' %}" 
+           class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded text-lg font-semibold transition-colors inline-block">
+            Shop Now
+        </a>
+    </div>
+</div>
+
+<!-- New Arrivals Section -->
+<section class="py-20 bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">New Arrivals</h2>
+            <p class="text-gray-400">Fresh drops added weekly</p>
+        </div>
+
+        {% if new_arrivals %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for product in new_arrivals|slice:":6" %}
+            <a href="{% url 'product_detail' product.slug %}" class="group">
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-purple-500 transition-colors duration-300">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                             class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                        
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
+                                NEW
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="text-lg font-medium text-white mb-2">{{ product.name }}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-purple-500">₦{{ product.price }}</span>
+                            <span class="text-sm text-gray-400">{{ product.get_category_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-400 text-lg mb-4">No new arrivals available at the moment.</p>
+            <a href="{% url 'product_list' %}" 
+               class="inline-block border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white px-6 py-2 rounded transition-colors">
+                Browse All Products
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-8">
+            <a href="{% url 'product_list' %}?sort=newest" 
+               class="inline-block border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white px-6 py-2 rounded transition-colors">
+                View All Products
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="py-16 bg-gray-800">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+            {% if user.is_authenticated %}
+            Welcome to VULOR
+            {% else %}
+            Ready to Elevate Your Style?
+            {% endif %}
+        </h2>
+        
+        <p class="text-gray-400 mb-6">
+            {% if user.is_authenticated %}
+            Continue your streetwear journey with our latest collection
+            {% else %}
+            Join the VULOR community today
+            {% endif %}
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'product_list' %}" 
+               class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded font-semibold transition-colors text-center">
+                {% if user.is_authenticated %}
+                Continue Shopping
+                {% else %}
+                Start Shopping
+                {% endif %}
+            </a>
+            
+            {% if not user.is_authenticated %}
+            <a href="{% url 'signup' %}" 
+               class="border border-gray-600 text-gray-300 hover:bg-gray-700 px-6 py-3 rounded font-semibold transition-colors text-center">
+                Create Account
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Customer Reviews Section -->
+<section class="py-20 bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">Customer Reviews</h2>
+            <p class="text-gray-400">What our customers are saying</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-4"></div>
+        </div>
+
+        <!-- Display Reviews -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {% for review in reviews %}
+            <div class="bg-gray-700 rounded-lg p-6 border border-gray-600">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {{ review.user.username|first|upper }}
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-white">{{ review.user.username }}</h4>
+                        <div class="flex items-center">
+                            <!-- Star Rating -->
+                            <div class="flex text-yellow-400 mr-2">
+                                {% for star in review.get_star_rating %}
+                                <span>★</span>
+                                {% endfor %}
+                                {% for star in review.get_empty_stars %}
+                                <span class="text-gray-500">★</span>
+                                {% endfor %}
+                            </div>
+                            <span class="text-gray-400 text-sm">{{ review.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-300 text-sm leading-relaxed">"{{ review.comment }}"</p>
+            </div>
+            {% empty %}
+            <div class="col-span-2 text-center py-8">
+                <p class="text-gray-400">No reviews yet. Be the first to review!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Review Form -->
+        <div class="bg-gray-700 rounded-2xl p-8 border border-gray-600">
+            <h3 class="text-2xl font-bold text-white mb-6 text-center">Write a Review</h3>
+            
+            {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'submit_review' %}" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="submit_review" value="true">
+                
+                <!-- Star Rating -->
+                <div class="text-center">
+                    <label class="block text-white text-lg font-semibold mb-4">How would you rate us?</label>
+                    <div class="flex justify-center space-x-2 mb-2" id="star-rating">
+                        {% for i in "54321" %}
+                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
+                               {% if forloop.first %}checked{% endif %}>
+                        <label for="star{{ i }}" class="text-3xl cursor-pointer text-gray-500 hover:text-yellow-400 transition-colors star-label" data-rating="{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                    <div id="rating-text" class="text-gray-400 text-sm">Excellent</div>
+                </div>
+
+                <!-- Comment -->
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Your Review</label>
+                    <textarea name="comment" required 
+                              class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 resize-none"
+                              rows="4"
+                              placeholder="Share your experience with our products and service..."></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors">
+                    Submit Review
+                </button>
+            </form>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-400 mb-4">Please log in to write a review</p>
+                <a href="{% url 'login' %}" 
+                   class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded transition-colors">
+                    Login to Review
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<style>
+.star-label:hover,
+.star-label:hover ~ .star-label {
+    color: #fbbf24 !important; 
+}
+
+.star-input:checked ~ .star-label,
+.star-input:checked + .star-label {
+    color: #fbbf24 !important; 
+}
+
+.star-input:checked ~ .star-label {
+    color: #fbbf24 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const starInputs = document.querySelectorAll('.star-input');
+    const starLabels = document.querySelectorAll('.star-label');
+    const ratingText = document.getElementById('rating-text');
+    
+    const ratingTexts = {
+        '5': 'Excellent',
+        '4': 'Very Good', 
+        '3': 'Good',
+        '2': 'Fair',
+        '1': 'Poor'
+    };
+    
+    starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const rating = this.value;
+            ratingText.textContent = ratingTexts[rating];
+            
+            // Update star colors
+            starLabels.forEach(label => {
+                const labelRating = label.getAttribute('data-rating');
+                if (labelRating <= rating) {
+                    label.style.color = '#fbbf24'; 
+                } else {
+                    label.style.color = '#6b7280'; 
+                }
+            });
+        });
+    });
+    
+    // Initialize on page load
+    const checkedInput = document.querySelector('.star-input:checked');
+    if (checkedInput) {
+        checkedInput.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+
+{% endblock %}

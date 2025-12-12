@@ -37,3 +37,13 @@ Thumbs.db
 # Cache
 *.tmp
 *.cache
+
+
+# Coverage reports
+htmlcov/
+
+*.docker-compose.yaml
+*.docker-compose.override.yaml
+*.docker-file.dockerfile
+
+*.nginx.conf

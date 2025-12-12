@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px;">
+        <h2 style="margin-bottom: 10px;">Weekly Sales Report</h2>
+        <p>Here's your weekly VULOR performance summary:</p>
+
+        <h3>Summary</h3>
+        <p><strong>Total Orders:</strong> {{ total_orders }}</p>
+        <p><strong>Total Revenue:</strong> ₦{{ total_revenue }}</p>
+
+        <h3 style="margin-top: 20px;">Orders This Week</h3>
+        {% if orders %}
+            <ul>
+            {% for order in orders %}
+                <li>
+                    Order #{{ order.id }} — ₦{{ order.total_amount }} — {{ order.created_at|date:"M d, Y" }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No orders this week.</p>
+        {% endif %}
+
+        <h3 style="margin-top: 20px;">Low Stock Products</h3>
+        {% if low_stock_products %}
+            <ul>
+            {% for product in low_stock_products %}
+                <li>{{ product.name }} — Qty: {{ product.quantity }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No low-stock items.</p>
+        {% endif %}
+
+        <p style="margin-top: 20px;">Sent automatically by the VULOR system.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VULOR | Order Shipped</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; padding: 30px; }
+        .container { background: white; padding: 25px; border-radius: 10px; max-width: 600px; margin: auto; }
+        p { font-size: 15px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Order Is On The Way 🚚</h2>
+        <p>Hi {{ user.first_name }},</p>
+        <p>Your order <strong>#{{ order.id }}</strong> has just shipped.</p>
+        <p>We'll notify you again when it's out for delivery.</p>
+        <p>— VULOR Team</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <!-- Product Image -->
+        <div class="bg-gray-900 aspect-square rounded-lg overflow-hidden">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                 class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Product Details -->
+        <div class="flex flex-col justify-center">
+            <!-- Category -->
+            <div class="text-gray-400 text-sm mb-4">{{ product.get_category_display }}</div>
+            
+            <!-- Product Name -->
+            <h1 class="text-3xl font-bold text-white mb-4">{{ product.name }}</h1>
+            
+            <!-- Pricing -->
+            <div class="mb-8">
+                <span class="text-3xl font-bold text-purple-500">₦{{ product.price }}</span>
+                {% if product.compare_price %}
+                <span class="text-xl text-gray-400 line-through">₦{{ product.compare_price }}</span>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Description</h3>
+                <p class="text-gray-300 leading-relaxed">{{ product.description }}</p>
+            </div>
+
+            <!-- Detailed Measurements for Cargo Jeans & Sweatpants -->
+            {% if product.has_detailed_measurements %}
+            <div class="mb-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h3 class="text-xl font-bold text-white mb-4">📏 Size & Measurements</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for measurement_name, measurement_value in product.get_measurements_dict.items %}
+                    <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                        <span class="text-gray-300 font-medium">{{ measurement_name }}:</span>
+                        <span class="text-white">{{ measurement_value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-gray-400 text-sm mt-4">
+                    💡 All measurements in inches. Refer to our <a href="{% url 'size_guide' %}" class="text-purple-400 hover:text-purple-300">size guide</a> for help.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Add to Cart Form -->
+            {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'add_to_cart' product.id %}" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if product.category == 'cargo-jeans' %}
+<div class="mb-6">
+    <label class="block text-white text-sm mb-3">FIT</label>
+    <div class="flex flex-wrap gap-2">
+        {% for fit_value, fit_label in FIT_CHOICES %}
+        <label class="flex items-center">
+            <input type="radio" name="fit_type" value="{{ fit_value }}"
+                   class="hidden peer" {% if product.fit_type == fit_value %}checked{% endif %}>
+            <span class="px-4 py-2 border border-gray-600 rounded-lg cursor-pointer peer-checked:border-purple-500 peer-checked:bg-purple-600 peer-checked:text-white">
+                {{ fit_label }}
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+                <!-- Size Selection -->
+                {% if product.get_available_sizes_list %}
+                <div>
+                    <label class="block text-white text-sm mb-3">
+                        {% if product.has_detailed_measurements %}
+                        SELECT WAIST SIZE
+                        {% else %}
+                        SELECT SIZE
+                        {% endif %}
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        {% for size in product.get_available_sizes_list %}
+                        <label class="flex items-center">
+                            <input type="radio" name="size" value="{{ size }}" 
+                                   class="hidden peer" {% if forloop.first %}checked{% endif %}>
+                            <span class="px-4 py-2 border border-gray-600 rounded-lg cursor-pointer peer-checked:border-purple-500 peer-checked:bg-purple-600 peer-checked:text-white">
+                                {{ size }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Color Selection -->
+                {% if product.get_available_colors_list %}
+                <div>
+                    <label class="block text-sm font-medium mb-2">COLOR</label>
+                    <div class="flex flex-wrap gap-2">
+                        {% for color in product.get_available_colors_list %}
+                        <label class="flex items-center">
+                            <input type="radio" name="color" value="{{ color }}" 
+                                   class="hidden peer" {% if forloop.first %}checked{% endif %}>
+                            <span class="px-4 py-2 border border-gray-600 rounded-lg cursor-pointer peer-checked:border-purple-500 peer-checked:bg-purple-600 peer-checked:text-white">
+                                {{ color }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Quantity & Add to Cart -->
+                <div class="flex items-center gap-4 pt-4">
+                    <div class="flex items-center border border-gray-600 rounded-lg">
+                        <button type="button" class="decrease-quantity px-4 py-2 text-gray-400 hover:text-white">−</button>
+                        <input type="number" name="quantity" value="1" min="1" 
+                               class="w-16 bg-transparent text-center py-3 text-white quantity-input">
+                        <button type="button" class="increase-quantity px-4 py-3 text-gray-400 hover:text-white">+</button>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            {% if not product.is_in_stock %}disabled{% endif %}>
+                        {% if product.is_in_stock %}
+                            Add to Cart
+                        {% else %}
+                            Out of Stock
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+            
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-400 mb-4">Please log in to purchase</p>
+                <a href="{% url 'login' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full transition-colors">
+                    Login
+                </a>
+            </div>
+            {% endif %}
+            
+            <!-- Product Features -->
+            <div class="mt-12 pt-8 border-t border-gray-800">
+                <div class="grid grid-cols-3 gap-8 text-center text-sm text-gray-400">
+                    <div>
+                        <div class="text-purple-500 font-semibold">Shipping</div>
+                        <div>Free over ₦50,000</div>
+                    </div>
+                    <div>
+                        <div class="text-purple-500 font-semibold">Returns</div>
+                        <div>30 days</div>
+                    </div>
+                    <div>
+                        <div class="text-purple-500 font-semibold">Payment</div>
+                        <div>Secured by Paystack</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Quantity controls
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', () => {
+            const input = button.parentElement.querySelector('.quantity-input');
+            input.value = parseInt(input.value) + 1;
+        });
+    });
+
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', () => {
+            const input = button.parentElement.querySelector('.quantity-input');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+    });
+</script>
+{% endblock %}

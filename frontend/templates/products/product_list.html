@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Products - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-4">Explore Our Catalogue</h1>
+        
+        <!-- Filters and Search -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <!-- Search -->
+            <div class="flex-1">
+                <form method="GET" class="flex">
+                    <input type="text" name="search" placeholder="Search products..." 
+                           value="{{ search_query }}"
+                           class="flex-1 bg-gray-800 border border-gray-700 rounded-l-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500">
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-r-lg">
+                        Search
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Sort -->
+            <select title="filter" name="sort" onchange="window.location.href='?sort='+this.value" 
+                    class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white">
+                <option value="newest" {% if sort_method == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="price_low" {% if sort_method == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if sort_method == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                <option value="name" {% if sort_method == 'name' %}selected{% endif %}>Name</option>
+            </select>
+        </div>
+        
+        <!-- Category Filters -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <a href="{% url 'product_list' %}" 
+               class="px-4 py-2 rounded-full {% if not current_category %}bg-purple-600 text-white{% else %}bg-gray-800 text-gray-300 hover:bg-gray-700{% endif %}">
+                All
+            </a>
+            {% for value, label in categories %}
+            <a href="?category={{ value }}" 
+               class="px-4 py-2 rounded-full {% if current_category == value %}bg-purple-600 text-white{% else %}bg-gray-800 text-gray-300 hover:bg-gray-700{% endif %}">
+                {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for product in products %}
+        <div class="group relative bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300 transform hover:scale-105">
+            <!-- Image Container -->
+            <div class="relative overflow-hidden">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                     class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700">
+                
+                <!-- Quick actions overlay -->
+                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <a href="{% url 'product_detail' product.slug %}" 
+                       class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        View Details
+                    </a>
+                </div>
+                
+                <!-- Discount badge -->
+                {% if product.get_discount_percentage > 0 %}
+                <div class="absolute top-4 left-4">
+                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        -{{ product.get_discount_percentage }}%
+                    </span>
+                </div>
+                {% endif %}
+                
+                <!-- Category badge -->
+                <div class="absolute top-4 right-4">
+                    <span class="bg-purple-600/90 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        {{ product.get_category_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="p-4">
+                <h3 class="text-xl font-semibold mb-2 group-hover:text-purple-400 transition-colors">
+                    {{ product.name }}
+                </h3>
+                
+                <!-- Pricing -->
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl font-bold text-purple-500">₦{{ product.price }}</span>
+                    {% if product.compare_price %}
+                    <span class="text-lg text-gray-400 line-through">₦{{ product.compare_price }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Stock status -->
+                <div class="flex justify-between items-center text-sm">
+                    {% if product.is_in_stock %}
+                    <span class="text-green-400">In Stock</span>
+                    {% else %}
+                    <span class="text-red-400">Out of Stock</span>
+                    {% endif %}
+                    <!-- <span class="text-gray-400">Free Shipping</span> -->
+                </div>
+            </div>
+            
+            <!-- View Details Link -->
+            <a href="{% url 'product_detail' product.slug %}" class="absolute inset-0 z-10"></a>
+        </div>
+        {% empty %}
+        <div class="col-span-4 text-center py-16">
+            <p class="text-gray-400 text-xl mb-4">No products found.</p>
+            <a href="{% url 'product_list' %}" class="text-purple-500 hover:text-purple-400">
+                Clear filters and try again
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

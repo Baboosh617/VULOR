@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Customers</h1>
+
+<form method="get" class="mb-4">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search users..." class="px-3 py-1 border rounded">
+    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Search</button>
+</form>
+
+<table class="min-w-full bg-white shadow rounded">
+<thead class="bg-gray-200">
+<tr>
+    <th class="px-4 py-2">Username</th>
+    <th class="px-4 py-2">Email</th>
+    <th class="px-4 py-2">Joined</th>
+    <th class="px-4 py-2">Status</th>
+    <th class="px-4 py-2">Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for user in users %}
+<tr class="border-b hover:bg-gray-50">
+    <td class="px-4 py-2">{{ user.username }}</td>
+    <td class="px-4 py-2">{{ user.email }}</td>
+    <td class="px-4 py-2">{{ user.date_joined }}</td>
+    <td class="px-4 py-2">{% if user.is_active %}Active{% else %}Inactive{% endif %}</td>
+    <td class="px-4 py-2">
+        {% if not user.is_superuser %}
+        <a href="{% url 'dashboard:toggle_user_active' user.id %}" class="text-blue-500 hover:underline">
+            {% if user.is_active %}Disable{% else %}Enable{% endif %}
+        </a> |
+        <a href="{% url 'dashboard:edit_customer' user.id %}" class="text-green-500 hover:underline">Edit</a>
+        {% else %}
+        <span class="text-gray-500">—</span>
+        {% endif %}
+    </td>
+</tr>
+{% empty %}
+<tr><td colspan="5" class="px-4 py-2 text-center text-gray-500">No users found.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

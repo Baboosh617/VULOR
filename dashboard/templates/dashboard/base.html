@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white p-6 flex flex-col">
+        <h1 class="text-2xl font-bold mb-6">Vulor Admin</h1>
+
+        <nav class="flex flex-col gap-3">
+            <a href="{% url 'dashboard:dashboard_home' %}" class="hover:bg-gray-700 p-2 rounded">Home</a>
+            <a href="{% url 'dashboard:order_list' %}" class="hover:bg-gray-700 p-2 rounded">Orders</a>
+            <a href="{% url 'dashboard:review_list' %}" class="hover:bg-gray-700 p-2 rounded">Reviews</a>
+            <a href="{% url 'dashboard:product_list' %}" class="hover:bg-gray-700 p-2 rounded">Products</a>
+            <a href="{% url 'dashboard:customer_list' %}" class="hover:bg-gray-700 p-2 rounded">Customers</a>
+        </nav>
+    </div>
+
+    <!-- Main content -->
+    <div class="flex-1 p-8 overflow-auto">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+const ws = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+
+ws.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    alert(data.text);  // simple example, can replace with nicer UI badge
+}
+</script>
+
+</body>
+</html>

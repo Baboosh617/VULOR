@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% load socialaccount %}
+
+{% block title %}Register - VULOR{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                Create your VULOR account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-400">
+                Join the premium streetwear community
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="POST" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-600 text-white p-4 rounded-lg">
+                <strong>Please fix the following errors:</strong>
+                <ul class="list-disc list-inside mt-2">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                    <input type="text" name="username" id="id_username" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                           placeholder="Choose a username"
+                           value="{{ form.username.value|default:'' }}">
+                    {% if form.username.help_text %}
+                    <p class="text-xs text-gray-400 mt-1">{{ form.username.help_text }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="id_email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" name="email" id="id_email" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                           placeholder="Enter your email"
+                           value="{{ form.email.value|default:'' }}">
+                </div>
+                
+                <div>
+                    <label for="id_password1" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" name="password1" id="id_password1" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                           placeholder="Enter password">
+                    {% if form.password1.help_text %}
+                    <p class="text-xs text-gray-400 mt-1">{{ form.password1.help_text }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="id_password2" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <input type="password" name="password2" id="id_password2" required
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                           placeholder="Confirm password">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" 
+                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                    Create Account
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-gray-400">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="text-purple-500 hover:text-purple-400 font-medium">Sign in here</a>
+                </p>
+            </div>
+
+            <div class="mb-4">
+                        <p class="text-muted mb-3">Quick sign up with:</p>
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-3">
+                            <i class="bi bi-google me-2"></i> Sign up with Google
+                        </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

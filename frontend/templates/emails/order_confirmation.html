@@ -1,0 +1,21 @@
+{% load static %}
+<html>
+  <body style="font-family: system-ui, sans-serif; background-color: #f9fafb; margin:0; padding:0;">
+    <div style="max-width:600px; margin:auto; background-color:#fff; padding:20px; border-radius:8px;">
+      <img src="{% static 'vulor_logo.png' %}" style="height:50px; margin-bottom:20px;" alt="VULOR Logo" />
+      <h1 style="font-size:24px; font-weight:bold; color:#111827;">Thanks for your order, {{ user.first_name }}!</h1>
+      <p style="font-size:16px; color:#374151;">Your order <strong>#{{ order.id }}</strong> has been placed successfully.</p>
+
+      <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Order Details:</h2>
+      <ul>
+        {% for item in order.items.all %}
+          <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.total_price }}</li>
+        {% endfor %}
+      </ul>
+
+      <p style="margin-top:20px; font-size:16px; color:#374151;">We’ll notify you when your order is shipped.</p>
+
+      <a href="http://localhost:8000/orders/{{ order.id }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
+    </div>
+  </body>
+</html>

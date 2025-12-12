@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VULOR | Order Confirmed</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f8f8; padding: 30px; }
+        .container { background: #ffffff; padding: 25px; border-radius: 10px; max-width: 600px; margin: auto; }
+        h2 { font-size: 22px; margin-bottom: 10px; }
+        p { font-size: 15px; line-height: 1.6; }
+        .footer { margin-top: 25px; font-size: 13px; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Order Is Confirmed 🎉</h2>
+        <p>Hi {{ user.first_name }},</p>
+        <p>Your order <strong>#{{ order.id }}</strong> has been placed successfully.</p>
+
+        <p><strong>Total:</strong> ₦{{ order.total_amount }}</p>
+
+        <p>We'll keep you updated every step of the way.</p>
+
+        <p class="footer">Thanks for shopping with VULOR.</p>
+    </div>
+</body>
+</html>

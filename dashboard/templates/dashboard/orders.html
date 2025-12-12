@@ -1,0 +1,58 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Orders</h1>
+
+<div class="overflow-auto bg-white shadow rounded">
+
+    <form method="get" class="mb-4 flex gap-2">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by user..." class="px-3 py-1 border rounded">
+    
+    <select name="status" class="px-3 py-1 border rounded">
+        <option value="">All Status</option>
+        <option value="pending" {% if status_filter|default:'' == "pending" %}selected{% endif %}>Pending</option>
+        <option value="completed" {% if status_filter|default:'' == "completed" %}selected{% endif %}>Completed</option>
+    </select>
+    
+    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Filter</button>
+</form>
+
+
+    <table class="min-w-full">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2 text-left">ID</th>
+                <th class="px-4 py-2 text-left">User</th>
+                <th class="px-4 py-2 text-left">Total</th>
+                <th class="px-4 py-2 text-left">Status</th>
+                <th class="px-4 py-2 text-left">Date</th>
+                <th class="px-4 py-2 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2">{{ order.id }}</td>
+                <td class="px-4 py-2">{{ order.user.username }}</td>
+                <td class="px-4 py-2">₦{{ order.total_amount }}</td>
+                <td class="px-4 py-2">
+                    {% if order.status == "pending" %}
+                        <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded">{{ order.status }}</span>
+                    {% else %}
+                        <span class="bg-green-200 text-green-800 px-2 py-1 rounded">{{ order.status }}</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2">{{ order.created_at }}</td>
+                <td class="px-4 py-2">
+                    <a href="{% url 'dashboard:update_order_status' order.id %}" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Toggle Status</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="px-4 py-2 text-center text-gray-500">No orders yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{% url 'dashboard:dashboard_home' %}" class="text-blue-500 hover:underline mt-4 inline-block">← Back to Dashboard</a>
+{% endblock %}

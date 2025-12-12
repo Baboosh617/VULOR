@@ -1,0 +1,476 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+    <p class="text-gray-600 mt-1">Fill in all required fields to {% if product %}update{% else %}add{% endif %} product</p>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    <div class="mb-6">
+      {% for m in messages %}
+        <div class="p-4 rounded-lg text-sm
+          {% if 'success' in m.tags %}bg-green-50 text-green-800 border border-green-200
+          {% elif 'error' in m.tags %}bg-red-50 text-red-800 border border-red-200
+          {% else %}bg-yellow-50 text-yellow-800 border border-yellow-200
+          {% endif %}">
+          {{ m }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Form Errors -->
+  {% if form.errors %}
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <h3 class="font-medium text-red-800">Please correct the errors below:</h3>
+      <ul class="mt-2 text-sm text-red-700">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li>• {{ field|title }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="bg-white shadow-lg rounded-xl p-8 space-y-8">
+    {% csrf_token %}
+
+    <!-- SECTION 1: Basic Information -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Basic Information</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Name <span class="text-red-500">*</span>
+          </label>
+          {{ form.name }}
+        </div>
+        <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+        Slug (URL)
+    </label>
+    {{ form.slug }}
+    {% if form.slug.help_text %}
+        <p class="mt-1 text-xs text-gray-500">{{ form.slug.help_text }}</p>
+    {% endif %}
+    <p class="mt-1 text-xs text-gray-500">
+        This will be auto-generated as: white-tee, white-tee-1, white-tee-2, etc.
+    </p>
+</div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Description <span class="text-red-500">*</span>
+          </label>
+          {{ form.description }}
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Pricing -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Pricing</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Price <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+            {{ form.price }}
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Compare Price
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+            {{ form.compare_price }}
+          </div>
+        </div>
+        <div>
+          <div class="block text-sm font-medium text-gray-700 mb-2">Discount</div>
+          <div id="discount-badge" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800">
+            <span class="mr-2">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Category & Inventory -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Category & Inventory</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Category <span class="text-red-500">*</span>
+          </label>
+          {{ form.category }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Inventory Count
+          </label>
+          {{ form.inventory_count }}
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            {{ form.is_active }}
+            <label for="{{ form.is_active.id_for_label }}" class="ml-2 text-sm text-gray-700">
+              Active
+            </label>
+          </div>
+          <div class="flex items-center">
+            {{ form.featured }}
+            <label for="{{ form.featured.id_for_label }}" class="ml-2 text-sm text-gray-700">
+              Featured on Homepage
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Sizes -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Sizes</h2>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Available Sizes <span class="text-red-500">*</span>
+        </label>
+        {{ form.available_sizes }}
+        {% if form.available_sizes.help_text %}
+          <p class="mt-2 text-sm text-gray-500" id="size-help-text">{{ form.available_sizes.help_text }}</p>
+        {% endif %}
+        
+        <!-- Size Examples -->
+        <div class="mt-3">
+          <p class="text-sm font-medium text-gray-700 mb-1">Examples:</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="setSizeExample('S,M,L,XL')" class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
+              Hoodies/T-Shirts: S,M,L,XL
+            </button>
+            <button type="button" onclick="setSizeExample('28,30,32,34')" class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200">
+              Cargo/Sweatpants: 28,30,32,34
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Colors -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Colors</h2>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Available Colors <span class="text-red-500">*</span>
+        </label>
+        {{ form.available_colors }}
+        {% if form.available_colors.help_text %}
+          <p class="mt-2 text-sm text-gray-500">{{ form.available_colors.help_text }}</p>
+        {% endif %}
+        
+        <!-- Color Examples -->
+        <div class="mt-3">
+          <p class="text-sm font-medium text-gray-700 mb-1">Examples:</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="addColor('Black')" class="text-xs px-2 py-1 bg-gray-800 text-white rounded">Black</button>
+            <button type="button" onclick="addColor('White')" class="text-xs px-2 py-1 bg-white text-gray-800 border rounded">White</button>
+            <button type="button" onclick="addColor('Navy')" class="text-xs px-2 py-1 bg-blue-900 text-white rounded">Navy</button>
+            <button type="button" onclick="addColor('Gray')" class="text-xs px-2 py-1 bg-gray-500 text-white rounded">Gray</button>
+            <button type="button" onclick="addColor('Brown')" class="text-xs px-2 py-1 bg-yellow-900 text-white rounded">Brown</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Fit Type (Conditional) -->
+    <section id="fit-type-section" style="display: none;" class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Fit Type (Cargo Jeans Only)</h2>
+      <div class="max-w-md">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Fit Type <span class="text-red-500">*</span>
+        </label>
+        {{ form.fit_type }}
+        <p class="mt-2 text-sm text-gray-600">Choose between "Loose" (relaxed fit) or "Fit" (slimmer fit) for cargo jeans.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Measurements (Conditional) -->
+    <section id="measurements-section" style="display: none;" class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Detailed Measurements (Inches)</h2>
+      <p class="text-sm text-gray-600 mb-6">Enter measurements for each available size. Format: <code class="bg-gray-100 px-1 rounded">SIZE: MEASUREMENT</code> (one per line)</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Waist Measurements
+          </label>
+          {{ form.waist_measurements }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Hip Measurements
+          </label>
+          {{ form.hip_measurements }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Length Measurements
+          </label>
+          {{ form.length_measurements }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Thigh Measurements
+          </label>
+          {{ form.thigh_measurements }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Rise Measurements
+          </label>
+          {{ form.rise_measurements }}
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8: Media -->
+    <section class="border-b pb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Media</h2>
+      <div class="flex flex-col md:flex-row gap-8 items-start">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Product Image <span class="text-red-500">*</span>
+          </label>
+          {{ form.image }}
+          <p class="mt-2 text-sm text-gray-500">Upload a high-quality image of the product.</p>
+        </div>
+        <div class="w-48 h-48 bg-gray-100 rounded-xl overflow-hidden shadow-md">
+          {% if product and product.image %}
+            <img id="image-preview" src="{{ product.image.url }}" class="object-cover w-full h-full" />
+          {% else %}
+            <img id="image-preview" src="" style="display: none;" class="object-cover w-full h-full" />
+            <div id="no-image" class="w-full h-full flex items-center justify-center">
+              <div class="text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">No image</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: Timestamps (Read-only for edit) -->
+    {% if product %}
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Timestamps</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Created At
+          </label>
+          <input type="text" value="{{ product.created_at|date:'Y-m-d H:i:s' }}" 
+                 class="border rounded-lg p-3 w-full bg-gray-50 text-gray-700" readonly />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Updated At
+          </label>
+          <input type="text" value="{{ product.updated_at|date:'Y-m-d H:i:s' }}" 
+                 class="border rounded-lg p-3 w-full bg-gray-50 text-gray-700" readonly />
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- FORM ACTIONS -->
+    <div class="pt-6 border-t flex justify-between items-center">
+      <div class="text-sm text-gray-500">
+        Fields marked with <span class="text-red-500">*</span> are required
+      </div>
+      <div class="flex gap-3">
+        <a href="{% url 'dashboard:product_list' %}" 
+           class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+          Cancel
+        </a>
+        <button type="submit" 
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors font-medium">
+          {% if product %}Update Product{% else %}Add Product{% endif %}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Category change handler
+  const categorySelect = document.getElementById('id_category');
+  const fitTypeSection = document.getElementById('fit-type-section');
+  const measurementsSection = document.getElementById('measurements-section');
+  const sizeHelpText = document.getElementById('size-help-text');
+  
+  function updateCategoryUI() {
+    const category = categorySelect.value;
+    
+    // Show/hide fit type section
+    if (category === 'cargo-jeans') {
+      fitTypeSection.style.display = 'block';
+      document.getElementById('id_fit_type').required = true;
+    } else {
+      fitTypeSection.style.display = 'none';
+      document.getElementById('id_fit_type').required = false;
+    }
+    
+    // Show/hide measurements section
+    if (category === 'cargo-jeans' || category === 'sweatpants') {
+      measurementsSection.style.display = 'block';
+      if (sizeHelpText) {
+        sizeHelpText.textContent = 'Comma-separated numeric waist sizes (e.g., 28,30,32,34)';
+      }
+    } else {
+      measurementsSection.style.display = 'none';
+      if (sizeHelpText) {
+        sizeHelpText.textContent = 'Comma-separated letter sizes (e.g., S,M,L,XL)';
+      }
+    }
+  }
+  
+  // Initial update
+  updateCategoryUI();
+  
+  // Listen for changes
+  categorySelect.addEventListener('change', updateCategoryUI);
+  
+  // Image preview
+  const imageInput = document.querySelector('input[type="file"][name="image"]');
+  const imagePreview = document.getElementById('image-preview');
+  const noImage = document.getElementById('no-image');
+  
+  if (imageInput) {
+    imageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+          if (noImage) noImage.style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  
+  // Price comparison calculator
+  const priceInput = document.getElementById('id_price');
+  const comparePriceInput = document.getElementById('id_compare_price');
+  const discountBadge = document.getElementById('discount-badge');
+  
+  function calculateDiscount() {
+    const price = parseFloat(priceInput?.value || 0);
+    const comparePrice = parseFloat(comparePriceInput?.value || 0);
+    
+    if (comparePrice && comparePrice > price) {
+      const diff = (comparePrice - price).toFixed(2);
+      const pct = Math.round(((comparePrice - price) / comparePrice) * 100);
+      discountBadge.innerHTML = `
+        <span class="mr-1">🎉</span>
+        <span>${pct}% off (Save ₦${diff})</span>
+      `;
+      discountBadge.classList.remove('bg-gray-100', 'text-gray-800');
+      discountBadge.classList.add('bg-green-100', 'text-green-800');
+    } else {
+      discountBadge.innerHTML = '<span>No discount</span>';
+      discountBadge.classList.remove('bg-green-100', 'text-green-800');
+      discountBadge.classList.add('bg-gray-100', 'text-gray-800');
+    }
+  }
+  
+  if (priceInput && comparePriceInput) {
+    priceInput.addEventListener('input', calculateDiscount);
+    comparePriceInput.addEventListener('input', calculateDiscount);
+    calculateDiscount(); // Initial calculation
+  }
+  
+    
+    // Keep your existing category, image, price JS if you need it
+    // But remove any complex slug logic
+});
+
+// Helper functions
+function setSizeExample(example) {
+  document.getElementById('id_available_sizes').value = example;
+}
+
+function addColor(color) {
+  const colorsInput = document.getElementById('id_available_colors');
+  let currentColors = colorsInput.value.split(',').map(c => c.trim()).filter(c => c);
+  
+  if (!currentColors.includes(color)) {
+    currentColors.push(color);
+    colorsInput.value = currentColors.join(', ');
+  }
+}
+
+function slugify(text) {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('id_name');
+    const slugInput = document.getElementById('id_slug');
+    const slugPreview = document.createElement('div');
+    
+    if (nameInput && slugInput) {
+        // Add preview element
+        slugPreview.className = 'mt-1 text-xs text-blue-500';
+        slugPreview.id = 'slug-preview';
+        slugInput.parentNode.appendChild(slugPreview);
+        
+        // Function to update slug preview
+        function updateSlugPreview() {
+            const name = nameInput.value;
+            if (name) {
+                const baseSlug = name
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\w-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .trim();
+                
+                // Show preview of what the slug will be
+                slugPreview.textContent = `Will generate: ${baseSlug} (or ${baseSlug}-1, ${baseSlug}-2 if needed)`;
+                
+                // Only auto-fill slug if it's empty (for new products)
+                if (!slugInput.value) {
+                    slugInput.value = baseSlug;
+                }
+            } else {
+                slugPreview.textContent = '';
+            }
+        }
+        
+        // Update preview when typing
+        nameInput.addEventListener('input', updateSlugPreview);
+        
+        // Initial preview
+        updateSlugPreview();
+    }
+});
+</script>
+{% endblock %}

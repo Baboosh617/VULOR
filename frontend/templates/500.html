@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - VULOR{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
+    <div class="text-center max-w-md">
+        <div class="mb-8">
+            <div class="text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 mb-4">
+                500
+            </div>
+            <div class="w-32 h-1 bg-gradient-to-r from-red-500 to-pink-500 mx-auto"></div>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-white mb-4">Server Error</h1>
+        <p class="text-gray-400 mb-6 leading-relaxed">
+            Something went wrong on our end. Our team has been notified and we're working to fix it.
+        </p>
+        <p class="text-gray-500 text-sm mb-8">
+            Please try again in a few moments.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'home' %}" 
+               class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors text-center">
+                Go Home
+            </a>
+            <button onclick="window.location.reload()" 
+                    class="border border-gray-600 text-gray-300 px-8 py-3 rounded-full font-semibold hover:bg-gray-800 transition-colors">
+                Try Again
+            </button>
+        </div>
+        
+        <!-- Contact info -->
+        <div class="mt-12 p-6 bg-gray-800 rounded-2xl border border-gray-700">
+            <h3 class="text-white font-semibold mb-3">Need immediate help?</h3>
+            <p class="text-gray-400 text-sm mb-4">Contact our support team</p>
+            <div class="space-y-2 text-sm">
+                <a href="mailto:support@vulor.com" class="text-purple-400 hover:text-purple-300 block">
+                    📧 support@vulor.com
+                </a>
+                <a href="https://wa.me/2348123456789" class="text-purple-400 hover:text-purple-300 block">
+                    💬 +234 812 345 6789
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

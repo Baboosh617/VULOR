@@ -1,0 +1,46 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Pending Reviews</h1>
+
+{% if reviews %}
+<div class="overflow-auto bg-white shadow rounded">
+    <table class="min-w-full">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2 text-left">Product</th>
+                <th class="px-4 py-2 text-left">User</th>
+                <th class="px-4 py-2 text-left">Rating</th>
+                <th class="px-4 py-2 text-left">Comment</th>
+                <th class="px-4 py-2 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2">{{ review.product.name }}</td>
+                <td class="px-4 py-2">{{ review.user.username }}</td>
+                <td class="px-4 py-2 text-yellow-500">
+                    {% for i in review.get_star_rating %}
+                        ★
+                    {% endfor %}
+                    {% for i in review.get_empty_stars %}
+                        ☆
+                    {% endfor %}
+                </td>
+                <td class="px-4 py-2">{{ review.comment }}</td>
+                <td class="px-4 py-2 flex gap-2">
+                    <a href="{% url 'dashboard:approve_review' review.id %}" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Approve</a>
+                    <a href="{% url 'dashboard:delete_review' review.id %}" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray-500">No pending reviews.</p>
+{% endif %}
+
+<a href="{% url 'dashboard:dashboard_home' %}" class="text-blue-500 hover:underline mt-4 inline-block">← Back to Dashboard</a>
+{% endblock %}

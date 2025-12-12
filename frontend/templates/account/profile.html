@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">My Profile</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <nav class="space-y-2">
+                <a href="{% url 'profile_view' %}" 
+                   class="block px-4 py-2 bg-purple-600 text-white rounded-lg">Profile</a>
+                <a href="{% url 'orders:history' %}" 
+                   class="block px-4 py-2 text-gray-400 hover:bg-gray-700 rounded-lg">Order History</a>
+                <a href="{% url 'logout' %}" 
+                   class="block px-4 py-2 text-gray-400 hover:bg-gray-700 rounded-lg">Logout</a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <div class="bg-gray-800 rounded-2xl p-6">
+                <h2 class="text-2xl font-bold mb-6">Personal Information</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Username:</label>
+                        <p class="text-gray-300">{{ user.username }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Email:</label>
+                        <p class="text-gray-300">{{ user.email }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Date Joined:</label>
+                        <p class="text-gray-300">{{ user.date_joined|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">Account Stats</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="text-center p-4 bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-500">{{ orders.count }}</div>
+                            <div class="text-gray-400">Total Orders</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-500">
+                                ₦{% widthratio orders.count 1 0 %}.00
+                            </div>
+                            <div class="text-gray-400">Total Spent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            {% if orders %}
+            <div class="bg-gray-800 rounded-2xl p-6 mt-6">
+                <h2 class="text-2xl font-bold mb-6">Recent Orders</h2>
+                
+                <div class="space-y-4">
+                    {% for order in orders %}
+                    <div class="border border-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold">Order #{{ order.order_number }}</h3>
+                            <span class="px-2 py-1 rounded text-sm 
+                                {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
+                                {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
+                                {% else %}bg-yellow-500/20 text-yellow-500{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Placed on {{ order.created_at|date:"M j, Y" }}</p>
+                        <p class="text-gray-400 text-sm">Total: ₦{{ order.total_amount }}</p>
+                        <a href="{% url 'orders:order_detail' order.order_number %}" 
+                           class="text-purple-500 hover:text-purple-400 text-sm mt-2 inline-block">
+                            View Details
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <a href="{% url 'orders:history' %}" 
+                       class="text-purple-500 hover:text-purple-400 font-semibold">
+                        View All Orders
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

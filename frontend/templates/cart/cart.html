@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Your Shopping Cart</h1>
+    
+    {% if cart.items.all %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2 space-y-4">
+            {% for item in cart.items.all %}
+            <div class="bg-gray-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
+                <!-- Product Image -->
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                     class="w-24 h-24 object-cover rounded-lg">
+                
+                <!-- Product Info -->
+                <div class="flex-1 text-center sm:text-left">
+                    <h3 class="text-xl font-semibold mb-2">{{ item.product.name }}</h3>
+                    <p class="text-purple-500 text-lg font-bold">₦{{ item.product.price }}</p>
+                    {% if item.size or item.color %}
+                    <p class="text-gray-400 text-sm">
+                        {% if item.size %}Size: {{ item.size }}{% endif %}
+                        {% if item.color %} | Color: {{ item.color }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Quantity Controls -->
+                <div class="flex items-center gap-4">
+                    <form method="POST" action="{% url 'update_cart_item' item.id %}" class="flex items-center">
+                        {% csrf_token %}
+                        <div class="flex items-center border border-gray-600 rounded-lg">
+                            <button type="button" class="decrease-quantity px-3 py-1 text-gray-400 hover:text-white">-</button>
+                            <input placeholder="###" type="number" name="quantity" value="{{ item.quantity }}" min="1" 
+                                   class="w-12 bg-transparent text-center py-1 text-white quantity-display">
+                            <button type="button" class="increase-quantity px-3 py-1 text-gray-400 hover:text-white">+</button>
+                        </div>
+                        <button type="submit" class="ml-2 text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded hidden update-btn">
+                            Update
+                        </button>
+                    </form>
+                    
+                    <!-- Remove Item -->
+                    <form method="POST" action="{% url 'remove_from_cart' item.id %}">
+    {% csrf_token %}
+    <button type="submit" class="text-red-400 hover:text-red-300 ml-4">
+        Remove
+    </button>
+</form>
+                </div>
+                
+                <!-- Item Total -->
+                <div class="text-right">
+                    <p class="text-lg font-semibold">₦{{ item.total_price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="bg-gray-800 rounded-2xl p-6 h-fit sticky top-8">
+            <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
+            
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>₦{{ cart.total_price }}</span>
+                </div>
+                <!-- <div class="flex justify-between">
+                    <span>Shipping</span>
+                    <span>₦5.00</span>
+                </div> -->
+                <div class="flex justify-between text-lg font-bold border-t border-gray-700 pt-3">
+                    <span>Total</span>
+                    <span>₦{{ cart.total_price }}</span>
+                </div>
+            </div>
+            
+            <a href="{% url 'orders:checkout' %}" 
+   class="w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-3 rounded-full font-semibold transition-colors block mb-4">
+    Proceed to Checkout
+</a>
+            
+            <a href="{% url 'product_list' %}" 
+               class="w-full bg-gray-700 hover:bg-gray-600 text-white text-center py-3 rounded-full font-semibold transition-colors block">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-2xl font-bold mb-4">Your cart is empty</h2>
+        <p class="text-gray-400 mb-8">Start shopping to add items to your cart</p>
+        <a href="{% url 'product_list' %}" 
+           class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-colors">
+            Continue Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Quantity controls with auto-update
+    document.querySelectorAll('.increase-quantity, .decrease-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('form');
+            const input = form.querySelector('.quantity-display');
+            const updateBtn = form.querySelector('.update-btn');
+            
+            if (this.classList.contains('increase-quantity')) {
+                input.value = parseInt(input.value) + 1;
+            } else if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+            
+            // Show update button
+            updateBtn.classList.remove('hidden');
+        });
+    });
+</script>
+{% endblock %}
