@@ -18,6 +18,7 @@ from .services.paystack_service import PaystackService
 from orders.models import Order
 
 from django.urls import reverse
+from django.utils import timezone
 
 # 1) Initiate payment and redirect admin -> paystack (used by server-side flow)
 @login_required
@@ -154,59 +155,37 @@ def verify_payment(request):
 
 # 4) Webhook handler (Paystack posts here) — secure with HMAC SHA512 signature
 @csrf_exempt
-@require_POST
-def webhook_view(request):
-    signature = request.headers.get('x-paystack-signature', '')
-    body = request.body
+def paystack_webhook(request):
+    payload = request.body
+    signature = request.headers.get("x-paystack-signature")
 
-    # verify signature
-    webhook_secret = settings.PAYSTACK_WEBHOOK_SECRET
-    computed = hmac.new(webhook_secret.encode('utf-8'), body, hashlib.sha512).hexdigest()
-    if not hmac.compare_digest(computed, signature):
-        return JsonResponse({'error': 'Invalid signature'}, status=400)
+    expected_signature = hmac.new(
+        settings.PAYSTACK_SECRET_KEY.encode(),
+        payload,
+        hashlib.sha512
+    ).hexdigest()
 
-    payload = json.loads(body.decode('utf-8'))
-    event = payload.get('event')
-    data = payload.get('data', {})
+    if signature != expected_signature:
+        return HttpResponse(status=400)
 
-    # minimal handling: charge.success & charge.failed
-    if event == 'charge.success':
-        reference = data.get('reference')
-        try:
-            payment = PaymentTransaction.objects.get(paystack_reference=reference)
-            if payment.status != 'success':
-                payment.status = 'success'
-                payment.verified_at = datetime.now()
-                payment.metadata.setdefault('webhook', {}).update(data)
-                payment.save()
+    event = json.loads(payload)
 
-                order = payment.order
-                order.payment_status = 'success'
-                order.paystack_reference = reference
-                order.save()
-                # Optionally send email here
-        except PaymentTransaction.DoesNotExist:
-            # log or ignore
-            pass
-        return JsonResponse({'status': 'ok'})
+    if event["event"] == "charge.success":
+        data = event["data"]
+        reference = data["reference"]
 
-    if event == 'charge.failed':
-        reference = data.get('reference')
-        try:
-            payment = PaymentTransaction.objects.get(paystack_reference=reference)
-            payment.status = 'failed'
-            payment.metadata.setdefault('webhook', {}).update(data)
-            payment.save()
+        # ✅ FIND TRANSACTION
+        transaction = PaymentTransaction.objects.get(reference=reference)
+        transaction.status = "success"
+        transaction.verified_at = timezone.now()
+        transaction.save()
 
-            order = payment.order
-            order.payment_status = 'failed'
-            order.save()
-        except PaymentTransaction.DoesNotExist:
-            pass
-        return JsonResponse({'status': 'ok'})
+        # ✅ UPDATE ORDER
+        order = transaction.order
+        order.payment_status = "success"
+        order.save()
 
-    # default
-    return JsonResponse({'status': 'ignored'})
+    return HttpResponse(status=200)
 
 # 5) Success and failure pages
 @login_required
