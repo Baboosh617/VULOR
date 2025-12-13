@@ -4,6 +4,8 @@ from django.conf import settings
 
 import uuid
 
+from decimal import Decimal
+
 class Payment(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -23,6 +25,8 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    verified_at = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return f"Payment {self.reference} - {self.user.username} - ₦{self.amount}"
 
@@ -33,13 +37,26 @@ class Payment(models.Model):
 class PaymentTransaction(models.Model):
     paystack_reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # stored in Naira
+    status = models.CharField(max_length=20, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    paystack_access_code = models.CharField(max_length=200, blank=True, null=True)
+    metadata = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
-        return f"Transaction {self.paystack_reference} - Order {self.order.order_number} - ₦{self.amount}"
+        return f"{self.paystack_reference} - {self.order.order_number}"    
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Payment Transaction'
-        verbose_name_plural = 'Payment Transactions'
+            ordering = ['-created_at']
+            verbose_name = 'Payment Transaction'
+            verbose_name_plural = 'Payment Transactions'
+
+    @property
+    def amount_in_kobo(self):
+        # ensure Decimal -> int (kobo)
+        return int( (Decimal(self.amount) * 100).quantize(0) )
+
+    @staticmethod
+    def generate_reference():
+        # simple unique reference generator
+        return uuid.uuid4().hex[:20]
