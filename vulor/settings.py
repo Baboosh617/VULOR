@@ -6,6 +6,9 @@ import environ
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+USE_TZ = True
+TIME_ZONE = 'UTC'
+
 # Initialize environment variables
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))

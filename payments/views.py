@@ -20,6 +20,8 @@ from orders.models import Order
 from django.urls import reverse
 from django.utils import timezone
 
+from cart.models import CartItem, Cart
+
 # 1) Initiate payment and redirect admin -> paystack (used by server-side flow)
 @login_required
 def initiate_payment(request, order_id):
@@ -36,7 +38,7 @@ def initiate_payment(request, order_id):
 
     # reuse recent pending transaction if exists (optional)
     existing = PaymentTransaction.objects.filter(order=order, status__in=['pending', 'initiated']).order_by('-created_at').first()
-    if existing and (datetime.now() - existing.created_at).total_seconds() < 1800:
+    if existing and (timezone.now() - existing.created_at).total_seconds() < 1800:
         payment = existing
     else:
         payment = PaymentTransaction.objects.create(
@@ -119,7 +121,7 @@ def verify_payment(request):
         messages.error(request, "Payment not found.")
         return redirect('cart:view_cart')
 
-    if payment.status == 'success':
+    if payment.status != 'pending':
         return redirect('payments:payment_success', order_id=payment.order.id)
 
     paystack = PaystackService()
@@ -132,7 +134,7 @@ def verify_payment(request):
     if verification.get('status') and verification['data']['status'] == 'success':
         # mark payment success
         payment.status = 'success'
-        payment.verified_at = datetime.now()
+        payment.verified_at = timezone.now()
         payment.metadata['verify_data'] = verification['data']
         payment.save()
 
@@ -143,19 +145,34 @@ def verify_payment(request):
         order.save()
 
         # optional: clear cart, send email etc.
+        cart = Cart.objects.filter(user=request.user).first()
+        if cart:
+            CartItem.objects.filter(cart=cart).delete()
+
         messages.success(request, "Payment completed successfully.")
         return redirect('payments:payment_success', order_id=order.id)
+    
+    elif payment.status != 'pending':
+        return HttpResponse("Payment already processed.", status=200)
+    
     else:
         payment.status = 'failed'
         payment.metadata['verify_data'] = verification
         payment.save()
         messages.error(request, "Payment verification failed.")
         return redirect('payments:payment_failed', order_id=payment.order.id)
+    
+    
 
 
 # 4) Webhook handler (Paystack posts here) — secure with HMAC SHA512 signature
 @csrf_exempt
+@require_POST
 def paystack_webhook(request):
+
+    print("WEBHOOK HIT")
+
+
     payload = request.body
     signature = request.headers.get("x-paystack-signature")
 
@@ -175,7 +192,9 @@ def paystack_webhook(request):
         reference = data["reference"]
 
         # ✅ FIND TRANSACTION
-        transaction = PaymentTransaction.objects.get(reference=reference)
+        transaction = PaymentTransaction.objects.get(paystack_reference=reference)
+        if transaction.status == "success":
+            return HttpResponse(status=200)
         transaction.status = "success"
         transaction.verified_at = timezone.now()
         transaction.save()
@@ -185,8 +204,14 @@ def paystack_webhook(request):
         order.payment_status = "success"
         order.save()
 
+        # ✅ OPTIONAL: clear cart, send email etc.
+        cart = Cart.objects.filter(user=order.user).first()
+        if cart:
+            CartItem.objects.filter(cart=cart).delete()
+    
     return HttpResponse(status=200)
 
+    
 # 5) Success and failure pages
 @login_required
 def payment_success(request, order_id):
