@@ -16,7 +16,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # Debug settings and Allowed hosts
 DEBUG = True
 SECRET_KEY = 'django-insecure-development-key-1234567890-change-in-production'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com']
 
 # Applications
 INSTALLED_APPS = [
