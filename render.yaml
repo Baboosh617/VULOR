@@ -3,7 +3,7 @@ services:
     name: vulor-web
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn vulor.wsgi:application"
+    startCommand: "python manage.py migrate --noinput &&gunicorn vulor.wsgi:application"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
@@ -11,3 +11,9 @@ services:
         value: "10000"
       - key: WEB_CONCURRENCY
         value: "2"
+      - key: DATABASE_URL
+        # Render auto-provides this when you connect a PostgreSQL database
+        # We'll set it up in Step 3
+        value: ""
+      - key: DISABLE_COLLECTSTATIC
+        value: "1"  # We'll handle static files properly later
