@@ -8,6 +8,6 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
       - key: PORT
-        value: 10000
+        value: "10000"
       - key: WEB_CONCURRENCY
-        value: 2
+        value: "2"
