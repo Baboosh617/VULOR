@@ -32,7 +32,7 @@ def home(request):
         product__isnull=True  # Only store reviews
     ).order_by('-created_at')[:10]  # Show 10 most recent
 
-    avg_rating = store_reviews.aggregate(Avg('rating'))['rating__avg']
+    avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
     
     total_reviews = Review.objects.filter(approved=True).count()
 
