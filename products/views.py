@@ -27,12 +27,12 @@ def home(request):
     # Initialize form
     form = ReviewForm()
 
-    store_reviews = Review.objects.filter(
-        approved=True,
-        product__isnull=True  # Only store reviews
-    ).order_by('-created_at')[:10]  # Show 10 most recent
+    # store_reviews = Review.objects.filter(
+     #   approved=True,
+    #    product__isnull=True  # Only store reviews
+    #).order_by('-created_at')[:10]  # Show 10 most recent
 
-    avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+   # avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
     
     total_reviews = Review.objects.filter(approved=True).count()
 
@@ -56,7 +56,7 @@ def home(request):
     
     context = {
         'store_reviews': store_reviews,
-        'avg_rating': round(avg_rating, 1) if avg_rating else None,
+        #'avg_rating': round(avg_rating, 1) if avg_rating else None,
         'total_reviews': total_reviews,
         'recent_products': recent_products,
         'new_arrivals': new_arrivals,
