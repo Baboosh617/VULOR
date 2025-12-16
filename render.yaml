@@ -1,17 +1,25 @@
 services:
   - type: web
-    name: vulor-web
+    name: vulor
     env: python
-    buildCommand: "chmod +x predeploy.sh && pip install -r requirements.txt"
-    startCommand: "./predeploy.sh && gunicorn vulor.wsgi:application"
+    buildCommand: |
+      chmod +x startup.sh &&
+      pip install -r requirements.txt
+    startCommand: ./startup.sh
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
       - key: PORT
         value: "10000"
       - key: DATABASE_URL
-        sync: false  # Render will auto-fill this when connected to PostgreSQL
+        fromDatabase:
+          name: vulor-db
+          property: connectionString
       - key: WEB_CONCURRENCY
         value: "2"
-      - key: DISABLE_COLLECTSTATIC
-        value: "1"
+      - key: DEBUG
+        value: "False"
+databases:
+  - name: vulor-db
+    databaseName: vulor
+    user: vulor_user
