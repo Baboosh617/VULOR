@@ -3,9 +3,9 @@ services:
     name: vulor
     env: python
     buildCommand: |
-      chmod +x startup.sh &&
-      pip install -r requirements.txt
-    startCommand: ./startup.sh
+      pip install -r requirements.txt &&
+      python manage.py migrate --noinput --verbosity=3
+    startCommand: gunicorn vulor.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
@@ -15,8 +15,6 @@ services:
         fromDatabase:
           name: vulor-db
           property: connectionString
-      - key: WEB_CONCURRENCY
-        value: "2"
       - key: DEBUG
         value: "False"
 databases:
