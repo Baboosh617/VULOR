@@ -33,7 +33,7 @@ python manage.py shell << END
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@example.com', 'securepassword123')
+    User.objects.create_superuser('admin', 'babasmuhammad617@gmail.com', 'securepassword123')
     print('✅ Superuser created')
 else:
     print('ℹ️ Superuser already exists')
