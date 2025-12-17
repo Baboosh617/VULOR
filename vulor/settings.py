@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+import dj_database_url
 
 
 
@@ -230,9 +231,10 @@ ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
 
-import dj_database_url
-if "DATABASE_URL" in os.environ:
-    DATABASES["default"] = dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600
     )
+}
