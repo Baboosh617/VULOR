@@ -18,7 +18,7 @@ def home(request):
     if request.method == 'POST':
         print(f"POST data: {request.POST}")
     
-    # 1️⃣ DEFINE ALL VARIABLES FIRST (before any redirects)
+    #DEFINE ALL VARIABLES FIRST (before any redirects)
     new_arrivals = Product.objects.order_by('-created_at')[:6]
     reviews = Review.objects.filter(approved=True)[:4]
     form = ReviewForm()
@@ -32,7 +32,7 @@ def home(request):
     total_reviews = Review.objects.filter(approved=True).count()
     recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
     
-    # 2️⃣ HANDLE POST REQUESTS AFTER VARIABLES ARE DEFINED
+    # HANDLE POST REQUESTS AFTER VARIABLES ARE DEFINED
     if request.method == 'POST':
         if 'submit_review' in request.POST:
             if not request.user.is_authenticated:
