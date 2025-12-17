@@ -4,19 +4,13 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements.txt &&
-      python manage.py migrate --noinput --verbosity=3
+      python manage.py migrate --noinput
     startCommand: gunicorn vulor.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
       - key: PORT
         value: "10000"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vulor-db
-          property: connectionString
-      - key: DEBUG
-        value: "False"
 databases:
   - name: vulor-db
     databaseName: vulor
