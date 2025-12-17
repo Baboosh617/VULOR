@@ -12,9 +12,9 @@ ENV/
 # Django
 *.sqlite3
 db.sqlite3
-media/
-staticfiles/
-static/
+# media/
+# staticfiles/
+# static/
 
 # Secrets
 .env
