@@ -11,35 +11,29 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.db.models import Avg
 
-
 def home(request):
-
     print(f"Current URL: {request.path}")
     print(f"Method: {request.method}")
     
     if request.method == 'POST':
         print(f"POST data: {request.POST}")
+    
+    # 1️⃣ DEFINE ALL VARIABLES FIRST (before any redirects)
     new_arrivals = Product.objects.order_by('-created_at')[:6]
-    
-    # Get approved reviews (always show at least 4 if available)
     reviews = Review.objects.filter(approved=True)[:4]
-    
-    # Initialize form
     form = ReviewForm()
-
+    
     store_reviews = Review.objects.filter(
         approved=True,
-        product__isnull=True  # Only store reviews
-    ).order_by('-created_at')[:10]  # Show 10 most recent
-
-    avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+        product__isnull=True
+    ).order_by('-created_at')[:10]
     
+    avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
     total_reviews = Review.objects.filter(approved=True).count()
-
     recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
-
+    
+    # 2️⃣ HANDLE POST REQUESTS AFTER VARIABLES ARE DEFINED
     if request.method == 'POST':
-        # Check if this is a review submission
         if 'submit_review' in request.POST:
             if not request.user.is_authenticated:
                 messages.error(request, 'Please log in to submit a review.')
@@ -51,9 +45,9 @@ def home(request):
                 review.user = request.user
                 review.save()
                 messages.success(request, 'Thank you for your review! It will be visible after approval.')
-                # Redirect to home page to show the success message
                 return redirect('home')
     
+    # 3️⃣ BUILD CONTEXT WITH GUARANTEED DEFINED VARIABLES
     context = {
         'store_reviews': store_reviews,
         'avg_rating': round(avg_rating, 1) if avg_rating else None,
