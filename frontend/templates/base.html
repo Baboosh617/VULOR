@@ -122,7 +122,7 @@
 
                     {% else %}
                             <a href="{% url 'login' %}" class="hover:text-purple-400 transition-colors">Login</a>
-                            <a href="{% url 'account_signup' %}" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition-colors">Sign Up</a>
+                            <a href="{% url 'register' %}" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition-colors">Sign Up</a>
                     {% endif %}
                 </div>
 
@@ -152,7 +152,7 @@
                         <a href="{% url 'logout' %}" class="px-3 py-2 hover:bg-gray-700 rounded">Logout</a>
                     {% else %}
                         <a href="{% url 'login' %}" class="px-3 py-2 hover:bg-gray-700 rounded">Login</a>
-                        <a href="{% url 'signup' %}" class="px-3 py-2 hover:bg-gray-700 rounded">Sign Up</a>
+                        <a href="{% url 'register' %}" class="px-3 py-2 hover:bg-gray-700 rounded">Sign Up</a>
                     {% endif %}
                 </div>
             </div>
