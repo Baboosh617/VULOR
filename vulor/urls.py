@@ -14,7 +14,7 @@ urlpatterns = [
     # Authentication URLs - FIXED
     path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
-    path('signup/', register, name='signup'),  # CHANGED THIS LINE
+    path('register/', register, name='register'),  # ADDED THIS LINE
     
     # App URLs
     path('accounts/', include('accounts.urls')),
