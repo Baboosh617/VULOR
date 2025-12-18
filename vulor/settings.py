@@ -231,11 +231,14 @@ ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
 
-# Only define STATIC_ROOT in production
-if not settings.DEBUG:
+# SAFE WAY TO CHECK DEBUG MODE (doesn't use settings module during load)
+DEBUG_ENV = os.environ.get('DEBUG', 'True') == 'True'
+
+if not DEBUG_ENV:
+    # Production: collect static files to this folder
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 else:
-    # During development, look for static files in these directories
+    # Development: look for static files here
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static'),
     ]
