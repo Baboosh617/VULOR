@@ -231,10 +231,7 @@ ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
 
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600
-    )
-}
+if DEBUG:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'staticfiles'),
+    ]
