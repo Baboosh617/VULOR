@@ -16,7 +16,6 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Debug settings and Allowed hosts
-DEBUG = True
 SECRET_KEY = 'django-insecure-development-key-1234567890-change-in-production'
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com']
 
@@ -63,13 +62,14 @@ CHANNEL_LAYERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # ADD THIS LINE
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'vulor.urls'
@@ -132,9 +132,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Debug settings
+DEBUG = not ON_RENDER
+
 CSRF_TRUSTED_ORIGINS = [
+    "https://*.vulor.onrender.com",
+    "https://*.vulor.com",
     "https://*.ngrok-free.app",
     "https://*.ngrok-free.dev",
+    "https://*.victorious-ivan-uncharily.ngrok-free.dev",
 ]
 
 # Internationalization
@@ -143,11 +149,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key
@@ -179,13 +180,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
 
-# Custom error handlers
-if not DEBUG:
-    # Production error handlers
-    handler404 = 'error_pages.views.custom_404'  
-    handler500 = 'error_pages.views.custom_500'
-    handler403 = 'error_pages.views.custom_403'
-    handler400 = 'error_pages.views.custom_400'
+
 
 # Paystack Configuration
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
@@ -242,17 +237,28 @@ ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = '/static/'
 
-# Only use STATIC_ROOT in production
-if DEBUG:
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'frontend', 'static'),
-    ]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    BASE_DIR / 'frontend' / 'static',
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Custom error handlers
+if not DEBUG:
+    # Production error handlers
+    handler404 = 'error_pages.views.custom_404'  
+    handler500 = 'error_pages.views.custom_500'
+    handler403 = 'error_pages.views.custom_403'
+    handler400 = 'error_pages.views.custom_400'
