@@ -93,12 +93,12 @@ if ON_RENDER:
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
-            ssl_require=True
+            ssl_require=True,
 
             options={
                 'connect_timeout': 10,  # Fail fast if DB is slow
                 'application_name': 'vulor-app',
-            }
+            },
         )
     }
 else:
