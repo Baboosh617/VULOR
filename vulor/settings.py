@@ -95,16 +95,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vulor.wsgi.application'
 
-# Database
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        'OPTIONS': {
-            'connect_timeout': 10,
+# This checks if we're running on Render (production) or locally
+ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
+
+if ON_RENDER:
+    # Production: Use PostgreSQL on Render
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    # Development: Use SQLite locally (no PostgreSQL needed)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
-    )
-}
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -139,9 +149,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -235,14 +242,17 @@ ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
 
-# SAFE WAY TO CHECK DEBUG MODE (doesn't use settings module during load)
-DEBUG_ENV = os.environ.get('DEBUG', 'True') == 'True'
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
 
-if not DEBUG_ENV:
-    # Production: collect static files to this folder
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-else:
-    # Development: look for static files here
+# Only use STATIC_ROOT in production
+if DEBUG:
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
+        os.path.join(BASE_DIR, 'frontend', 'static'),
     ]
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
