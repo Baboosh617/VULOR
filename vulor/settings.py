@@ -98,6 +98,8 @@ WSGI_APPLICATION = 'vulor.wsgi.application'
 # This checks if we're running on Render (production) or locally
 ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
 
+DEBUG = not ON_RENDER
+
 if ON_RENDER:
     # Production: Use PostgreSQL on Render
     DATABASES = {
@@ -133,7 +135,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Debug settings
-DEBUG = not ON_RENDER
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vulor.onrender.com",
