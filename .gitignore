@@ -23,6 +23,8 @@ node_modules/
 dist/
 build/
 
+# media/
+
 # Logs
 *.log
 

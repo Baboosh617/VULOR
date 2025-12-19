@@ -28,3 +28,14 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+    
+    # ADD THIS METHOD - fixes the 'try_save' error
+    def try_save(self, request):
+        """
+        Required by django-allauth's SignupView in production
+        """
+        try:
+            user = self.save()
+            return user, None  # Return user and no error
+        except Exception as e:
+            return None, str(e)
