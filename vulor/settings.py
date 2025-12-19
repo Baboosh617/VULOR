@@ -47,19 +47,6 @@ INSTALLED_APPS = [
     'dashboard',
 ]
 
-INSTALLED_APPS += ["channels"]
-
-# Channels config
-ASGI_APPLICATION = "backend.asgi.application"
-
-# Optional: In-memory channel layer for development
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
-
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -107,6 +94,11 @@ if ON_RENDER:
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
             ssl_require=True
+
+            options={
+                'connect_timeout': 10,  # Fail fast if DB is slow
+                'application_name': 'vulor-app',
+            }
         )
     }
 else:
