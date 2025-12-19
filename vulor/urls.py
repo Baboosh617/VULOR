@@ -7,6 +7,7 @@ from products import views as product_views
 from accounts.views import register  # ADD THIS IMPORT
 from services.admin_report_service import send_weekly_sales_report
 from django.http import HttpResponse
+from healthcheck import views as healthcheck_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('error-pages/', include('error_pages.urls')),
     path('services/', include('services.urls')),  # ADDED THIS LINE
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),  # ADDED THIS LINE
+    path('health-check/', healthcheck_views.health_check, name='health_check'),  # ADDED THIS LINE
 ]
 
 if settings.DEBUG:
