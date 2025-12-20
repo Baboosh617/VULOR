@@ -53,9 +53,12 @@ def home(request):
         'avg_rating': round(avg_rating, 1) if avg_rating else None,
         'total_reviews': total_reviews,
         'recent_products': recent_products,
-        'new_arrivals': new_arrivals,
+        # 'new_arrivals': new_arrivals,
         'reviews': reviews,
         'review_form': form,
+        'latest_product': Product.objects.filter(is_active=True).order_by('-created_at').first(),
+        'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at')[:6],
+        'store_reviews': Review.objects.filter(approved=True).order_by('-created_at')[:10],
     }
     return render(request, 'index.html', context)
 
