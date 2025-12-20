@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 from django.urls import reverse
 from django.conf import settings
+from django.db.models import Avg
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
@@ -50,6 +51,8 @@ class Product(models.Model):
     featured = models.BooleanField(default=False)
     inventory_count = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+
+    # image_alt = models.ImageField(upload_to='products/alt/', blank=True, null=True, verbose_name="Alternative Image")
 
     # ✅ Low stock tracking
     low_stock_email_sent = models.BooleanField(default=False)
@@ -189,6 +192,17 @@ class Review(models.Model):
     comment = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=False)
+
+    @property
+    def average_rating(self):
+        reviews = self.product.reviews.filter(approved=True)
+        if reviews.exists():
+            return reviews.aggregate(Avg('rating'))['rating__avg']
+        return 0
+    
+    @property
+    def total_reviews(self):
+        return self.reviews.count()
     
     class Meta:
         ordering = ['-created_at']
@@ -214,3 +228,15 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/images/')
+    alt_text = models.CharField(max_length=255, blank=True)
+    is_main = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_main', 'created_at']

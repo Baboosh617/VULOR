@@ -141,3 +141,38 @@ def submit_review(request):
             messages.success(request, 'Thank you for your review! It will be visible after approval.')
     
     return redirect('home')
+
+
+def add_review(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+        
+        if rating and comment:
+            # Check if user already reviewed this product
+            existing_review = Review.objects.filter(product=product, user=request.user).first()
+            
+            if existing_review:
+                # Update existing review
+                existing_review.rating = rating
+                existing_review.comment = comment
+                existing_review.save()
+                messages.success(request, 'Your review has been updated!')
+            else:
+                # Create new review
+                Review.objects.create(
+                    product=product,
+                    user=request.user,
+                    rating=rating,
+                    comment=comment
+                )
+                messages.success(request, 'Thank you for your review!')
+        else:
+            messages.error(request, 'Please provide both rating and comment.')
+        
+        return redirect('product_detail', slug=product.slug)
+    
+    # If not POST, redirect to product detail
+    return redirect('product_detail', slug=product.slug)

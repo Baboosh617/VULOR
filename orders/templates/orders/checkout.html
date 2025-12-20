@@ -3,118 +3,389 @@
 {% block title %}Checkout - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-12 text-center">CHECKOUT</h1>
     
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Shipping Form -->
-        <div class="bg-gray-800 rounded-2xl p-6">
-            <h2 class="text-2xl font-bold mb-6 text-white">Shipping Information</h2>
-            
-            <form method="POST" id="paymentForm" action="{% url 'orders:checkout' %}">
-                         {% csrf_token %}
-    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- LEFT COLUMN: Delivery Details -->
+        <div>
+            <!-- Delivery Information -->
+            <div class="mb-12">
+                <h2 class="text-[#111111] text-lg font-normal mb-6">DELIVERY INFORMATION</h2>
+                
+                <form method="POST" id="checkoutForm" action="{% url 'orders:checkout' %}">
+                    {% csrf_token %}
+                    
                     <div class="space-y-4">
-
+                        <!-- Full Name -->
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-white">Shipping Address</label>
-                            <input type="text" name="shipping_address" required 
-                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
-                                placeholder="123 Main St">
+                            <label class="block text-[#111111] text-sm mb-2">FULL NAME</label>
+                            <input type="text" name="full_name" required 
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   placeholder="John Doe">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-white">City</label>
-                                <input type="text" name="shipping_city" required 
-                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
-                                    placeholder="Lagos">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-white">State</label>
-                                <input type="text" name="shipping_state" required 
-                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
-                                    placeholder="Lagos State">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-white">ZIP Code</label>
-                                <input type="text" name="shipping_zipcode" required 
-                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
-                                    placeholder="100001">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-white">Country</label>
-                                <select name="shipping_country" 
-                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
-                                    <option value="Nigeria" selected>Nigeria</option>
-                                </select>
-                            </div>
-                        </div>
-
+                        <!-- Phone Number -->
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-white">Phone Number</label>
-                            <input type="tel" name="customer_phone" required 
-                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" 
-                                placeholder="+234 812 345 6789">
+                            <label class="block text-[#111111] text-sm mb-2">PHONE NUMBER</label>
+                            <input type="tel" name="phone_number" required 
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   placeholder="08012345678">
                         </div>
 
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-[#111111] text-sm mb-2">EMAIL</label>
+                            <input type="email" name="email" required 
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   placeholder="you@example.com">
+                        </div>
+
+                        <!-- Address Line -->
+                        <div>
+                            <label class="block text-[#111111] text-sm mb-2">ADDRESS</label>
+                            <input type="text" name="address_line" required 
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   placeholder="Street address, apartment, suite, etc.">
+                        </div>
+
+                        <!-- State Dropdown -->
+                        <div>
+                            <label class="block text-[#111111] text-sm mb-2">STATE</label>
+                            <select name="state" required 
+                                    id="stateSelect"
+                                    class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent">
+                                <option value="" disabled selected>Select your state</option>
+                                <!-- Kaduna Zone -->
+                                <option value="Kaduna">Kaduna</option>
+                                
+                                <!-- North Zone -->
+                                <option value="Kano">Kano</option>
+                                <option value="Zaria">Zaria</option>
+                                <option value="Jos">Jos</option>
+                                <option value="Katsina">Katsina</option>
+                                <option value="Sokoto">Sokoto</option>
+                                <option value="Kebbi">Kebbi</option>
+                                <option value="Zamfara">Zamfara</option>
+                                <option value="Bauchi">Bauchi</option>
+                                <option value="Gombe">Gombe</option>
+                                <option value="Yobe">Yobe</option>
+                                <option value="Borno">Borno</option>
+                                <option value="Adamawa">Adamawa</option>
+                                <option value="Taraba">Taraba</option>
+                                <option value="Niger">Niger</option>
+                                <option value="Plateau">Plateau</option>
+                                <option value="Nasarawa">Nasarawa</option>
+                                <option value="Kogi">Kogi</option>
+                                <option value="Benue">Benue</option>
+                                <option value="Kwara">Kwara</option>
+                                
+                                <!-- West Zone -->
+                                <option value="Lagos">Lagos</option>
+                                <option value="Ibadan">Ibadan</option>
+                                <option value="Abeokuta">Abeokuta</option>
+                                <option value="Akure">Akure</option>
+                                <option value="Osogbo">Osogbo</option>
+                                <option value="Ado-Ekiti">Ado-Ekiti</option>
+                                <option value="Ilorin">Ilorin</option>
+                                <option value="Oyo">Oyo</option>
+                                <option value="Ogun">Ogun</option>
+                                <option value="Ondo">Ondo</option>
+                                <option value="Osun">Osun</option>
+                                <option value="Ekiti">Ekiti</option>
+                                
+                                <!-- East Zone -->
+                                <option value="Enugu">Enugu</option>
+                                <option value="Owerri">Owerri</option>
+                                <option value="Onitsha">Onitsha</option>
+                                <option value="Awka">Awka</option>
+                                <option value="Abakaliki">Abakaliki</option>
+                                <option value="Umuahia">Umuahia</option>
+                                <option value="Abia">Abia</option>
+                                <option value="Anambra">Anambra</option>
+                                <option value="Ebonyi">Ebonyi</option>
+                                <option value="Enugu">Enugu</option>
+                                <option value="Imo">Imo</option>
+                                
+                                <!-- South-South Zone -->
+                                <option value="Port Harcourt">Port Harcourt</option>
+                                <option value="Uyo">Uyo</option>
+                                <option value="Calabar">Calabar</option>
+                                <option value="Yenagoa">Yenagoa</option>
+                                <option value="Asaba">Asaba</option>
+                                <option value="Warri">Warri</option>
+                                <option value="Benin">Benin</option>
+                                <option value="Akwa Ibom">Akwa Ibom</option>
+                                <option value="Bayelsa">Bayelsa</option>
+                                <option value="Cross River">Cross River</option>
+                                <option value="Delta">Delta</option>
+                                <option value="Edo">Edo</option>
+                                <option value="Rivers">Rivers</option>
+                            </select>
+                        </div>
+
+                        <!-- City / LGA -->
+                        <div>
+                            <label class="block text-[#111111] text-sm mb-2">CITY / LGA</label>
+                            <input type="text" name="city" required 
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   placeholder="e.g., Ikeja, Kaduna North">
+                        </div>
                     </div>
 
-                    <button type="submit" id="paystack-button" 
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-full font-semibold mt-6">
-                        Proceed to Paystack Payment
-                    </button>
-            </form>
+                    <!-- Shipping Section -->
+                    <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
+                        <h3 class="text-[#111111] text-sm font-normal mb-4">SHIPPING METHOD</h3>
+                        
+                        <!-- Shipping display that updates based on state -->
+                        <div id="shippingDisplay" class="text-[#8E8E93] text-sm italic">
+                            Select your state to calculate shipping
+                        </div>
+                        
+                        <!-- Hidden shipping fee input -->
+                        <input type="hidden" id="shippingFee" name="shipping_fee" value="0">
+                        <input type="hidden" id="shippingZone" name="shipping_zone" value="">
+                    </div>
 
+                    <!-- Payment Button -->
+                    <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
+                        <button type="submit" id="paymentButton"
+                                class="w-full bg-[#FF5A1F] text-[#111111] text-base font-medium py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                            PAY ₦<span id="totalAmount">{{ cart.total_price }}</span>
+                        </button>
+                        
+                        <p class="text-[#8E8E93] text-xs text-center mt-2">
+                            Secured by Paystack
+                        </p>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <!-- Order Summary -->
-        <div class="bg-gray-800 rounded-2xl p-6 h-fit sticky top-8">
-            <h2 class="text-2xl font-bold mb-6 text-white">Order Summary</h2>
-            
-            <div class="space-y-4 mb-6">
-                {% for item in cart.items.all %}
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-4">
-                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-12 h-12 object-cover rounded">
-                        <div>
-                            <p class="font-semibold text-white">{{ item.product.name }}</p>
-                            <p class="text-sm text-gray-400">
-                                {% if item.size %}Size: {{ item.size }}{% endif %}
-                                {% if item.color %} | Color: {{ item.color }}{% endif %}
-                            </p>
-                            <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
+        <!-- RIGHT COLUMN: Order Summary -->
+        <div class="lg:sticky lg:top-8">
+            <div class="border border-[#8E8E93]/30 p-6">
+                <h2 class="text-[#111111] text-lg font-normal mb-6">ORDER SUMMARY</h2>
+                
+                <!-- Products List -->
+                <div class="space-y-6 mb-8">
+                    {% for item in cart.items.all %}
+                    <div class="flex items-start gap-4">
+                        <!-- Product Thumbnail -->
+                        <div class="w-20 h-20 bg-[#F7F7F7] overflow-hidden flex-shrink-0">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        
+                        <!-- Product Details -->
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[#111111] text-sm font-normal mb-1">{{ item.product.name }}</div>
+                            {% if item.size %}
+                            <div class="text-[#8E8E93] text-xs">Size: {{ item.size }}</div>
+                            {% endif %}
+                            <div class="text-[#8E8E93] text-xs">Qty: {{ item.quantity }}</div>
+                        </div>
+                        
+                        <!-- Price -->
+                        <div class="text-[#111111] text-sm font-normal whitespace-nowrap">
+                            ₦{{ item.total_price }}
                         </div>
                     </div>
-                    <p class="font-semibold text-white">₦{{ item.total_price }}</p>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+
+                <!-- Divider -->
+                <div class="border-t border-[#8E8E93]/20 mb-6"></div>
+
+                <!-- Order Totals -->
+                <div class="space-y-3">
+                    <!-- Subtotal -->
+                    <div class="flex justify-between text-[#111111] text-sm">
+                        <span>Subtotal</span>
+                        <span>₦<span id="subtotal">{{ cart.total_price }}</span></span>
+                    </div>
+                    
+                    <!-- Shipping (dynamic) -->
+                    <div class="flex justify-between text-[#111111] text-sm">
+                        <span>Shipping</span>
+                        <span id="shippingLine">Select state</span>
+                    </div>
+                    
+                    <!-- Total -->
+                    <div class="flex justify-between text-[#111111] text-lg font-normal pt-4 border-t border-[#8E8E93]/20">
+                        <span>Total</span>
+                        <span>₦<span id="orderTotal">{{ cart.total_price }}</span></span>
+                    </div>
+                </div>
             </div>
             
-            <div class="border-t border-gray-700 pt-4 space-y-2">
-                <div class="flex justify-between text-white">
-                    <span>Subtotal</span>
-                    <span>₦{{ cart.total_price }}</span>
-                </div>
-                <!-- <div class="flex justify-between text-white">
-                    <span>Shipping</span>
-                    <span>Free</span>
-                </div> -->
-                <div class="flex justify-between text-lg font-bold text-white">
-                    <span>Total</span>
-                    <span>₦{{ cart.total_price }}</span>
-                </div>
-            </div>
-
-            <div class="mt-4 text-sm text-gray-400">
-                <p>Secured by <strong>Paystack</strong></p>
+            <!-- Continue Shopping Link -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'product_list' %}" 
+                   class="inline-block text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
+                    Continue Shopping
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Zone-based shipping pricing (₦)
+        const shippingZones = {
+            'Kaduna': { price: 1500, days: '2-3', zone: 'Kaduna' },
+            
+            // North Zone
+            'Kano': { price: 2500, days: '3-4', zone: 'North' },
+            'Zaria': { price: 2500, days: '3-4', zone: 'North' },
+            'Jos': { price: 2500, days: '3-4', zone: 'North' },
+            'Katsina': { price: 2500, days: '3-4', zone: 'North' },
+            'Sokoto': { price: 2500, days: '3-4', zone: 'North' },
+            'Kebbi': { price: 2500, days: '3-4', zone: 'North' },
+            'Zamfara': { price: 2500, days: '3-4', zone: 'North' },
+            'Bauchi': { price: 2500, days: '3-4', zone: 'North' },
+            'Gombe': { price: 2500, days: '3-4', zone: 'North' },
+            'Yobe': { price: 2500, days: '3-4', zone: 'North' },
+            'Borno': { price: 2500, days: '3-4', zone: 'North' },
+            'Adamawa': { price: 2500, days: '3-4', zone: 'North' },
+            'Taraba': { price: 2500, days: '3-4', zone: 'North' },
+            'Niger': { price: 2500, days: '3-4', zone: 'North' },
+            'Plateau': { price: 2500, days: '3-4', zone: 'North' },
+            'Nasarawa': { price: 2500, days: '3-4', zone: 'North' },
+            'Kogi': { price: 2500, days: '3-4', zone: 'North' },
+            'Benue': { price: 2500, days: '3-4', zone: 'North' },
+            'Kwara': { price: 2500, days: '3-4', zone: 'North' },
+            
+            // West Zone
+            'Lagos': { price: 3500, days: '3-5', zone: 'West' },
+            'Ibadan': { price: 3500, days: '3-5', zone: 'West' },
+            'Abeokuta': { price: 3500, days: '3-5', zone: 'West' },
+            'Akure': { price: 3500, days: '3-5', zone: 'West' },
+            'Osogbo': { price: 3500, days: '3-5', zone: 'West' },
+            'Ado-Ekiti': { price: 3500, days: '3-5', zone: 'West' },
+            'Ilorin': { price: 3500, days: '3-5', zone: 'West' },
+            'Oyo': { price: 3500, days: '3-5', zone: 'West' },
+            'Ogun': { price: 3500, days: '3-5', zone: 'West' },
+            'Ondo': { price: 3500, days: '3-5', zone: 'West' },
+            'Osun': { price: 3500, days: '3-5', zone: 'West' },
+            'Ekiti': { price: 3500, days: '3-5', zone: 'West' },
+            
+            // East Zone
+            'Enugu': { price: 4000, days: '4-6', zone: 'East' },
+            'Owerri': { price: 4000, days: '4-6', zone: 'East' },
+            'Onitsha': { price: 4000, days: '4-6', zone: 'East' },
+            'Awka': { price: 4000, days: '4-6', zone: 'East' },
+            'Abakaliki': { price: 4000, days: '4-6', zone: 'East' },
+            'Umuahia': { price: 4000, days: '4-6', zone: 'East' },
+            'Abia': { price: 4000, days: '4-6', zone: 'East' },
+            'Anambra': { price: 4000, days: '4-6', zone: 'East' },
+            'Ebonyi': { price: 4000, days: '4-6', zone: 'East' },
+            'Imo': { price: 4000, days: '4-6', zone: 'East' },
+            
+            // South-South Zone
+            'Port Harcourt': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Uyo': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Calabar': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Yenagoa': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Asaba': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Warri': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Benin': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Akwa Ibom': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Bayelsa': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Cross River': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Delta': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Edo': { price: 4500, days: '4-7', zone: 'South-South' },
+            'Rivers': { price: 4500, days: '4-7', zone: 'South-South' }
+        };
+
+        // Get DOM elements
+        const stateSelect = document.getElementById('stateSelect');
+        const shippingDisplay = document.getElementById('shippingDisplay');
+        const shippingFeeInput = document.getElementById('shippingFee');
+        const shippingZoneInput = document.getElementById('shippingZone');
+        const shippingLine = document.getElementById('shippingLine');
+        const subtotalElement = document.getElementById('subtotal');
+        const orderTotalElement = document.getElementById('orderTotal');
+        const totalAmountButton = document.getElementById('totalAmount');
+        const paymentButton = document.getElementById('paymentButton');
+
+        // Calculate totals
+        function updateTotals() {
+            const subtotal = parseFloat(subtotalElement.textContent) || 0;
+            const shippingFee = parseFloat(shippingFeeInput.value) || 0;
+            const total = subtotal + shippingFee;
+            
+            orderTotalElement.textContent = total.toLocaleString('en-US');
+            totalAmountButton.textContent = total.toLocaleString('en-US');
+            
+            // Update shipping line display
+            if (shippingFee > 0) {
+                shippingLine.innerHTML = `₦${shippingFee.toLocaleString('en-US')}`;
+            }
+        }
+
+        // Update shipping information when state changes
+        stateSelect.addEventListener('change', function() {
+            const selectedState = this.value;
+            
+            if (selectedState && shippingZones[selectedState]) {
+                const shippingInfo = shippingZones[selectedState];
+                const shippingPrice = shippingInfo.price;
+                const deliveryDays = shippingInfo.days;
+                const zone = shippingInfo.zone;
+                
+                // Update shipping display
+                shippingDisplay.innerHTML = `
+                    <div class="text-[#111111] text-sm">
+                        Shipping (Kaduna → ${selectedState})
+                    </div>
+                    <div class="text-[#111111] text-lg font-normal mt-1">
+                        ₦${shippingPrice.toLocaleString('en-US')}
+                    </div>
+                    <div class="text-[#8E8E93] text-xs mt-1">
+                        Estimated delivery: ${deliveryDays} business days
+                    </div>
+                `;
+                
+                // Update hidden inputs
+                shippingFeeInput.value = shippingPrice;
+                shippingZoneInput.value = zone;
+                
+                // Update totals
+                updateTotals();
+                
+                // Enable payment button
+                paymentButton.disabled = false;
+            } else {
+                // Reset if no state selected
+                shippingDisplay.innerHTML = '<div class="text-[#8E8E93] text-sm italic">Select your state to calculate shipping</div>';
+                shippingFeeInput.value = 0;
+                shippingZoneInput.value = '';
+                shippingLine.innerHTML = 'Select state';
+                updateTotals();
+                paymentButton.disabled = true;
+            }
+        });
+
+        // Form validation
+        const checkoutForm = document.getElementById('checkoutForm');
+        checkoutForm.addEventListener('submit', function(e) {
+            const state = stateSelect.value;
+            
+            if (!state || !shippingZones[state]) {
+                e.preventDefault();
+                alert('Please select a valid state to calculate shipping.');
+                stateSelect.focus();
+                return false;
+            }
+            
+            // Additional validation can be added here
+            // For now, let it proceed to Paystack
+        });
+
+        // Initialize
+        updateTotals();
+    });
+</script>
 {% endblock %}

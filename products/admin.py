@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Product, Review
+from .models import Product, Review, ProductImage
+from django.utils.html import format_html
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -86,3 +87,30 @@ class ReviewAdmin(admin.ModelAdmin):
     list_filter = ['approved', 'rating', 'created_at']
     search_fields = ['user__username', 'comment']
     readonly_fields = ['created_at']
+
+# Inline admin for ProductImage
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1  # Number of empty forms to display
+    fields = ['image', 'alt_text', 'is_main', 'image_preview']
+    readonly_fields = ['image_preview']
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" height="100" style="object-fit: cover;" />', obj.image.url)
+        return "No Image"
+    image_preview.short_description = 'Preview'
+
+# Register the ProductImage model separately (optional)
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'image_preview', 'is_main', 'created_at']
+    list_filter = ['is_main', 'created_at']
+    list_editable = ['is_main']
+    search_fields = ['product__name', 'alt_text']
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" style="object-fit: cover;" />', obj.image.url)
+        return "No Image"
+    image_preview.short_description = 'Image'
