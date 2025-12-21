@@ -159,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vulor.onrender.com",
     "https://*.vulor.com",
-    "vulor-1.onrender.com",
+    "https://*.vulor-1.onrender.com",
     "https://*.ngrok-free.app",
     "https://*.ngrok-free.dev",
     "https://*.victorious-ivan-uncharily.ngrok-free.dev",
