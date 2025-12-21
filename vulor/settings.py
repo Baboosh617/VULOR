@@ -17,7 +17,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Debug settings and Allowed hosts
 SECRET_KEY = 'django-insecure-development-key-1234567890-change-in-production'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com', 'vulor-1.onrender.com']
 
 # Applications
 INSTALLED_APPS = [
@@ -159,6 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vulor.onrender.com",
     "https://*.vulor.com",
+    "https://*.vulor-1.onrender.com",
     "https://*.ngrok-free.app",
     "https://*.ngrok-free.dev",
     "https://*.victorious-ivan-uncharily.ngrok-free.dev",
