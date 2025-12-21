@@ -3,58 +3,141 @@
 {% block title %}Order History - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-8">Order History</h1>
-    
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- Page Header -->
+    <div class="mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-2">ORDER HISTORY</h1>
+        <p class="text-[#8E8E93] text-sm">Track and review your past orders</p>
+    </div>
+
     {% if orders %}
-    <div class="space-y-6">
+    <!-- Orders List -->
+    <div class="space-y-4">
         {% for order in orders %}
-        <div class="bg-gray-800 rounded-2xl p-6">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h2 class="text-xl font-semibold">Order #{{ order.order_number }}</h2>
-                    <p class="text-gray-400">{{ order.created_at|date:"F j, Y" }}</p>
+        <!-- Order Card - Simple horizontal row -->
+        <div class="border border-[#8E8E93]/30 py-6 px-6 hover:border-[#8E8E93]/50 transition-colors duration-300">
+            <div class="flex flex-col md:flex-row md:items-center gap-6">
+                <!-- Left: Order ID and Date -->
+                <div class="md:w-1/4">
+                    <div class="text-[#111111] text-base font-normal mb-1">
+                        #{{ order.order_number|slice:":8" }}
+                    </div>
+                    <div class="text-[#8E8E93] text-sm">
+                        {{ order.created_at|date:"M j, Y" }}
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-lg font-bold">₦{{ order.total_amount }}</p>
-                    <span class="px-3 py-1 rounded-full text-sm font-medium 
-                        {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
-                        {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
-                        {% elif order.status == 'processing' %}bg-yellow-500/20 text-yellow-500
-                        {% else %}bg-gray-500/20 text-gray-500{% endif %}">
+
+                <!-- Middle: Product Thumbnails -->
+                <div class="md:w-2/4 flex items-center">
+                    <div class="flex -space-x-2">
+                        {% for item in order.items.all|slice:":3" %}
+                        <div class="w-12 h-12 bg-[#F7F7F7] overflow-hidden rounded border border-[#F7F7F7]">
+                            <img src="{{ item.product.image.url }}" 
+                                 alt="{{ item.product.name }}"
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% endfor %}
+                        
+                        {% if order.items.count > 3 %}
+                        <div class="w-12 h-12 bg-[#F7F7F7] rounded border border-[#F7F7F7] flex items-center justify-center">
+                            <span class="text-[#8E8E93] text-xs">+{{ order.items.count|add:"-3" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if order.items.count == 0 %}
+                    <div class="text-[#8E8E93] text-sm italic">No items</div>
+                    {% endif %}
+                </div>
+
+                <!-- Right: Total Price and Status Badge -->
+                <div class="md:w-1/4">
+                    <div class="text-[#111111] text-lg font-normal mb-2">
+                        ₦{{ order.total_amount }}
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    {% if order.status == 'delivered' %}
+                    <span class="inline-block bg-[#10B981]/10 text-[#10B981] text-xs px-3 py-1 rounded-full">
+                        Delivered
+                    </span>
+                    {% elif order.status == 'shipped' %}
+                    <span class="inline-block bg-[#3B82F6]/10 text-[#3B82F6] text-xs px-3 py-1 rounded-full">
+                        Shipped
+                    </span>
+                    {% elif order.status == 'processing' %}
+                    <span class="inline-block bg-[#8E8E93]/10 text-[#8E8E93] text-xs px-3 py-1 rounded-full">
+                        Processing
+                    </span>
+                    {% elif order.status == 'cancelled' %}
+                    <span class="inline-block bg-[#EF4444]/10 text-[#EF4444] text-xs px-3 py-1 rounded-full">
+                        Cancelled
+                    </span>
+                    {% else %}
+                    <span class="inline-block bg-[#8E8E93]/10 text-[#8E8E93] text-xs px-3 py-1 rounded-full">
                         {{ order.get_status_display }}
                     </span>
+                    {% endif %}
                 </div>
-            </div>
-            
-            <div class="border-t border-gray-700 pt-4">
-                <h3 class="font-semibold mb-2">Items:</h3>
-                <div class="space-y-2">
-                    {% for item in order.items.all %}
-                    <div class="flex justify-between">
-                        <span>{{ item.quantity }} x {{ item.product.name }}</span>
-                        <span>${{ item.total_price }}</span>
-                    </div>
-                    {% endfor %}
+
+                <!-- Far Right: View Order Button -->
+                <div class="md:w-1/4 text-right">
+                    <a href="{% url 'orders:order_detail' order.order_number %}" 
+                       class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
+                        View Order
+                        <span class="ml-1 transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </a>
                 </div>
-            </div>
-            
-            <div class="mt-4">
-                <a href="{% url 'orders:order_detail' order.order_number %}" 
-                   class="text-purple-500 hover:text-purple-400 font-semibold">
-                    View Order Details
-                </a>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-16">
-        <p class="text-gray-400 text-xl">You haven't placed any orders yet.</p>
-        <a href="{% url 'product_list' %}" class="text-purple-500 hover:text-purple-400 mt-4 inline-block">
-            Start Shopping
+    <!-- Empty State -->
+    <div class="text-center py-20">
+        <div class="mb-6">
+            <span class="material-symbols-outlined text-[#8E8E93] text-6xl">
+                receipt_long
+            </span>
+        </div>
+        <h2 class="text-[#111111] text-2xl font-normal mb-4">No orders yet</h2>
+        <p class="text-[#8E8E93] mb-8 max-w-md mx-auto">
+            When you place an order, it'll show up here.
+        </p>
+        <a href="{% url 'product_list' %}" 
+           class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-8 py-3 transition-colors duration-300 text-sm tracking-wide">
+            START SHOPPING
         </a>
     </div>
     {% endif %}
 </div>
+
+<style>
+    /* Hover effect for the entire order card */
+    .border-\[\#8E8E93\]\/30:hover {
+        transform: translateY(-1px);
+        transition: all 0.3s ease;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effect to view order links
+        document.querySelectorAll('a[href*="order_detail"]').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                const arrow = this.querySelector('span');
+                if (arrow) {
+                    arrow.style.transform = 'translateX(4px)';
+                }
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                const arrow = this.querySelector('span');
+                if (arrow) {
+                    arrow.style.transform = 'translateX(0)';
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

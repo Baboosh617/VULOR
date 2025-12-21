@@ -3,141 +3,209 @@
 {% block title %}Contact - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <!-- Header -->
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- SECTION 1: Header -->
     <div class="text-center mb-16">
-        <h1 class="text-4xl font-bold text-white mb-6">Contact Us</h1>
-        <p class="text-gray-400 text-lg">Get in touch with the VULOR team</p>
-        <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-4"></div>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-4">CONTACT VULOR</h1>
+        <p class="text-[#8E8E93] text-sm">
+            Questions about orders, sizing, or delivery? We've got you.
+        </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <!-- Contact Information -->
-        <div class="space-y-8">
-            <div>
-                <h2 class="text-2xl font-bold text-white mb-6">Get In Touch</h2>
-                <p class="text-gray-300 mb-6">
-                    Have questions about our products, orders, or just want to say hello? 
-                    We'd love to hear from you. Reach out through any of the channels below.
-                </p>
-            </div>
-
-            <!-- Contact Methods -->
+    <!-- SECTION 2: Contact Options -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <!-- LEFT: Contact Info -->
+        <div>
             <div class="space-y-6">
                 <!-- Email -->
-                <div class="flex items-start space-x-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-2xl">📧</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Email</h3>
-                        <a href="mailto:info@vulor.com" class="text-gray-300 hover:text-purple-400 transition-colors">
-                            info@vulor.com
+                <div>
+                    <div class="text-[#8E8E93] text-sm mb-1">EMAIL</div>
+                    <div class="text-[#111111] text-base">
+                        <a href="mailto:support@vulor.com" class="hover:text-[#FF5A1F] transition-colors duration-300">
+                            support@vulor.com
                         </a>
-                        <p class="text-gray-400 text-sm mt-1">We'll respond within 24 hours</p>
                     </div>
                 </div>
 
-                <!-- WhatsApp -->
-                <div class="flex items-start space-x-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-2xl">💬</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">WhatsApp</h3>
-                        <a href="https://wa.me/2348123456789" class="text-gray-300 hover:text-purple-400 transition-colors">
-                            +234 812 345 6789
+                <!-- Phone / WhatsApp -->
+                <div>
+                    <div class="text-[#8E8E93] text-sm mb-1">PHONE / WHATSAPP</div>
+                    <div class="text-[#111111] text-base">
+                        <a href="https://wa.me/2348000000000" class="hover:text-[#FF5A1F] transition-colors duration-300">
+                            +234 800 000 0000
                         </a>
-                        <p class="text-gray-400 text-sm mt-1">Quick responses during business hours</p>
                     </div>
                 </div>
 
-                <!-- Business Hours -->
-                <div class="flex items-start space-x-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-2xl">🕒</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Business Hours</h3>
-                        <p class="text-gray-300">Monday - Sunday: 9:00 AM - 9:00 PM</p>
-                        <p class="text-gray-400 text-sm mt-1">Lagos Time (WAT)</p>
-                    </div>
+                <!-- Location -->
+                <div>
+                    <div class="text-[#8E8E93] text-sm mb-1">LOCATION</div>
+                    <div class="text-[#111111] text-base">Kaduna, Nigeria</div>
                 </div>
 
-                <!-- Social Media -->
-                <div class="flex items-start space-x-4">
-                    <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-2xl">📱</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-3">Follow Us</h3>
-                        <div class="flex space-x-4">
-                            <a href="https://instagram.com/vulor" class="text-gray-400 hover:text-white transition-colors">
-                                Instagram
-                            </a>
-                            <a href="https://twitter.com/vulor" class="text-gray-400 hover:text-white transition-colors">
-                                Twitter
-                            </a>
-                            <a href="https://facebook.com/vulor" class="text-gray-400 hover:text-white transition-colors">
-                                Facebook
-                            </a>
-                        </div>
-                    </div>
+                <!-- Support Hours -->
+                <div>
+                    <div class="text-[#8E8E93] text-sm mb-1">SUPPORT HOURS</div>
+                    <div class="text-[#111111] text-base">Mon – Sat, 9am – 6pm</div>
                 </div>
             </div>
         </div>
 
-        <!-- Contact Form -->
-        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
-            <h2 class="text-2xl font-bold text-white mb-6">Send us a Message</h2>
+        <!-- RIGHT: Contact Form -->
+        <div class="border border-[#8E8E93]/30 p-8 bg-white">
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'contact' in message.tags %}
+                    <div class="mb-6 p-4 bg-[#10B981]/10 text-[#111111] text-sm">
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             
-            <form method="POST" class="space-y-6">
+            <form method="POST" action="{% url 'contact' %}" class="space-y-6">
                 {% csrf_token %}
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-white text-sm font-medium mb-2">First Name</label>
-                        <input type="text" name="first_name" required 
-                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-white text-sm font-medium mb-2">Last Name</label>
-                        <input type="text" name="last_name" required 
-                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
-                    </div>
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-[#111111] text-sm mb-2">FULL NAME</label>
+                    <input type="text" name="full_name" required 
+                           class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                           placeholder="Your full name">
                 </div>
 
+                <!-- Email Address -->
                 <div>
-                    <label class="block text-white text-sm font-medium mb-2">Email</label>
+                    <label class="block text-[#111111] text-sm mb-2">EMAIL ADDRESS</label>
                     <input type="email" name="email" required 
-                           class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
+                           class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                           placeholder="you@example.com">
                 </div>
 
+                <!-- Subject Dropdown -->
                 <div>
-                    <label class="block text-white text-sm font-medium mb-2">Subject</label>
-                    <select name="subject" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
-                        <option value="general">General Inquiry</option>
-                        <option value="order">Order Support</option>
-                        <option value="product">Product Question</option>
-                        <option value="shipping">Shipping Information</option>
-                        <option value="returns">Returns & Exchanges</option>
+                    <label class="block text-[#111111] text-sm mb-2">SUBJECT</label>
+                    <select name="subject" required 
+                            class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent">
+                        <option value="" disabled selected>Select a subject</option>
+                        <option value="order_issue">Order issue</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="product_question">Product question</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
 
+                <!-- Message -->
                 <div>
-                    <label class="block text-white text-sm font-medium mb-2">Message</label>
-                    <textarea name="message" rows="5" required 
-                              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500"
-                              placeholder="Tell us how we can help you..."></textarea>
+                    <label class="block text-[#111111] text-sm mb-2">MESSAGE</label>
+                    <textarea name="message" rows="4" required 
+                              class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                              placeholder="How can we help you?"></textarea>
                 </div>
 
+                <!-- Button -->
                 <button type="submit" 
-                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors">
-                    Send Message
+                        class="w-full bg-[#FF5A1F] text-[#111111] text-base font-medium py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300">
+                    SEND MESSAGE
                 </button>
             </form>
         </div>
     </div>
+
+    <!-- SECTION 3: Order Help Shortcut -->
+    <div class="text-center border-t border-[#8E8E93]/20 pt-12">
+        <p class="text-[#8E8E93] text-sm mb-4">
+            Already placed an order?
+        </p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'orders:order_history' %}" 
+           class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
+            <span>View your order details</span>
+            <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" 
+           class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
+            <span>Log in to view your order details</span>
+            <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+        </a>
+        {% endif %}
+    </div>
 </div>
+
+<!-- Success Modal (hidden by default) -->
+<div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-8 max-w-md mx-4 border border-[#8E8E93]/30">
+        <div class="text-center">
+            <div class="mb-4">
+                <span class="material-symbols-outlined text-[#10B981] text-4xl">
+                    check_circle
+                </span>
+            </div>
+            <h3 class="text-[#111111] text-lg font-normal mb-2">Message sent</h3>
+            <p class="text-[#8E8E93] text-sm mb-6">
+                We'll get back to you within 24 hours.
+            </p>
+            <button onclick="closeSuccessModal()" 
+                    class="border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-6 py-2 transition-colors duration-300 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Success message handling
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'contact' in message.tags and message.tags == 'success' %}
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    showSuccessModal();
+                }, 500);
+            });
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    function showSuccessModal() {
+        const modal = document.getElementById('successModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeSuccessModal() {
+        const modal = document.getElementById('successModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('successModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeSuccessModal();
+        }
+    });
+
+    // Form submission with feedback
+    const contactForm = document.querySelector('form[action*="contact"]');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            
+            // Show loading state
+            submitButton.textContent = 'SENDING...';
+            submitButton.disabled = true;
+            
+            // In a real implementation, this would be handled by Django backend
+            // For now, we'll simulate a successful submission
+            // Remove this in production and let Django handle the form
+            setTimeout(() => {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }, 2000);
+        });
+    }
+</script>
 {% endblock %}

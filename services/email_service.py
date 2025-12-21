@@ -9,17 +9,21 @@ ADMIN_EMAIL = "babasmuhammad617@gmail.com"
 user = User()
 
 def send_order_confirmation(user, order):
-    subject = f"Your VULOR Order #{order.id} is Confirmed"
-    message = (
-        f"Hey {user.first_name},\n\n"
-        f"Your order has been successfully placed!\n"
-        f"Order ID: {order.id}\n"
-        f"Total: ₦{order.get_total_price}\n\n"
-        f"We’ll keep you updated.\n"
-        f"— VULOR Team"
-    )
-    
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    try:
+        subject = f"Your VULOR Order #{order.id} is Confirmed"
+        message = (
+            f"Hey {user.first_name},\n\n"
+            f"Your order has been successfully placed!\n"
+            f"Order ID: {order.id}\n"
+            f"Total: ₦{order.get_total_price}\n\n"
+            f"We’ll keep you updated.\n"
+            f"— VULOR Team"
+        )
+        
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    except Exception as e:
+        # Log the exception (you can use logging framework here)
+        print(f"Failed to send order confirmation email: {e}")    
 
 def send_order_shipped(user, order):
     subject = f"VULOR Order #{order.id} Shipped!"

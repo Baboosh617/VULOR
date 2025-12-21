@@ -1,101 +1,427 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% load socialaccount %}
 
 {% block title %}Register - VULOR{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
-                Create your VULOR account
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-400">
-                Join the premium streetwear community
-            </p>
-        </div>
-        
-        <form class="mt-8 space-y-6" method="POST" action="{% url 'account_signup' %}">
-            {% csrf_token %}
+<style>
+    /* Reuse animations from login page */
+    @keyframes floatIn {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes progressFill {
+        0% {
+            width: 0%;
+        }
+        100% {
+            width: var(--target-width);
+        }
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    .animate-float-in {
+        animation: floatIn 0.8s ease-out forwards;
+        opacity: 0;
+    }
+    
+    .animate-float-in-delay {
+        animation: floatIn 0.8s ease-out 0.3s forwards;
+        opacity: 0;
+    }
+    
+    .animate-float-in-delay-2 {
+        animation: floatIn 0.8s ease-out 0.6s forwards;
+        opacity: 0;
+    }
+    
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .image-container-3d {
+        position: relative;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        transition: transform 0.5s ease;
+    }
+    
+    .image-container-3d:hover {
+        transform: rotateY(5deg) rotateX(5deg);
+    }
+    
+    .image-container-3d img {
+        transition: transform 0.5s ease;
+    }
+    
+    .image-container-3d:hover img {
+        transform: scale(1.05);
+    }
+    
+    .parallax-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+    }
+    
+    .parallax-container img {
+        transition: transform 0.5s ease-out;
+    }
+    
+    .parallax-container:hover img {
+        transform: scale(1.1);
+    }
+    
+    .shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    .password-strength {
+        height: 4px;
+        transition: all 0.3s ease;
+        animation: progressFill 0.5s ease-out forwards;
+    }
+    
+    /* Strength indicator colors */
+    .strength-0 { width: 20%; background-color: #ef4444; } /* Red */
+    .strength-1 { width: 40%; background-color: #f97316; } /* Orange */
+    .strength-2 { width: 60%; background-color: #eab308; } /* Yellow */
+    .strength-3 { width: 80%; background-color: #22c55e; } /* Green */
+    .strength-4 { width: 100%; background-color: #10b981; } /* Emerald */
+</style>
+
+<div class="min-h-screen bg-[#F7F7F7] flex flex-col lg:flex-row">
+    <!-- Left: Hero Image with 3D and parallax effects -->
+    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+        <div class="max-w-md w-full text-center animate-float-in">
+            <h3 class="text-[#111111] text-2xl font-normal mb-4">Create Your Account</h3>
             
+            <!-- Glassmorphism container with 3D effect -->
+            <div class="glass-effect p-6 rounded-2xl mb-6">
+                <div class="image-container-3d parallax-container">
+                    <img src="{% static 'images/logo-2.jpg' %}" 
+                         alt="VULOR Design Process" 
+                         class="w-full h-64 lg:h-80 object-cover rounded-lg"
+                         data-parallax-speed="0.1">
+                    
+                    <!-- Interactive design elements -->
+                    <div class="absolute top-4 right-4 glass-effect rounded-full p-2">
+                        <div class="w-8 h-8 rounded-full bg-[#FF5A1F]/20 flex items-center justify-center">
+                            <span class="text-[#FF5A1F] text-sm">★</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interactive design badge -->
+                <div class="mt-4 flex items-center justify-center space-x-3">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse"></div>
+                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse delay-75"></div>
+                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse delay-150"></div>
+                    </div>
+                    <span class="text-[#8E8E93] text-sm">Exclusive Designs</span>
+                </div>
+            </div>
+            
+            <p class="text-[#8E8E93] text-sm animate-float-in-delay">Join our community of premium streetwear enthusiasts</p>
+            
+            <!-- Animated benefits -->
+            <div class="mt-6 space-y-3 animate-float-in-delay-2">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
+                    <span class="text-[#111111] text-sm">Early access to new collections</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
+                    <span class="text-[#111111] text-sm">Member-only discounts</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
+                    <span class="text-[#111111] text-sm">Priority customer support</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right: Signup Form with password strength indicator -->
+    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+        <div class="max-w-md w-full space-y-8 animate-float-in">
+            <!-- Header -->
+            <div class="text-center">
+                <h2 class="text-[#111111] text-3xl font-normal">Join VULOR</h2>
+                <p class="text-[#8E8E93] text-sm mt-2">Create your premium streetwear account</p>
+            </div>
+            
+            <!-- Form Errors -->
             {% if form.errors %}
-            <div class="bg-red-600 text-white p-4 rounded-lg">
-                <strong>Please fix the following errors:</strong>
-                <ul class="list-disc list-inside mt-2">
+            <div class="bg-red-50 border border-red-200 text-[#111111] p-4 rounded-lg text-sm animate-float-in-delay">
+                <strong class="block mb-2">Please fix the following errors:</strong>
+                <ul class="space-y-1">
                     {% for field in form %}
                         {% for error in field.errors %}
-                            <li>{{ field.label }}: {{ error }}</li>
+                            <li class="text-red-600">• {{ field.label }}: {{ error }}</li>
                         {% endfor %}
                     {% endfor %}
                     {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
+                        <li class="text-red-600">• {{ error }}</li>
                     {% endfor %}
                 </ul>
             </div>
             {% endif %}
 
-            <div class="space-y-4">
-                <div>
-                    <label for="id_username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                    <input type="text" name="username" id="id_username" required
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
-                           placeholder="Choose a username"
-                           value="{{ form.username.value|default:'' }}">
-                    {% if form.username.help_text %}
-                    <p class="text-xs text-gray-400 mt-1">{{ form.username.help_text }}</p>
-                    {% endif %}
-                </div>
+            <!-- Signup Form -->
+            <form class="mt-8 space-y-6" method="POST" action="{% url 'account_signup' %}" id="signupForm">
+                {% csrf_token %}
                 
-                <div>
-                    <label for="id_email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                    <input type="email" name="email" id="id_email" required
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
-                           placeholder="Enter your email"
-                           value="{{ form.email.value|default:'' }}">
+                <div class="space-y-4 animate-float-in-delay">
+                    <!-- Name Field -->
+                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
+                        <label for="id_name" class="block text-[#111111] text-sm mb-2">Name</label>
+                        <input type="text" name="name" id="id_name" required
+                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               placeholder="John Doe"
+                               value="{{ form.name.value|default:'' }}">
+                    </div>
+                    
+                    <!-- Email Field -->
+                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
+                        <label for="id_email" class="block text-[#111111] text-sm mb-2">Email</label>
+                        <input type="email" name="email" id="id_email" required
+                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               placeholder="you@example.com"
+                               value="{{ form.email.value|default:'' }}">
+                    </div>
+                    
+                    <!-- Password Field with Strength Indicator -->
+                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
+                        <label for="id_password1" class="block text-[#111111] text-sm mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" name="password1" id="id_password1" required
+                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)] pr-10"
+                                   placeholder="Create a password"
+                                   oninput="checkPasswordStrength(this.value)">
+                            <button type="button" onclick="togglePassword('id_password1')"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8E8E93] hover:text-[#111111] transition-colors duration-300">
+                                👁️
+                            </button>
+                        </div>
+                        
+                        <!-- Password Strength Indicator -->
+                        <div class="mt-2 space-y-2">
+                            <div class="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div id="passwordStrength" class="password-strength strength-0"></div>
+                            </div>
+                            <div id="strengthText" class="text-xs text-[#8E8E93]">Very weak</div>
+                            
+                            <!-- Password Requirements -->
+                            <div id="passwordRequirements" class="space-y-1 mt-2">
+                                <div class="flex items-center text-xs" id="reqLength">
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
+                                    <span class="text-[#8E8E93]">At least 8 characters</span>
+                                </div>
+                                <div class="flex items-center text-xs" id="reqUppercase">
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
+                                    <span class="text-[#8E8E93]">One uppercase letter</span>
+                                </div>
+                                <div class="flex items-center text-xs" id="reqLowercase">
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
+                                    <span class="text-[#8E8E93]">One lowercase letter</span>
+                                </div>
+                                <div class="flex items-center text-xs" id="reqNumber">
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
+                                    <span class="text-[#8E8E93]">One number</span>
+                                </div>
+                                <div class="flex items-center text-xs" id="reqSpecial">
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
+                                    <span class="text-[#8E8E93]">One special character</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confirm Password Field -->
+                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
+                        <label for="id_password2" class="block text-[#111111] text-sm mb-2">Confirm Password</label>
+                        <input type="password" name="password2" id="id_password2" required
+                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               placeholder="Confirm your password"
+                               oninput="checkPasswordMatch()">
+                        <div id="passwordMatch" class="text-xs mt-1 hidden"></div>
+                    </div>
                 </div>
-                
-                <div>
-                    <label for="id_password1" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                    <input type="password" name="password1" id="id_password1" required
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
-                           placeholder="Enter password">
-                    {% if form.password1.help_text %}
-                    <p class="text-xs text-gray-400 mt-1">{{ form.password1.help_text }}</p>
-                    {% endif %}
-                </div>
-                
-                <div>
-                    <label for="id_password2" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-                    <input type="password" name="password2" id="id_password2" required
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500"
-                           placeholder="Confirm password">
-                </div>
-            </div>
 
-            <div>
-                <button type="submit" 
-                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-                    Create Account
-                </button>
-            </div>
-            
-            <div class="text-center">
-                <p class="text-gray-400">
-                    Already have an account? 
-                    <a href="{% url 'login' %}" class="text-purple-500 hover:text-purple-400 font-medium">Sign in here</a>
-                </p>
-            </div>
-
-            <div class="mb-4">
-                        <p class="text-muted mb-3">Quick sign up with:</p>
-                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-3">
-                            <i class="bi bi-google me-2"></i> Sign up with Google
+                <!-- Signup Button -->
+                <div class="animate-float-in-delay-2">
+                    <button type="submit" 
+                            class="w-full bg-[#FF5A1F] text-[#111111] text-sm font-medium uppercase py-3 px-4 hover:bg-[#FF5A1F]/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5A1F] transform hover:scale-[1.02] active:scale-[0.98] rounded-lg"
+                            id="submitButton">
+                        Sign Up
+                    </button>
+                </div>
+                
+                <!-- Login Link -->
+                <div class="text-center animate-float-in-delay-2">
+                    <p class="text-[#8E8E93] text-sm">
+                        Already have an account? 
+                        <a href="{% url 'account_login' %}" 
+                           class="text-[#111111] hover:text-[#FF5A1F] font-medium transition-all duration-300 transform hover:scale-105 inline-block">
+                            Login here
                         </a>
-            </div>
-        </form>
+                    </p>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Enhanced Password Toggle & Strength Indicator Script -->
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        button.innerHTML = '👁️‍🗨️';
+    } else {
+        field.type = 'password';
+        button.innerHTML = '👁️';
+    }
+}
+
+function checkPasswordStrength(password) {
+    let strength = 0;
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password)
+    };
+    
+    // Update requirement indicators
+    updateRequirement('reqLength', requirements.length);
+    updateRequirement('reqUppercase', requirements.uppercase);
+    updateRequirement('reqLowercase', requirements.lowercase);
+    updateRequirement('reqNumber', requirements.number);
+    updateRequirement('reqSpecial', requirements.special);
+    
+    // Calculate strength
+    if (requirements.length) strength++;
+    if (requirements.uppercase) strength++;
+    if (requirements.lowercase) strength++;
+    if (requirements.number) strength++;
+    if (requirements.special) strength++;
+    
+    // Update strength indicator
+    const strengthBar = document.getElementById('passwordStrength');
+    const strengthText = document.getElementById('strengthText');
+    
+    strengthBar.className = `password-strength strength-${strength}`;
+    
+    // Set custom property for animation
+    strengthBar.style.setProperty('--target-width', `${(strength + 1) * 20}%`);
+    
+    // Update text
+    const texts = ['Very weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981'];
+    strengthText.textContent = texts[strength];
+    strengthText.style.color = colors[strength];
+    
+    // Add shake animation if password is weak
+    if (strength < 2 && password.length > 0) {
+        strengthBar.classList.add('shake');
+        setTimeout(() => strengthBar.classList.remove('shake'), 500);
+    }
+}
+
+function updateRequirement(elementId, met) {
+    const element = document.getElementById(elementId);
+    const circle = element.querySelector('span');
+    const text = element.querySelector('span:last-child');
+    
+    if (met) {
+        circle.innerHTML = '✓';
+        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-green-500';
+        text.className = 'text-green-600';
+    } else {
+        circle.innerHTML = '○';
+        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-gray-400';
+        text.className = 'text-[#8E8E93]';
+    }
+}
+
+function checkPasswordMatch() {
+    const password1 = document.getElementById('id_password1').value;
+    const password2 = document.getElementById('id_password2').value;
+    const matchDiv = document.getElementById('passwordMatch');
+    const submitButton = document.getElementById('submitButton');
+    
+    if (password2.length === 0) {
+        matchDiv.classList.add('hidden');
+        return;
+    }
+    
+    if (password1 === password2) {
+        matchDiv.textContent = '✓ Passwords match';
+        matchDiv.className = 'text-xs mt-1 text-green-600';
+        matchDiv.classList.remove('hidden');
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        matchDiv.textContent = '✗ Passwords do not match';
+        matchDiv.className = 'text-xs mt-1 text-red-600 shake';
+        matchDiv.classList.remove('hidden');
+        submitButton.disabled = true;
+        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// Parallax effect for the image
+document.addEventListener('DOMContentLoaded', function() {
+    const image = document.querySelector('[data-parallax-speed]');
+    if (image) {
+        document.addEventListener('mousemove', function(e) {
+            const speed = parseFloat(image.getAttribute('data-parallax-speed') || 0.1);
+            const x = (window.innerWidth - e.pageX * speed) / 100;
+            const y = (window.innerHeight - e.pageY * speed) / 100;
+            image.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.1)`;
+        });
+    }
+    
+    // Form validation enhancement
+    const form = document.getElementById('signupForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = document.getElementById('id_password2').value;
+            
+            if (password1 !== password2) {
+                e.preventDefault();
+                document.getElementById('passwordMatch').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('passwordMatch').classList.remove('shake');
+                }, 500);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

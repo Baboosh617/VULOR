@@ -13,29 +13,55 @@ def checkout(request):
         
         if not cart.items.exists():
             messages.error(request, "Your cart is empty.")
-            return redirect("cart:view_cart")
+            return redirect("view_cart")
 
         if request.method == "POST":
-            # Validate required shipping fields
-            required_fields = ['shipping_address', 'shipping_city', 'shipping_state', 'shipping_zipcode', 'customer_phone']
-            missing_fields = [field.replace('_', ' ').title() for field in required_fields if not request.POST.get(field)]
+            # Get all form data from template
+            full_name = request.POST.get("full_name", "").strip()
+            phone_number = request.POST.get("phone_number", "").strip()
+            email = request.POST.get("email", "").strip()
+            address_line = request.POST.get("address_line", "").strip()
+            state = request.POST.get("state", "").strip()
+            city = request.POST.get("city", "").strip()
+            shipping_fee = request.POST.get("shipping_fee", "0").strip()
+            shipping_zone = request.POST.get("shipping_zone", "").strip()
+            
+            # Validate required fields (using template field names)
+            required_fields = {
+                'full_name': full_name,
+                'phone_number': phone_number,
+                'email': email,
+                'address_line': address_line,
+                'state': state,
+                'city': city
+            }
+            
+            missing_fields = [field.replace('_', ' ').title() for field, value in required_fields.items() if not value]
             
             if missing_fields:
                 messages.error(request, f"Please fill in: {', '.join(missing_fields)}")
                 return render(request, "orders/checkout.html", {"cart": cart})
 
             try:
-                # Create order
+                # Convert shipping fee to decimal
+                from decimal import Decimal
+                shipping_fee_decimal = Decimal(shipping_fee)
+                
+                # Create order - ONLY map template fields to model fields
                 order = Order.objects.create(
                     user=request.user,
                     total_amount=cart.total_price,
-                    shipping_address=request.POST.get("shipping_address"),
-                    shipping_city=request.POST.get("shipping_city"),
-                    shipping_state=request.POST.get("shipping_state"),
-                    shipping_zipcode=request.POST.get("shipping_zipcode"),
-                    shipping_country=request.POST.get("shipping_country", "Nigeria"),
-                    customer_email=request.user.email,
-                    customer_phone=request.POST.get("customer_phone", ""),
+                    # Map template fields to model fields
+                    shipping_full_name=full_name,
+                    shipping_address=address_line,  # address_line -> shipping_address
+                    shipping_city=city,  # city -> shipping_city
+                    shipping_state=state,  # state -> shipping_state
+                    shipping_zipcode="",  # Not in template, set to empty
+                    shipping_country="Nigeria",  # Default
+                    shipping_fee=shipping_fee_decimal,  # From hidden input
+                    shipping_zone=shipping_zone,  # From hidden input
+                    customer_email=email,  # email -> customer_email
+                    customer_phone=phone_number,  # phone_number -> customer_phone
                 )
 
                 # Create order items from cart items
@@ -56,6 +82,8 @@ def checkout(request):
 
             except Exception as e:
                 print(f"❌ Order creation error: {e}")
+                import traceback
+                traceback.print_exc()
                 messages.error(request, f"Error creating order: {str(e)}")
                 return render(request, "orders/checkout.html", {"cart": cart})
 
@@ -64,7 +92,7 @@ def checkout(request):
     
     except Cart.DoesNotExist:
         messages.error(request, "Your cart is empty.")
-        return redirect("cart:view_cart")
+        return redirect("view_cart")
 @login_required
 def order_success(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)

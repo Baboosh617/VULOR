@@ -88,7 +88,7 @@
                         <img src="{% static 'images/photo_2025-06-30_12-29-30.jpg' %}" 
                              alt="VULOR Logo" 
                              class="h-10 w-auto transition-opacity duration-300 group-hover:opacity-80">
-                        <span class="text-xl font-bold tracking-tight text-[#F7F7F7]">VULOR</span>
+                        <!-- <span class="text-xl font-bold tracking-tight text-[#F7F7F7]">VULOR</span> -->
                     </a>
                 </div>
 
@@ -105,7 +105,7 @@
                             PROFILE
                         </a>
                         
-                        <a href="{% url 'orders:history' %}" 
+                        <a href="{% url 'orders:order_history' %}" 
                            class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors duration-300 text-sm tracking-wide">
                             ORDERS
                         </a>
@@ -193,7 +193,7 @@
                             PROFILE
                         </a>
                         
-                        <a href="{% url 'orders:history' %}" 
+                        <a href="{% url 'orders:order_history' %}" 
                            class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
                             <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">receipt</span> -->
                             ORDERS

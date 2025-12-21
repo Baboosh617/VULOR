@@ -59,6 +59,34 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
+
+
+
+
+INSTALLED_APPS += ["channels"]
+
+# Channels config
+
+ASGI_APPLICATION = "backend.asgi.application"
+
+# Optional: In-memory channel layer for development
+
+CHANNEL_LAYERS = {
+
+
+    "default": {
+
+
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+
+
+    },
+
+
+}
+
+
+
 ROOT_URLCONF = 'vulor.urls'
 
 TEMPLATES = [

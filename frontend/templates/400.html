@@ -3,33 +3,34 @@
 {% block title %}Bad Request - VULOR{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
-    <div class="text-center max-w-md">
-        <div class="mb-8">
-            <div class="text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 mb-4">
-                400
-            </div>
-            <div class="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto"></div>
+<div class="min-h-screen flex items-center justify-center bg-[#F7F7F7] px-4">
+    <div class="text-center max-w-md space-y-8">
+        <!-- Error Code -->
+        <div class="space-y-4">
+            <div class="text-9xl font-bold text-[#111111]">400</div>
+            <div class="w-24 h-1 bg-[#8E8E93]/30 mx-auto"></div>
         </div>
         
-        <h1 class="text-3xl font-bold text-white mb-4">Bad Request</h1>
-        <p class="text-gray-400 mb-8 leading-relaxed">
-            Your browser sent a request that we couldn't process. This might be due to invalid data or an expired session.
-        </p>
+        <!-- Message -->
+        <div class="space-y-4">
+            <h1 class="text-2xl font-normal text-[#111111]">Bad Request</h1>
+            <p class="text-[#8E8E93] leading-relaxed">
+                Oops! Something went wrong with your request.
+            </p>
+        </div>
         
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <!-- Optional Illustration -->
+        <div class="py-4">
+            <div class="text-6xl text-[#8E8E93]/30">📝</div>
+            <p class="text-[#8E8E93] text-sm mt-2">Check the URL or try again.</p>
+        </div>
+        
+        <!-- CTA Button -->
+        <div>
             <a href="{% url 'home' %}" 
-               class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors text-center">
-                Go Home
+               class="inline-block bg-[#FF5A1F] text-[#111111] text-base font-medium py-3 px-8 hover:bg-[#FF5A1F]/90 transition-colors duration-300">
+                Back to Home
             </a>
-            <button onclick="window.location.reload()" 
-                    class="border border-gray-600 text-gray-300 px-8 py-3 rounded-full font-semibold hover:bg-gray-800 transition-colors">
-                Try Again
-            </button>
-        </div>
-        
-        <div class="mt-8 text-gray-500 text-sm">
-            <p>If the problem persists, please clear your browser cache and cookies.</p>
         </div>
     </div>
 </div>

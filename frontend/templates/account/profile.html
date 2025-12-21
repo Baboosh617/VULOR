@@ -1,98 +1,181 @@
 {% extends "base.html" %}
 
-{% block title %}My Profile - VULOR{% endblock %}
+{% block title %}My Account - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-8">My Profile</h1>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Sidebar -->
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- Page Header -->
+    <div class="mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-2">MY ACCOUNT</h1>
+        <p class="text-[#8E8E93] text-sm">Manage your profile and orders</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- LEFT: Profile Navigation -->
         <div class="lg:col-span-1">
-            <nav class="space-y-2">
+            <nav class="space-y-1">
                 <a href="{% url 'profile_view' %}" 
-                   class="block px-4 py-2 bg-purple-600 text-white rounded-lg">Profile</a>
-                <a href="{% url 'orders:history' %}" 
-                   class="block px-4 py-2 text-gray-400 hover:bg-gray-700 rounded-lg">Order History</a>
+                   class="block text-[#111111] text-sm py-3 border-l-2 border-[#FF5A1F] pl-4 hover:text-[#FF5A1F] transition-colors duration-300">
+                    Profile
+                </a>
+                <a href="{% url 'orders:order_history' %}" 
+                   class="block text-[#8E8E93] text-sm py-3 pl-4 hover:text-[#111111] transition-colors duration-300">
+                    Orders
+                </a>
+                <div class="block text-[#8E8E93] text-sm py-3 pl-4 cursor-not-allowed">
+                    Addresses
+                </div>
+                <div class="block text-[#8E8E93] text-sm py-3 pl-4 cursor-not-allowed">
+                    Security
+                </div>
                 <a href="{% url 'logout' %}" 
-                   class="block px-4 py-2 text-gray-400 hover:bg-gray-700 rounded-lg">Logout</a>
+                   class="block text-[#8E8E93] text-sm py-3 pl-4 hover:text-[#EF4444] transition-colors duration-300">
+                    Logout
+                </a>
             </nav>
         </div>
-        
-        <!-- Main Content -->
-        <div class="lg:col-span-2">
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-6">Personal Information</h2>
+
+        <!-- RIGHT: Content Area -->
+        <div class="lg:col-span-3">
+            <!-- Success Message -->
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                <div class="text-[#10B981] text-sm">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- SECTION 1: Profile Info -->
+            <div class="border border-[#8E8E93]/30 p-8 mb-8">
+                <h2 class="text-[#111111] text-sm font-medium mb-6">PROFILE INFORMATION</h2>
                 
+                <!-- Display current user info (non-editable for now) -->
                 <div class="space-y-4">
+                    <!-- Full Name -->
                     <div>
-                        <label class="block text-sm font-bold mb-2">Username:</label>
-                        <p class="text-gray-300">{{ user.username }}</p>
+                        <label class="block text-[#111111] text-sm mb-2">FULL NAME</label>
+                        <div class="text-[#111111] text-base">
+                            {{ user.get_full_name|default:user.username }}
+                        </div>
                     </div>
-                    
+
+                    <!-- Email (readonly) -->
                     <div>
-                        <label class="block text-sm font-bold mb-2">Email:</label>
-                        <p class="text-gray-300">{{ user.email }}</p>
+                        <label class="block text-[#111111] text-sm mb-2">EMAIL</label>
+                        <div class="text-[#111111] text-base">{{ user.email }}</div>
                     </div>
-                    
+
+                    <!-- Phone Number (if exists) -->
+                    {% if user.phone_number %}
                     <div>
-                        <label class="block text-sm font-bold mb-2">Date Joined:</label>
-                        <p class="text-gray-300">{{ user.date_joined|date:"F j, Y" }}</p>
+                        <label class="block text-[#111111] text-sm mb-2">PHONE NUMBER</label>
+                        <div class="text-[#111111] text-base">{{ user.phone_number }}</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Date Joined -->
+                    <div>
+                        <label class="block text-[#111111] text-sm mb-2">MEMBER SINCE</label>
+                        <div class="text-[#111111] text-base">{{ user.date_joined|date:"F j, Y" }}</div>
                     </div>
                 </div>
                 
-                <div class="mt-8 pt-6 border-t border-gray-700">
-                    <h3 class="text-lg font-semibold mb-4">Account Stats</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="text-center p-4 bg-gray-700 rounded-lg">
-                            <div class="text-2xl font-bold text-purple-500">{{ orders.count }}</div>
-                            <div class="text-gray-400">Total Orders</div>
-                        </div>
-                        <div class="text-center p-4 bg-gray-700 rounded-lg">
-                            <div class="text-2xl font-bold text-purple-500">
-                                ₦{% widthratio orders.count 1 0 %}.00
-                            </div>
-                            <div class="text-gray-400">Total Spent</div>
-                        </div>
-                    </div>
+                <!-- Note about editing (you can add editing later) -->
+                <div class="mt-8 pt-6 border-t border-[#8E8E93]/20">
+                    <p class="text-[#8E8E93] text-xs">
+                        To update your profile information, please contact support.
+                    </p>
                 </div>
             </div>
-            
-            <!-- Recent Orders -->
-            {% if orders %}
-            <div class="bg-gray-800 rounded-2xl p-6 mt-6">
-                <h2 class="text-2xl font-bold mb-6">Recent Orders</h2>
+
+            <!-- SECTION 2: Shipping Address (Optional - only show if you have addresses) -->
+            {% if user.address %}
+            <div class="border border-[#8E8E93]/30 p-8 mb-8">
+                <h2 class="text-[#111111] text-sm font-medium mb-6">DEFAULT SHIPPING ADDRESS</h2>
                 
-                <div class="space-y-4">
-                    {% for order in orders %}
-                    <div class="border border-gray-700 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="font-semibold">Order #{{ order.order_number }}</h3>
-                            <span class="px-2 py-1 rounded text-sm 
-                                {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
-                                {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
-                                {% else %}bg-yellow-500/20 text-yellow-500{% endif %}">
-                                {{ order.get_status_display }}
-                            </span>
-                        </div>
-                        <p class="text-gray-400 text-sm">Placed on {{ order.created_at|date:"M j, Y" }}</p>
-                        <p class="text-gray-400 text-sm">Total: ₦{{ order.total_amount }}</p>
-                        <a href="{% url 'orders:order_detail' order.order_number %}" 
-                           class="text-purple-500 hover:text-purple-400 text-sm mt-2 inline-block">
-                            View Details
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                <div class="mt-4 text-center">
-                    <a href="{% url 'orders:history' %}" 
-                       class="text-purple-500 hover:text-purple-400 font-semibold">
-                        View All Orders
-                    </a>
+                <div class="text-[#111111] text-sm leading-relaxed">
+                    {{ user.get_full_name|default:user.username }}<br>
+                    {% if user.address.street %}{{ user.address.street }}<br>{% endif %}
+                    {% if user.address.city %}{{ user.address.city }}, {% endif %}
+                    {% if user.address.state %}{{ user.address.state }}<br>{% endif %}
+                    Nigeria
                 </div>
             </div>
             {% endif %}
+
+            <!-- SECTION 3: Recent Orders Summary -->
+            {% if orders %}
+            <div class="border border-[#8E8E93]/30 p-8 mb-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-[#111111] text-sm font-medium">RECENT ORDERS</h2>
+                    <a href="{% url 'orders:order_history' %}" 
+                       class="text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
+                        View all
+                    </a>
+                </div>
+                
+                <div class="space-y-4">
+                    {% for order in orders|slice:":3" %}
+                    <div class="flex justify-between items-center py-3 border-b border-[#8E8E93]/10 last:border-0">
+                        <div>
+                            <div class="text-[#111111] text-sm">Order {{ order.order_number|slice:":8" }}</div>
+                            <div class="text-[#8E8E93] text-xs">{{ order.created_at|date:"M j, Y" }}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[#111111] text-sm">₦{{ order.total_amount }}</div>
+                            <div class="text-[#8E8E93] text-xs">
+                                {% if order.status == 'delivered' %}
+                                <span class="text-[#10B981]">Delivered</span>
+                                {% elif order.status == 'shipped' %}
+                                <span class="text-[#3B82F6]">Shipped</span>
+                                {% elif order.status == 'processing' %}
+                                <span class="text-[#8E8E93]">Processing</span>
+                                {% elif order.status == 'cancelled' %}
+                                <span class="text-[#EF4444]">Cancelled</span>
+                                {% else %}
+                                {{ order.get_status_display }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- SECTION 4: Account Stats (Optional) -->
+            <div class="border-t border-[#8E8E93]/20 pt-8">
+                <h2 class="text-[#111111] text-sm font-medium mb-6">ACCOUNT OVERVIEW</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-[#111111] text-2xl font-normal">{{ total_orders|default:"0" }}</div>
+                        <div class="text-[#8E8E93] text-sm">Total Orders</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[#111111] text-2xl font-normal">₦{{ total_spent|default:"0" }}</div>
+                        <div class="text-[#8E8E93] text-sm">Total Spent</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[#111111] text-2xl font-normal">{{ user.date_joined|date:"Y" }}</div>
+                        <div class="text-[#8E8E93] text-sm">Member since</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: Account Actions -->
+            <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-[#111111] text-sm">Account security</div>
+                        <div class="text-[#8E8E93] text-xs">Update password and security settings</div>
+                    </div>
+                    <div class="text-[#8E8E93] text-sm">Coming soon</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

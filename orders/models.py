@@ -56,8 +56,12 @@ class Order(models.Model):
     shipping_address = models.TextField()
     shipping_city = models.CharField(max_length=100)
     shipping_state = models.CharField(max_length=100)
-    shipping_zipcode = models.CharField(max_length=20)
+    shipping_zipcode = models.CharField(max_length=20, default='00000')
     shipping_country = models.CharField(max_length=100, default='Nigeria')
+    shipping_full_name = models.CharField(max_length=200, blank=True, default='')
+
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_zone = models.CharField(max_length=50, blank=True, default='')
 
     # --------- CUSTOMER ----------
     customer_email = models.EmailField()
@@ -78,42 +82,53 @@ class Order(models.Model):
     # --------- UTILS ----------
     @property
     def paystack_amount(self):
-        return int(self.total_amount * 100)
+        total_with_shipping = self.total_amount + self.shipping_fee
+        return int(total_with_shipping * 100)
+    
+    @property
+    def grand_total(self):
+        """Calculate grand total including shipping"""
+        return self.total_amount + self.shipping_fee
 
     # --------- SAVE OVERRIDE ----------
     def save(self, *args, **kwargs):
-        # Get old status for comparison
-        old_status = None
-        if self.pk:
-            try:
-                old_status = Order.objects.get(pk=self.pk).status
-            except Order.DoesNotExist:
-                old_status = None
-        
-        # Auto-generate order number
-        if not self.pk and not self.order_number:
-            import time
-            self.order_number = f"VU{self.user.id:06d}{int(time.time())}"
-        
-        # Use transaction to ensure atomic operations
-        with transaction.atomic():
-            # Call parent save first to ensure order exists
-            super().save(*args, **kwargs)
-            
-            # Handle status changes
-            if old_status != self.status:
-                self.handle_status_change(old_status)
-        
-        # Email logic (outside transaction for safety)
-        if self.pk:
-            old = Order.objects.get(pk=self.pk)
-            if old.status != self.status:
-                if self.status == 'shipped':
-                    send_order_shipped(self.user, self)
-                elif self.status == 'delivered':
-                    send_order_delivered(self.user, self)
-                elif self.status == 'cancelled':
-                    send_order_cancelled(self.user, self)
+    # Get old status for comparison
+     old_status = None
+     if self.pk:
+         try:
+             old_status = Order.objects.get(pk=self.pk).status
+         except Order.DoesNotExist:
+             old_status = None
+     
+     # Auto-generate order number
+     if not self.pk and not self.order_number:
+         import time
+         self.order_number = f"VU{self.user.id:06d}{int(time.time())}"
+     
+     # Skip email logic for NEW orders to prevent the group_send error
+     # Save without calling handle_status_change for new orders
+     if not self.pk:
+         # This is a new order - save without triggering email logic
+         super().save(*args, **kwargs)
+         return
+     
+     # For existing orders, proceed with the original logic
+     with transaction.atomic():
+         super().save(*args, **kwargs)
+         
+         if old_status != self.status:
+             self.handle_status_change(old_status)
+     
+     # Email logic (outside transaction for safety)
+     if self.pk:
+         old = Order.objects.get(pk=self.pk)
+         if old.status != self.status:
+             if self.status == 'shipped':
+                 send_order_shipped(self.user, self)
+             elif self.status == 'delivered':
+                 send_order_delivered(self.user, self)
+             elif self.status == 'cancelled':
+                 send_order_cancelled(self.user, self)
 
             
     def handle_status_change(self, old_status):

@@ -3,79 +3,270 @@
 {% block title %}Order {{ order.order_number }} - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-2">Order #{{ order.order_number }}</h1>
-    <p class="text-gray-400 mb-8">Placed on {{ order.created_at|date:"F j, Y" }}</p>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Order Items -->
-        <div class="bg-gray-800 rounded-2xl p-6">
-            <h2 class="text-2xl font-bold mb-6">Order Items</h2>
-            
-            <div class="space-y-4">
-                {% for item in order.items.all %}
-                <div class="flex items-center space-x-4">
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                         class="w-16 h-16 object-cover rounded">
-                    <div class="flex-1">
-                        <h3 class="font-semibold">{{ item.product.name }}</h3>
-                        <p class="text-gray-400 text-sm">
-                            {% if item.size %}Size: {{ item.size }}{% endif %}
-                            {% if item.color %} | Color: {{ item.color }}{% endif %}
-                        </p>
-                        <p class="text-sm">Quantity: {{ item.quantity }}</p>
-                    </div>
-                    <p class="font-semibold">₦{{ item.total_price }}</p>
-                </div>
-                {% endfor %}
-            </div>
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <!-- 1️⃣ Header: Order Identity -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-2">ORDER {{ order.order_number }}</h1>
+            <p class="text-[#8E8E93] text-sm">Placed on {{ order.created_at|date:"F j, Y" }}</p>
         </div>
         
-        <!-- Order Summary -->
-        <div class="space-y-6">
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
-                
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>₦{{ order.total_amount }}</span>
-                    </div>
-                    <!-- <div class="flex justify-between">
-                        <span>Shipping</span>
-                        <span>$5.00</span>
-                    </div> -->
-                    <div class="flex justify-between text-lg font-bold border-t border-gray-700 pt-3">
-                        <span>Total</span>
-                        <span>₦{{ order.total_amount }}</span>
-                    </div>
+        <!-- Status Badge -->
+        <div class="mt-4 sm:mt-0">
+            {% if order.status == 'delivered' %}
+            <span class="inline-block px-4 py-2 bg-[#10B981]/10 text-[#10B981] text-sm font-medium">
+                Delivered
+            </span>
+            {% elif order.status == 'shipped' %}
+            <span class="inline-block px-4 py-2 bg-[#3B82F6]/10 text-[#3B82F6] text-sm font-medium">
+                Shipped
+            </span>
+            {% elif order.status == 'processing' %}
+            <span class="inline-block px-4 py-2 bg-[#F59E0B]/10 text-[#F59E0B] text-sm font-medium">
+                Processing
+            </span>
+            {% elif order.status == 'cancelled' %}
+            <span class="inline-block px-4 py-2 bg-[#EF4444]/10 text-[#EF4444] text-sm font-medium">
+                Cancelled
+            </span>
+            {% else %}
+            <span class="inline-block px-4 py-2 bg-[#8E8E93]/10 text-[#8E8E93] text-sm font-medium">
+                {{ order.get_status_display }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2️⃣ Order Status Timeline (Horizontal Stepper) -->
+    <div class="mb-12">
+        <h2 class="text-[#111111] text-sm font-medium mb-6">ORDER STATUS</h2>
+        
+        <div class="flex items-center justify-between relative">
+            <!-- Timeline Line -->
+            <div class="absolute top-4 left-0 w-full h-px bg-[#8E8E93]/30 -z-10"></div>
+            
+            <!-- Step 1: Order Confirmed -->
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status in 'processing,shipped,delivered' %}bg-[#111111] text-[#F7F7F7]{% else %}bg-[#F7F7F7] border-2 border-[#111111]{% endif %}">
+                    <span class="text-xs">●</span>
                 </div>
+                <span class="text-[#111111] text-xs text-center">Order<br>Confirmed</span>
             </div>
             
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Shipping Information</h2>
-                
-                <div class="space-y-2">
-                    <p><strong>Address:</strong> {{ order.shipping_address }}</p>
-                    <p><strong>City:</strong> {{ order.shipping_city }}</p>
-                    <p><strong>State:</strong> {{ order.shipping_state }}</p>
-                    <p><strong>ZIP Code:</strong> {{ order.shipping_zipcode }}</p>
-                    <p><strong>Country:</strong> {{ order.shipping_country }}</p>
+            <!-- Step 2: Processing -->
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status in 'shipped,delivered' %}bg-[#111111] text-[#F7F7F7]{% elif order.status == 'processing' %}bg-[#F7F7F7] border-2 border-[#111111]{% else %}bg-[#F7F7F7] border-2 border-[#8E8E93]/30{% endif %}">
+                    <span class="text-xs">●</span>
                 </div>
+                <span class="text-[#111111] text-xs text-center">Processing</span>
             </div>
             
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Order Status</h2>
-                
-                <span class="px-3 py-1 rounded-full text-sm font-medium 
-                    {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
-                    {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
-                    {% elif order.status == 'processing' %}bg-yellow-500/20 text-yellow-500
-                    {% else %}bg-gray-500/20 text-gray-500{% endif %}">
-                    {{ order.get_status_display }}
-                </span>
+            <!-- Step 3: Shipped -->
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status == 'delivered' %}bg-[#111111] text-[#F7F7F7]{% elif order.status == 'shipped' %}bg-[#F7F7F7] border-2 border-[#111111]{% else %}bg-[#F7F7F7] border-2 border-[#8E8E93]/30{% endif %}">
+                    <span class="text-xs">●</span>
+                </div>
+                <span class="text-[#111111] text-xs text-center">Shipped</span>
+            </div>
+            
+            <!-- Step 4: Delivered -->
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status == 'delivered' %}bg-[#F7F7F7] border-2 border-[#111111]{% else %}bg-[#F7F7F7] border-2 border-[#8E8E93]/30{% endif %}">
+                    <span class="text-xs">●</span>
+                </div>
+                <span class="text-[#111111] text-xs text-center">Delivered</span>
             </div>
         </div>
     </div>
+
+    <!-- 3️⃣ Items in This Order -->
+    <div class="mb-12">
+        <h2 class="text-[#111111] text-sm font-medium mb-6">ITEMS IN THIS ORDER</h2>
+        
+        <div class="space-y-6">
+            {% for item in order.items.all %}
+            <div class="flex flex-col md:flex-row md:items-center gap-6 py-6 border-b border-[#8E8E93]/20 last:border-0">
+                <!-- Product Image -->
+                <div class="w-20 h-20 bg-[#F7F7F7] overflow-hidden flex-shrink-0">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                         class="w-full h-full object-cover">
+                </div>
+                
+                <!-- Product Details -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div>
+                            <h3 class="text-[#111111] text-base font-normal mb-1">{{ item.product.name }}</h3>
+                            {% if item.size or item.color %}
+                            <div class="text-[#8E8E93] text-sm">
+                                {% if item.size %}Size: {{ item.size }}{% endif %}
+                                {% if item.size and item.color %} · {% endif %}
+                                {% if item.color %}Color: {{ item.color }}{% endif %}
+                            </div>
+                            {% endif %}
+                            <div class="text-[#8E8E93] text-sm mt-1">Quantity: {{ item.quantity }}</div>
+                            
+                            <!-- View Product Link -->
+                            <a href="{% url 'product_detail' item.product.slug %}" 
+                               class="inline-block text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300 mt-2">
+                                View product
+                            </a>
+                        </div>
+                        
+                        <!-- Price -->
+                        <div class="text-[#111111] text-base font-normal">
+                            ₦{{ item.total_price }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- 4️⃣ Shipping Information -->
+        <div>
+            <h2 class="text-[#111111] text-sm font-medium mb-6">SHIPPING INFORMATION</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Shipping Address -->
+                <div>
+                    <h3 class="text-[#111111] text-sm font-medium mb-4">SHIPPING ADDRESS</h3>
+                    <div class="text-[#8E8E93] text-sm leading-relaxed">
+                        {{ order.shipping_full_name|default:user.get_full_name|default:user.username }}<br>
+                        {{ order.shipping_address|default:"" }}<br>
+                        {% if order.shipping_city %}{{ order.shipping_city }}, {% endif %}{{ order.shipping_state|default:"" }}<br>
+                        Nigeria<br>
+                        {{ order.customer_phone|default:"" }}
+                    </div>
+                </div>
+                
+                <!-- Shipping Method -->
+                <div>
+                    <h3 class="text-[#111111] text-sm font-medium mb-4">SHIPPING METHOD</h3>
+                    <div class="text-[#8E8E93] text-sm leading-relaxed">
+                        <div class="text-[#111111] font-normal mb-1">Standard Delivery</div>
+                        {% if order.shipping_state %}
+                        Kaduna → {{ order.shipping_state }}<br>
+                        {% endif %}
+                        {% if order.shipping_fee %}
+                        ₦{{ order.shipping_fee }}<br>
+                        {% endif %}
+                        Estimated: 3-5 business days
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5️⃣ Payment Summary -->
+        <div>
+            <h2 class="text-[#111111] text-sm font-medium mb-6">PAYMENT SUMMARY</h2>
+            
+            <div class="border border-[#8E8E93]/30 p-6">
+                <div class="space-y-4">
+                    <!-- Subtotal -->
+                    <div class="flex justify-between text-[#111111] text-sm">
+                        <span>Subtotal</span>
+                        <span>₦{{ order.subtotal|default:order.total_amount }}</span>
+                    </div>
+                    
+                    <!-- Shipping -->
+                    <div class="flex justify-between text-[#111111] text-sm">
+                        <span>Shipping</span>
+                        <span>₦{{ order.shipping_fee|default:"0" }}</span>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="border-t border-[#8E8E93]/30 pt-4"></div>
+                    
+                    <!-- Total -->
+                    <div class="flex justify-between text-[#111111] text-lg font-normal">
+                        <span>Total</span>
+                        <span>₦{{ order.total_amount }}</span>
+                    </div>
+                    
+                    <!-- Payment Status -->
+                    <div class="pt-4 border-t border-[#8E8E93]/30">
+                        {% if order.payment_status == 'paid' %}
+                        <div class="flex items-center text-[#10B981] text-sm">
+                            <span class="mr-2">✅</span>
+                            Paid via {{ order.payment_method|default:"Paystack" }}
+                        </div>
+                        {% elif order.payment_status == 'pending' %}
+                        <div class="flex items-center text-[#F59E0B] text-sm">
+                            <span class="mr-2">⏳</span>
+                            Payment Pending
+                        </div>
+                        {% else %}
+                        <div class="flex items-center text-[#8E8E93] text-sm">
+                            <span class="mr-2">ℹ️</span>
+                            {{ order.get_payment_status_display }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6️⃣ Actions (Minimal) -->
+    <div class="pt-8 border-t border-[#8E8E93]/20">
+        <h2 class="text-[#111111] text-sm font-medium mb-6">ACTIONS</h2>
+        
+        <div class="flex flex-wrap gap-4">
+            {% if order.status == 'shipped' and order.tracking_number %}
+            <a href="#" 
+               class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-6 py-2 transition-colors duration-300 text-sm">
+                Track Package
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'contact' %}" 
+               class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-6 py-2 transition-colors duration-300 text-sm">
+                Contact Support
+            </a>
+            
+            <button onclick="window.print()" 
+                    class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-6 py-2 transition-colors duration-300 text-sm">
+                Download Receipt
+            </button>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Print styles for receipt */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .max-w-4xl, .max-w-4xl * {
+            visibility: visible;
+        }
+        .max-w-4xl {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+        .border-t, .border-b {
+            border-color: #000 !important;
+        }
+        .text-\[\#111111\] {
+            color: #000 !important;
+        }
+        .text-\[\#8E8E93\] {
+            color: #666 !important;
+        }
+        button, a {
+            display: none !important;
+        }
+    }
+</style>
 {% endblock %}

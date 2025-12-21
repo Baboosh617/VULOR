@@ -3,322 +3,320 @@
 {% block title %}Size Guide - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
-    <!-- Header -->
+<div class="max-w-6xl mx-auto px-4 py-16">
+    <!-- SECTION 1: Header -->
     <div class="text-center mb-16">
-        <h1 class="text-4xl font-bold text-white mb-6">Size Guide</h1>
-        <p class="text-gray-400 text-lg">Find your perfect fit with our comprehensive sizing chart</p>
-        <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-4"></div>
+        <h1 class="text-4xl font-normal text-[#111111] mb-4">Size Guide</h1>
+        <p class="text-[#8E8E93] text-lg max-w-2xl mx-auto">
+            Find your perfect fit. If you're between sizes, we recommend sizing up.
+        </p>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="flex flex-wrap justify-center gap-4 mb-12">
-        <button onclick="showTab('standard')" class="size-tab-btn active bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-            Standard Sizes
+    <!-- SECTION 2: Fit Philosophy -->
+    <div class="text-center max-w-3xl mx-auto mb-16">
+        <p class="text-[#111111]/80 text-lg leading-relaxed">
+            Our pieces are designed for a modern, relaxed fit.<br>
+            Not too tight. Not oversized. Just right.
+        </p>
+    </div>
+
+    <!-- SECTION 3: Tabs by Product Type -->
+    <div class="flex justify-center space-x-1 border-b border-[#8E8E93]/20 mb-12">
+        <button onclick="showTab('hoodies')" 
+                class="size-tab-btn active px-8 py-3 text-[#111111] border-b-2 border-transparent font-normal hover:text-[#111111]/70 transition-all duration-300"
+                data-active-class="border-[#FF5A1F]">
+            Hoodies
         </button>
-        <button onclick="showTab('cargo-jeans')" class="size-tab-btn bg-gray-700 text-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors">
-            Cargo Jeans
+        <button onclick="showTab('tshirts')" 
+                class="size-tab-btn px-8 py-3 text-[#111111] border-b-2 border-transparent font-normal hover:text-[#111111]/70 transition-all duration-300"
+                data-active-class="border-[#FF5A1F]">
+            T-Shirts
         </button>
-        <button onclick="showTab('sweatpants')" class="size-tab-btn bg-gray-700 text-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors">
+        <button onclick="showTab('cargo-pants')" 
+                class="size-tab-btn px-8 py-3 text-[#111111] border-b-2 border-transparent font-normal hover:text-[#111111]/70 transition-all duration-300"
+                data-active-class="border-[#FF5A1F]">
+            Cargo Pants
+        </button>
+        <button onclick="showTab('sweatpants')" 
+                class="size-tab-btn px-8 py-3 text-[#111111] border-b-2 border-transparent font-normal hover:text-[#111111]/70 transition-all duration-300"
+                data-active-class="border-[#FF5A1F]">
             Sweatpants
         </button>
     </div>
 
-    <!-- Standard Sizes Tab -->
-    <div id="standard-tab" class="size-tab-content active">
-        <!-- T-Shirts Size Chart -->
-        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 mb-12">
-            <h2 class="text-2xl font-bold text-white mb-6">T-Shirts & Tops</h2>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-300">
-                    <thead class="text-xs text-white uppercase bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3">Size</th>
-                            <th class="px-6 py-3">Chest (inches)</th>
-                            <th class="px-6 py-3">Length (inches)</th>
-                            <th class="px-6 py-3">Fit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">XS</td>
-                            <td class="px-6 py-4">32-34</td>
-                            <td class="px-6 py-4">26</td>
-                            <td class="px-6 py-4">Slim</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">S</td>
-                            <td class="px-6 py-4">34-36</td>
-                            <td class="px-6 py-4">27</td>
-                            <td class="px-6 py-4">Regular</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">M</td>
-                            <td class="px-6 py-4">38-40</td>
-                            <td class="px-6 py-4">28</td>
-                            <td class="px-6 py-4">Regular</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">L</td>
-                            <td class="px-6 py-4">40-42</td>
-                            <td class="px-6 py-4">29</td>
-                            <td class="px-6 py-4">Regular</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-white">XL</td>
-                            <td class="px-6 py-4">42-44</td>
-                            <td class="px-6 py-4">30</td>
-                            <td class="px-6 py-4">Relaxed</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Hoodies & Sweaters Size Chart -->
-        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 mb-12">
-            <h2 class="text-2xl font-bold text-white mb-6">Hoodies & Sweaters</h2>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-300">
-                    <thead class="text-xs text-white uppercase bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3">Size</th>
-                            <th class="px-6 py-3">Chest (inches)</th>
-                            <th class="px-6 py-3">Length (inches)</th>
-                            <th class="px-6 py-3">Sleeve</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">S</td>
-                            <td class="px-6 py-4">38-40</td>
-                            <td class="px-6 py-4">27</td>
-                            <td class="px-6 py-4">25.5</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">M</td>
-                            <td class="px-6 py-4">40-42</td>
-                            <td class="px-6 py-4">28</td>
-                            <td class="px-6 py-4">26.5</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">L</td>
-                            <td class="px-6 py-4">42-44</td>
-                            <td class="px-6 py-4">29</td>
-                            <td class="px-6 py-4">27.5</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-white">XL</td>
-                            <td class="px-6 py-4">44-46</td>
-                            <td class="px-6 py-4">30</td>
-                            <td class="px-6 py-4">28.5</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- Hoodies Tab -->
+    <div id="hoodies-tab" class="size-tab-content active mb-16">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-[#111111]">
+                <thead>
+                    <tr class="border-b border-[#8E8E93]/30">
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Size</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Chest (cm)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Length (cm)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Sleeve (cm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">S</td>
+                        <td class="px-8 py-6">104</td>
+                        <td class="px-8 py-6">68</td>
+                        <td class="px-8 py-6">61</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">M</td>
+                        <td class="px-8 py-6">108</td>
+                        <td class="px-8 py-6">70</td>
+                        <td class="px-8 py-6">62</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">L</td>
+                        <td class="px-8 py-6">112</td>
+                        <td class="px-8 py-6">72</td>
+                        <td class="px-8 py-6">63</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-6 font-medium text-[#111111]">XL</td>
+                        <td class="px-8 py-6">116</td>
+                        <td class="px-8 py-6">74</td>
+                        <td class="px-8 py-6">64</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Cargo Jeans Tab -->
-    <div id="cargo-jeans-tab" class="size-tab-content hidden">
-        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 mb-12">
-            <h2 class="text-2xl font-bold text-white mb-6">Cargo Jeans - Detailed Measurements</h2>
-            <p class="text-gray-400 mb-6">All measurements in inches. Our cargo jeans feature a relaxed fit with multiple pockets.</p>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-300">
-                    <thead class="text-xs text-white uppercase bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3">Waist Size</th>
-                            <th class="px-6 py-3">Waist (inches)</th>
-                            <th class="px-6 py-3">Hip (inches)</th>
-                            <th class="px-6 py-3">Length (inches)</th>
-                            <th class="px-6 py-3">Thigh (inches)</th>
-                            <th class="px-6 py-3">Rise (inches)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">28</td>
-                            <td class="px-6 py-4">28-30</td>
-                            <td class="px-6 py-4">36-38</td>
-                            <td class="px-6 py-4">32</td>
-                            <td class="px-6 py-4">22</td>
-                            <td class="px-6 py-4">10</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">30</td>
-                            <td class="px-6 py-4">30-32</td>
-                            <td class="px-6 py-4">38-40</td>
-                            <td class="px-6 py-4">32</td>
-                            <td class="px-6 py-4">23</td>
-                            <td class="px-6 py-4">10.5</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">32</td>
-                            <td class="px-6 py-4">32-34</td>
-                            <td class="px-6 py-4">40-42</td>
-                            <td class="px-6 py-4">34</td>
-                            <td class="px-6 py-4">24</td>
-                            <td class="px-6 py-4">11</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">34</td>
-                            <td class="px-6 py-4">34-36</td>
-                            <td class="px-6 py-4">42-44</td>
-                            <td class="px-6 py-4">34</td>
-                            <td class="px-6 py-4">25</td>
-                            <td class="px-6 py-4">11.5</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-white">36</td>
-                            <td class="px-6 py-4">36-38</td>
-                            <td class="px-6 py-4">44-46</td>
-                            <td class="px-6 py-4">34</td>
-                            <td class="px-6 py-4">26</td>
-                            <td class="px-6 py-4">12</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- T-Shirts Tab -->
+    <div id="tshirts-tab" class="size-tab-content hidden mb-16">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-[#111111]">
+                <thead>
+                    <tr class="border-b border-[#8E8E93]/30">
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Size</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Chest (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Length (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Fit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">XS</td>
+                        <td class="px-8 py-6">32-34</td>
+                        <td class="px-8 py-6">26</td>
+                        <td class="px-8 py-6">Slim</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">S</td>
+                        <td class="px-8 py-6">34-36</td>
+                        <td class="px-8 py-6">27</td>
+                        <td class="px-8 py-6">Regular</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">M</td>
+                        <td class="px-8 py-6">38-40</td>
+                        <td class="px-8 py-6">28</td>
+                        <td class="px-8 py-6">Regular</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">L</td>
+                        <td class="px-8 py-6">40-42</td>
+                        <td class="px-8 py-6">29</td>
+                        <td class="px-8 py-6">Regular</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-6 font-medium text-[#111111]">XL</td>
+                        <td class="px-8 py-6">42-44</td>
+                        <td class="px-8 py-6">30</td>
+                        <td class="px-8 py-6">Relaxed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Cargo Pants Tab -->
+    <div id="cargo-pants-tab" class="size-tab-content hidden mb-16">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-[#111111]">
+                <thead>
+                    <tr class="border-b border-[#8E8E93]/30">
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Waist Size</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Waist (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Hip (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Length (inches)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">28</td>
+                        <td class="px-8 py-6">28-30</td>
+                        <td class="px-8 py-6">36-38</td>
+                        <td class="px-8 py-6">32</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">30</td>
+                        <td class="px-8 py-6">30-32</td>
+                        <td class="px-8 py-6">38-40</td>
+                        <td class="px-8 py-6">32</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">32</td>
+                        <td class="px-8 py-6">32-34</td>
+                        <td class="px-8 py-6">40-42</td>
+                        <td class="px-8 py-6">34</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">34</td>
+                        <td class="px-8 py-6">34-36</td>
+                        <td class="px-8 py-6">42-44</td>
+                        <td class="px-8 py-6">34</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-6 font-medium text-[#111111]">36</td>
+                        <td class="px-8 py-6">36-38</td>
+                        <td class="px-8 py-6">44-46</td>
+                        <td class="px-8 py-6">34</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <!-- Sweatpants Tab -->
-    <div id="sweatpants-tab" class="size-tab-content hidden">
-        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 mb-12">
-            <h2 class="text-2xl font-bold text-white mb-6">Sweatpants - Detailed Measurements</h2>
-            <p class="text-gray-400 mb-6">All measurements in inches. Our sweatpants feature elastic waistbands and tapered fit.</p>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-300">
-                    <thead class="text-xs text-white uppercase bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3">Waist Size</th>
-                            <th class="px-6 py-3">Waist (inches)</th>
-                            <th class="px-6 py-3">Hip (inches)</th>
-                            <th class="px-6 py-3">Length (inches)</th>
-                            <th class="px-6 py-3">Fit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">S</td>
-                            <td class="px-6 py-4">28-30</td>
-                            <td class="px-6 py-4">36-38</td>
-                            <td class="px-6 py-4">40</td>
-                            <td class="px-6 py-4">Slim</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">M</td>
-                            <td class="px-6 py-4">30-32</td>
-                            <td class="px-6 py-4">38-40</td>
-                            <td class="px-6 py-4">41</td>
-                            <td class="px-6 py-4">Regular</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-6 py-4 font-medium text-white">L</td>
-                            <td class="px-6 py-4">32-34</td>
-                            <td class="px-6 py-4">40-42</td>
-                            <td class="px-6 py-4">42</td>
-                            <td class="px-6 py-4">Regular</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-white">XL</td>
-                            <td class="px-6 py-4">34-36</td>
-                            <td class="px-6 py-4">42-44</td>
-                            <td class="px-6 py-4">42</td>
-                            <td class="px-6 py-4">Relaxed</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div id="sweatpants-tab" class="size-tab-content hidden mb-16">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-[#111111]">
+                <thead>
+                    <tr class="border-b border-[#8E8E93]/30">
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Size</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Waist (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Hip (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Length (inches)</th>
+                        <th class="px-8 py-4 font-normal text-[#111111] uppercase tracking-wider">Fit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">S</td>
+                        <td class="px-8 py-6">28-30</td>
+                        <td class="px-8 py-6">36-38</td>
+                        <td class="px-8 py-6">40</td>
+                        <td class="px-8 py-6">Slim</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">M</td>
+                        <td class="px-8 py-6">30-32</td>
+                        <td class="px-8 py-6">38-40</td>
+                        <td class="px-8 py-6">41</td>
+                        <td class="px-8 py-6">Regular</td>
+                    </tr>
+                    <tr class="border-b border-[#8E8E93]/20">
+                        <td class="px-8 py-6 font-medium text-[#111111]">L</td>
+                        <td class="px-8 py-6">32-34</td>
+                        <td class="px-8 py-6">40-42</td>
+                        <td class="px-8 py-6">42</td>
+                        <td class="px-8 py-6">Regular</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-6 font-medium text-[#111111]">XL</td>
+                        <td class="px-8 py-6">34-36</td>
+                        <td class="px-8 py-6">42-44</td>
+                        <td class="px-8 py-6">42</td>
+                        <td class="px-8 py-6">Relaxed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-[#8E8E93] text-sm mt-6 max-w-2xl">
+            Our sweatpants feature an elastic waistband and tapered fit for comfort and style.
+            Measurements in inches. All sweatpants are designed with a modern, relaxed silhouette.
+        </p>
+    </div>
+
+    <!-- SECTION 5: How to Measure -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <!-- Left: Visual Illustration -->
+        <div class="bg-[#F7F7F7] p-8 flex items-center justify-center">
+            <div class="relative w-64 h-80">
+                <!-- Simple chest measurement illustration -->
+                <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-48 h-32 border border-[#8E8E93]/30 rounded-lg"></div>
+                <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-40 h-0.5 bg-[#FF5A1F]"></div>
+                <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1 text-xs text-[#111111]">Chest</div>
+                
+                <!-- Length measurement illustration -->
+                <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-0.5 h-32 bg-[#FF5A1F]"></div>
+                <div class="absolute top-3/4 left-1/2 transform -translate-x-1/2 text-xs text-[#111111]">Length</div>
+                
+                <!-- Waist measurement illustration -->
+                <div class="absolute top-2/3 left-1/2 transform -translate-x-1/2 w-40 h-0.5 bg-[#FF5A1F] rotate-90"></div>
+                <div class="absolute top-2/3 left-1/2 transform translate-x-24 text-xs text-[#111111]">Waist</div>
+            </div>
+        </div>
+
+        <!-- Right: Bullet Explanations -->
+        <div class="space-y-8">
+            <div>
+                <h3 class="text-[#111111] text-lg font-normal mb-2">How to Measure</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="text-[#FF5A1F] mr-3">•</span>
+                        <span class="text-[#111111]/80">
+                            <strong class="text-[#111111]">Chest:</strong> Measure around the fullest part of your chest, keeping the tape horizontal.
+                        </span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#FF5A1F] mr-3">•</span>
+                        <span class="text-[#111111]/80">
+                            <strong class="text-[#111111]">Length:</strong> From the highest point of the shoulder to the bottom hem.
+                        </span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#FF5A1F] mr-3">•</span>
+                        <span class="text-[#111111]/80">
+                            <strong class="text-[#111111]">Waist:</strong> Measure around your natural waistline, usually just above the belly button.
+                        </span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#FF5A1F] mr-3">•</span>
+                        <span class="text-[#111111]/80">
+                            <strong class="text-[#111111]">Hip:</strong> Measure around the fullest part of your hips, keeping the tape horizontal.
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="pt-4 border-t border-[#8E8E93]/20">
+                <h3 class="text-[#111111] text-lg font-normal mb-2">Pro Tips</h3>
+                <ul class="space-y-2">
+                    <li class="text-[#111111]/80 text-sm">• Use a flexible measuring tape</li>
+                    <li class="text-[#111111]/80 text-sm">• Measure over light clothing</li>
+                    <li class="text-[#111111]/80 text-sm">• Keep the tape snug but not tight</li>
+                    <li class="text-[#111111]/80 text-sm">• When in doubt, size up</li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- Measurement Guide -->
-    <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
-        <h2 class="text-2xl font-bold text-white mb-6">How to Measure</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-4">
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">1</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Waist</h3>
-                        <p class="text-gray-300 text-sm">
-                            Measure around the narrowest part of your waist, usually just above the belly button.
-                        </p>
-                    </div>
-                </div>
+    <!-- SECTION 6: Model Reference -->
+    <div class="text-center mb-16 p-8 border border-[#8E8E93]/20">
+        <h3 class="text-[#111111] text-lg font-normal mb-4">Model Reference</h3>
+        <p class="text-[#8E8E93] leading-relaxed">
+            Our model is 6'0" (183cm), wearing size M<br>
+            Weight: 75kg
+        </p>
+      
+    </div>
 
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">2</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Hip</h3>
-                        <p class="text-gray-300 text-sm">
-                            Measure around the fullest part of your hips, keeping the tape horizontal.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">3</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Inseam (Length)</h3>
-                        <p class="text-gray-300 text-sm">
-                            Measure from the crotch seam to the bottom of the leg along the inner seam.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">4</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Thigh</h3>
-                        <p class="text-gray-300 text-sm">
-                            Measure around the fullest part of your thigh, keeping the tape parallel to the floor.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">5</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Rise</h3>
-                        <p class="text-gray-300 text-sm">
-                            Measure from the crotch seam to the top of the waistband at the front.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="text-white text-sm font-bold">6</span>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-white mb-1">Need Help?</h3>
-                        <p class="text-gray-300 text-sm">
-                            Contact our support team for personalized sizing assistance.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- SECTION 7: Final Reassurance -->
+    <div class="text-center pt-8 border-t border-[#8E8E93]/20">
+        <p class="text-[#111111]/80 text-lg mb-6">
+            Still unsure?<br>
+            Contact us before ordering — we're happy to help.
+        </p>
+        <a href="{% url 'contact' %}" 
+           class="inline-block border border-[#111111] text-[#111111] text-base font-normal py-3 px-8 hover:bg-[#111111] hover:text-white transition-colors duration-300">
+            Contact Us
+        </a>
     </div>
 </div>
 
@@ -333,32 +331,37 @@ function showTab(tabName) {
     
     // Remove active class from all buttons
     document.querySelectorAll('.size-tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-purple-600', 'text-white');
-        btn.classList.add('bg-gray-700', 'text-gray-300');
+        btn.classList.remove('active');
+        btn.style.borderBottom = '2px solid transparent';
     });
     
     // Show selected tab content
-    document.getElementById(tabName + '-tab').classList.remove('hidden');
-    document.getElementById(tabName + '-tab').classList.add('active');
+    const activeTab = document.getElementById(tabName + '-tab');
+    activeTab.classList.remove('hidden');
+    activeTab.classList.add('active');
     
     // Activate selected button
-    event.target.classList.remove('bg-gray-700', 'text-gray-300');
-    event.target.classList.add('active', 'bg-purple-600', 'text-white');
+    const activeButton = event.target;
+    activeButton.classList.add('active');
+    activeButton.style.borderBottom = '2px solid #FF5A1F';
 }
+
+// Initialize first tab as active
+document.addEventListener('DOMContentLoaded', function() {
+    const firstTabBtn = document.querySelector('.size-tab-btn');
+    if (firstTabBtn) {
+        firstTabBtn.style.borderBottom = '2px solid #FF5A1F';
+    }
+});
 </script>
 
 <style>
 .size-tab-content {
-    transition: all 0.3s ease;
+    display: none;
 }
 
 .size-tab-content.active {
     display: block;
-}
-
-.size-tab-btn.active {
-    background-color: #8B5CF6;
-    color: white;
 }
 </style>
 {% endblock %}
