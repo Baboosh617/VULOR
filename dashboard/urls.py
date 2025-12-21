@@ -17,4 +17,6 @@ urlpatterns = [
     path("customers/", views.customer_list, name="customer_list"),
     path("customers/<int:user_id>/toggle-active/", views.toggle_user_active, name="toggle_user_active"),
     path("customers/<int:user_id>/edit/", views.edit_customer, name="edit_customer"),
+    path('product/<int:product_id>/image/delete/<int:image_id>/', views.delete_alternate_image, name='delete_alternate_image'),
+    path('product/<int:product_id>/image/set-main/<int:image_id>/', views.set_main_alternate_image, name='set_main_alternate_image'),
 ]

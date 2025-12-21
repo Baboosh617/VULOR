@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from products.models import Product, Review
+from products.models import Product, Review, ProductImage
 from orders.models import Order
-from dashboard.forms import ProductForm  # Use the one from forms.py
+from dashboard.forms import ProductForm, ProductImageForm  # Use the one from forms.py
 from django.contrib.auth import get_user_model
 from django import forms
 from datetime import timedelta
@@ -145,8 +145,34 @@ def product_list(request):
 def add_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
+        
         if form.is_valid():
             product = form.save()
+            
+            # Handle alternate image upload
+            if request.FILES.get('alternate_images'):
+                # Handle multiple file uploads
+                files = request.FILES.getlist('alternate_images')
+                alt_texts = request.POST.getlist('alternate_alt_text')
+                is_main_index = request.POST.get('alternate_is_main')
+                
+                for i, image_file in enumerate(files):
+                    if image_file:  # Check if file was actually uploaded
+                        alt_text = alt_texts[i] if i < len(alt_texts) else ''
+                        is_main = str(i) == is_main_index
+                        
+                        # If setting as main, update all other images
+                        if is_main:
+                            ProductImage.objects.filter(product=product).update(is_main=False)
+                        
+                        # Create ProductImage instance
+                        ProductImage.objects.create(
+                            product=product,
+                            image=image_file,
+                            alt_text=alt_text,
+                            is_main=is_main
+                        )
+            
             messages.success(request, f'Product "{product.name}" added successfully.')
             return redirect('dashboard:product_list')
         else:
@@ -164,11 +190,38 @@ def add_product(request):
 
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    alternate_images = ProductImage.objects.filter(product=product)
     
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES, instance=product)
+        
         if form.is_valid():
             product = form.save()
+            
+            # Handle alternate image upload
+            if request.FILES.get('alternate_images'):
+                # Handle multiple file uploads
+                files = request.FILES.getlist('alternate_images')
+                alt_texts = request.POST.getlist('alternate_alt_text')
+                is_main_index = request.POST.get('alternate_is_main')
+                
+                for i, image_file in enumerate(files):
+                    if image_file:  # Check if file was actually uploaded
+                        alt_text = alt_texts[i] if i < len(alt_texts) else ''
+                        is_main = str(i) == is_main_index
+                        
+                        # If setting as main, update all other images
+                        if is_main:
+                            ProductImage.objects.filter(product=product).update(is_main=False)
+                        
+                        # Create ProductImage instance
+                        ProductImage.objects.create(
+                            product=product,
+                            image=image_file,
+                            alt_text=alt_text,
+                            is_main=is_main
+                        )
+            
             messages.success(request, f'Product "{product.name}" updated successfully.')
             return redirect('dashboard:product_list')
         else:
@@ -179,9 +232,38 @@ def edit_product(request, product_id):
     context = {
         'form': form, 
         'title': f'Edit {product.name}', 
-        'product': product
+        'product': product,
+        'alternate_images': alternate_images,
     }
     return render(request, 'dashboard/product_form.html', context)
+
+def delete_alternate_image(request, product_id, image_id):
+    """Delete an alternate product image"""
+    image = get_object_or_404(ProductImage, id=image_id)
+    
+    # Optional: Verify the image belongs to the product (security check)
+    if image.product.id != int(product_id):
+        messages.error(request, 'Image does not belong to the specified product.')
+        return redirect('dashboard:product_list')
+    
+    image.delete()
+    messages.success(request, 'Alternate image deleted successfully.')
+    return redirect('dashboard:edit_product', product_id=product_id)
+
+def set_main_alternate_image(request, product_id, image_id):
+    """Set an alternate image as the main product image"""
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Set all alternate images to not main
+    ProductImage.objects.filter(product=product).update(is_main=False)
+    
+    # Set the selected image as main
+    image = get_object_or_404(ProductImage, id=image_id)
+    image.is_main = True
+    image.save()
+    
+    messages.success(request, 'Alternate image set as main.')
+    return redirect('dashboard:edit_product', product_id=product_id)
 
 # Delete product
 def delete_product(request, product_id):

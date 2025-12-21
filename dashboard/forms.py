@@ -1,6 +1,7 @@
 # dashboard/forms.py
 from django import forms
 from products.models import Product
+from products.models import ProductImage
 
 class ProductForm(forms.ModelForm):
     # Custom field for slug
@@ -189,3 +190,25 @@ class ProductForm(forms.ModelForm):
             instance.save()
         
         return instance
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'alt_text', 'is_main']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+            }),
+            'alt_text': forms.TextInput(attrs={
+                'class': 'border rounded p-2 w-full',
+                'placeholder': 'e.g., Side view, Back detail, Worn look'
+            }),
+            'is_main': forms.CheckboxInput(attrs={
+                'class': 'h-5 w-5 text-blue-600 rounded'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['alt_text'].required = False
+        self.fields['is_main'].required = False
