@@ -18,7 +18,32 @@ def home(request):
     if request.method == 'POST':
         print(f"POST data: {request.POST}")
     
-    #DEFINE ALL VARIABLES FIRST (before any redirects)
+    # ===== GET LATEST PRODUCT FROM EACH CATEGORY FOR MOBILE CAROUSEL =====
+    # Define your categories (match with your Product model categories)
+    categories = [
+        'cargo-jeans',
+        'sweatpants', 
+        't-shirts',
+        'shorts',
+        'hoodies'
+    ]
+    
+    # Get the latest active product from each category
+    # Get latest product per category for mobile hero
+    hero_products = []
+    for category, _ in Product.CATEGORY_CHOICES:
+        product = (
+            Product.objects
+            .filter(is_active=True, category=category)
+            .order_by('-created_at')
+            .first()
+        )
+        if product and product.image:
+            hero_products.append(product)
+
+    
+    # ===== EXISTING CODE =====
+    # Define all variables first (before any redirects)
     new_arrivals = Product.objects.order_by('-created_at')[:6]
     reviews = Review.objects.filter(approved=True)[:4]
     form = ReviewForm()
@@ -32,7 +57,7 @@ def home(request):
     total_reviews = Review.objects.filter(approved=True).count()
     recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
     
-    # HANDLE POST REQUESTS AFTER VARIABLES ARE DEFINED
+    # Handle POST requests after variables are defined
     if request.method == 'POST':
         if 'submit_review' in request.POST:
             if not request.user.is_authenticated:
@@ -47,18 +72,19 @@ def home(request):
                 messages.success(request, 'Thank you for your review! It will be visible after approval.')
                 return redirect('home')
     
-    # 3️⃣ BUILD CONTEXT WITH GUARANTEED DEFINED VARIABLES
+    # Build context with guaranteed defined variables
     context = {
         'store_reviews': store_reviews,
         'avg_rating': round(avg_rating, 1) if avg_rating else None,
         'total_reviews': total_reviews,
         'recent_products': recent_products,
-        # 'new_arrivals': new_arrivals,
         'reviews': reviews,
         'review_form': form,
         'latest_product': Product.objects.filter(is_active=True).order_by('-created_at').first(),
         'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at')[:6],
         'store_reviews': Review.objects.filter(approved=True).order_by('-created_at')[:10],
+        # Add the hero_products for mobile carousel
+        'hero_products': hero_products,
     }
     return render(request, 'index.html', context)
 

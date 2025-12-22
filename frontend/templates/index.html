@@ -5,27 +5,59 @@
 <!-- SECTION 1 — Hero -->
 <section class="min-h-[90vh] lg:min-h-[90vh] bg-[#F7F7F7] flex items-center overflow-hidden">
     <div class="w-full">
-        <!-- Mobile: Single Column with Background Image -->
-        <div class="lg:hidden relative h-[75vh]">
-            {% if latest_product %}
-                <div class="absolute inset-0"
-                     style="background-image: url('{{ latest_product.image.url }}'); background-size: cover; background-position: center top;">
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#111111]/80"></div>
-                </div>
-                <div class="relative h-full flex items-end justify-center pb-10">
-                    <a href="{% url 'product_list' %}" 
-                       class="bg-[#FF5A1F] hover:bg-[#E04A1B] text-[#F7F7F7] px-10 py-4 text-lg font-medium tracking-wide transition-colors duration-300">
-                        Shop New Arrivals
-                    </a>
-                </div>
-            {% else %}
-                <div class="w-full h-full bg-[#111111]/10 flex items-center justify-center">
-                    <span class="text-[#111111]/30 text-lg">Latest Product Image</span>
-                </div>
-            {% endif %}
+        <!-- Mobile: Carousel of latest products from each category -->
+       <!-- Mobile: Carousel of latest products from each category -->
+<div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
+
+    {% if hero_products %}
+    <div id="mobileHeroCarousel" class="absolute inset-0">
+        {% for product in hero_products %}
+        <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-[1800ms] ease-in-out"
+             style="background-image: url('{{ product.image.url }}');
+                    background-size: cover;
+                    background-position: center top;">
+
+            <!-- Gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/80"></div>
+
+            <!-- Category Tag -->
+            <div class="absolute top-5 left-5 z-20 text-[10px] tracking-widest text-white/80 bg-black/50 px-3 py-1">
+                {{ product.get_category_display|upper }}
+            </div>
         </div>
+        {% endfor %}
+    </div>
+
+    <!-- CTA Overlay -->
+    <div class="absolute inset-0 z-30 flex flex-col items-center justify-end pb-10 space-y-4 text-center">
+        <a href="{% url 'product_list' %}"
+           class="bg-[#FF5A1F] hover:bg-[#E04A1B] text-white px-10 py-4 text-lg font-medium tracking-wide transition-colors">
+            Shop New Arrivals
+        </a>
+
+        <!-- <a href="{% url 'product_list' %}"
+           class="text-white/80 text-xs tracking-widest border-b border-transparent hover:border-white/60 transition-all">
+            SHOP COLLECTION
+        </a> -->
+    </div>
+
+    <!-- Indicators -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+        {% for product in hero_products %}
+        <span class="hero-dot w-2 h-2 rounded-full bg-white/40"></span>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="w-full h-full bg-[#111111]/10 flex items-center justify-center">
+        <span class="text-[#111111]/30 text-lg">Hero Image</span>
+    </div>
+    {% endif %}
+</div>
+
+
         
-        <!-- Desktop: Two Column Layout -->
+        <!-- Desktop: Two Column Layout (UNCHANGED) -->
         <div class="hidden lg:grid lg:grid-cols-2 h-[90vh]">
             <!-- Left: Text Content -->
             <div class="flex items-center p-8 lg:p-12">
@@ -298,53 +330,127 @@
     }
 </style>
 
+<!-- Add Mobile Hero Carousel Styles -->
+<style>
+    /* Mobile Hero Carousel Styles */
+    #mobileCarouselInner {
+        width: calc(100% * {{ hero_products|length }});
+    }
+    
+    /* Perfect image fitting */
+    #mobileHeroCarousel img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    /* Active indicator styling */
+    .carousel-indicator.active {
+        background-color: #FFFFFF;
+        transform: scale(1.2);
+    }
+    
+    /* Navigation button hover effects */
+    #prevBtn:hover, #nextBtn:hover {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Ensure carousel fills container */
+    #mobileHeroCarousel {
+        height: 100%;
+        width: 100%;
+    }
+    
+    /* Smooth transitions for all carousel elements */
+    #mobileCarouselInner,
+    .carousel-indicator,
+    #prevBtn,
+    #nextBtn {
+        transition: all 0.3s ease-in-out;
+    }
+</style>
+
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Reviews Carousel
-    const carousel = document.getElementById('reviewsCarousel');
-    const carouselItems = carousel.children;
-    let currentIndex = 0;
-    
-    function updateCarousel() {
-        let itemsPerView;
-        if (window.innerWidth >= 1024) {
-            itemsPerView = 3;
-        } else if (window.innerWidth >= 768) {
-            itemsPerView = 2;
-        } else {
-            itemsPerView = 1;
+document.addEventListener('DOMContentLoaded', () => {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+
+    if (!slides.length) return;
+
+    let index = 0;
+
+    function showSlide(i) {
+        slides.forEach(slide => slide.classList.remove('opacity-100'));
+        dots.forEach(dot => dot.classList.remove('bg-white'));
+
+        slides[i].classList.add('opacity-100');
+        dots[i].classList.add('bg-white');
+    }
+
+    showSlide(index);
+
+    setInterval(() => {
+        index = (index + 1) % slides.length;
+        showSlide(index);
+    }, 1800);
+});
+</script>
+
+<script>    
+    // ========== Reviews Carousel (EXISTING CODE) ==========
+    const reviewsCarousel = document.getElementById('reviewsCarousel');
+    if (reviewsCarousel) {
+        const carouselItems = reviewsCarousel.children;
+        let currentIndex = 0;
+        
+        function updateReviewsCarousel() {
+            let itemsPerView;
+            if (window.innerWidth >= 1024) {
+                itemsPerView = 3;
+            } else if (window.innerWidth >= 768) {
+                itemsPerView = 2;
+            } else {
+                itemsPerView = 1;
+            }
+            
+            const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+            const translateX = -currentIndex * (100 / itemsPerView);
+            reviewsCarousel.style.transform = `translateX(${translateX}%)`;
         }
         
-        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
-        const translateX = -currentIndex * (100 / itemsPerView);
-        carousel.style.transform = `translateX(${translateX}%)`;
-    }
-    
-    function nextSlide() {
-        let itemsPerView;
-        if (window.innerWidth >= 1024) {
-            itemsPerView = 3;
-        } else if (window.innerWidth >= 768) {
-            itemsPerView = 2;
-        } else {
-            itemsPerView = 1;
+        function nextReviewsSlide() {
+            let itemsPerView;
+            if (window.innerWidth >= 1024) {
+                itemsPerView = 3;
+            } else if (window.innerWidth >= 768) {
+                itemsPerView = 2;
+            } else {
+                itemsPerView = 1;
+            }
+            
+            const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+            currentIndex = (currentIndex + 1) % totalItems;
+            updateReviewsCarousel();
         }
         
-        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
-        currentIndex = (currentIndex + 1) % totalItems;
-        updateCarousel();
+        // Auto-advance carousel
+        let reviewsInterval = setInterval(nextReviewsSlide, 4000);
+        
+        // Pause on hover
+        reviewsCarousel.addEventListener('mouseenter', () => clearInterval(reviewsInterval));
+        reviewsCarousel.addEventListener('mouseleave', () => {
+            reviewsInterval = setInterval(nextReviewsSlide, 4000);
+        });
+        
+        // Responsive updates
+        window.addEventListener('resize', updateReviewsCarousel);
+        updateReviewsCarousel();
     }
     
-    // Auto-advance carousel
-    let carouselInterval = setInterval(nextSlide, 4000);
-    
-    // Pause on hover
-    carousel.addEventListener('mouseenter', () => clearInterval(carouselInterval));
-    carousel.addEventListener('mouseleave', () => {
-        carouselInterval = setInterval(nextSlide, 4000);
-    });
-    
-    // Star Rating
+    // ========== Star Rating (EXISTING CODE) ==========
     const starInputs = document.querySelectorAll('.star-input');
     const starLabels = document.querySelectorAll('.star-label');
     
@@ -363,12 +469,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    
-    // Responsive carousel updates
-    window.addEventListener('resize', updateCarousel);
-    
-    // Initialize
-    updateCarousel();
 });
 </script>
 {% endblock %}
