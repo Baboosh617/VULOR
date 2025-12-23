@@ -227,14 +227,17 @@
 <div class="mt-16 pt-16 border-t border-[#8E8E93]/20">
     <div class="flex justify-between items-center mb-8">
         <h2 class="text-2xl font-bold text-[#111111]">REVIEWS</h2>
+        {%  if user.is_authenticated %}
         <button id="write-review-toggle" 
                 class="text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
             Write a review
         </button>
+        {% endif %}
     </div>
     
     <!-- Review Form (Hidden by default) -->
     <div id="review-form-container" class="hidden mb-8">
+        {%  if user.is_authenticated %}
         <form method="POST" action="{% url 'add_review' product.id %}" class="space-y-4">
             {% csrf_token %}
             <div>
@@ -270,6 +273,12 @@
                 </button>
             </div>
         </form>
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-[#8E8E93] mb-4">Please <a href="{% url 'login' %}" class="text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300">log in</a> to write a review.</p>
+        </div>
+        {% endif %}
+
     </div>
     
     {% if product.reviews.all %}

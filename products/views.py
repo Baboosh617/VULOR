@@ -9,6 +9,7 @@ from .models import Review
 from .forms import ReviewForm
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 
 def home(request):
@@ -143,6 +144,7 @@ def product_detail(request, slug):
     return render(request, 'products/product_detail.html', context)
 
 
+@login_required
 def submit_review(request):
     if request.method == 'POST':
         if not request.user.is_authenticated:
@@ -169,36 +171,41 @@ def submit_review(request):
     return redirect('home')
 
 
+@login_required
 def add_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    
-    if request.method == 'POST':
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
-        
-        if rating and comment:
-            # Check if user already reviewed this product
-            existing_review = Review.objects.filter(product=product, user=request.user).first()
-            
-            if existing_review:
-                # Update existing review
-                existing_review.rating = rating
-                existing_review.comment = comment
-                existing_review.save()
-                messages.success(request, 'Your review has been updated!')
-            else:
-                # Create new review
-                Review.objects.create(
-                    product=product,
-                    user=request.user,
-                    rating=rating,
-                    comment=comment
-                )
-                messages.success(request, 'Thank you for your review!')
-        else:
-            messages.error(request, 'Please provide both rating and comment.')
-        
+
+    if request.method != 'POST':
         return redirect('product_detail', slug=product.slug)
-    
-    # If not POST, redirect to product detail
+
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please log in to submit a review.')
+        return redirect('login')
+
+    rating = request.POST.get('rating')
+    comment = request.POST.get('comment')
+
+    if not rating or not comment:
+        messages.error(request, 'Please provide both rating and comment.')
+        return redirect('product_detail', slug=product.slug)
+
+    existing_review = Review.objects.filter(
+        product=product,
+        user=request.user
+    ).first()
+
+    if existing_review:
+        existing_review.rating = rating
+        existing_review.comment = comment
+        existing_review.save()
+        messages.success(request, 'Your review has been updated!')
+    else:
+        Review.objects.create(
+            product=product,
+            user=request.user,  # ✅ guaranteed real user
+            rating=rating,
+            comment=comment
+        )
+        messages.success(request, 'Thank you for your review!')
+
     return redirect('product_detail', slug=product.slug)
