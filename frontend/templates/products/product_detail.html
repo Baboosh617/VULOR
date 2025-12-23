@@ -8,7 +8,7 @@
         <!-- Product Image Column -->
         <div>
             <!-- Main Image -->
-            <div class="bg-[#F7F7F7] aspect-[0.9] overflow-hidden mb-4 relative image-container">
+            <div class="bg-black border border-[#333333] aspect-[0.9] overflow-hidden mb-4 relative image-container">
                 <img src="{{ product.image.url }}" alt="{{ product.name }}" 
                      id="main-product-image"
                      class="w-full h-full object-cover main-image">
@@ -27,14 +27,14 @@
             {% if product.images.all %}
             <div class="flex space-x-2 mt-4">
                 <!-- Main image thumbnail -->
-                <div class="w-20 h-20 bg-[#F7F7F7] overflow-hidden cursor-pointer border border-[#111111] thumbnail-image"
+                <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer thumbnail-image"
                      data-full-image="{{ product.image.url }}">
                     <img src="{{ product.image.url }}" alt="{{ product.name }}" 
                          class="w-full h-full object-cover">
                 </div>
                 <!-- Alternative image thumbnails -->
                 {% for img in product.images.all %}
-                <div class="w-20 h-20 bg-[#F7F7F7] overflow-hidden cursor-pointer border border-transparent hover:border-[#8E8E93]/30 thumbnail-image"
+                <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer hover:border-[#dc2626] thumbnail-image"
                      data-full-image="{{ img.image.url }}">
                     <img src="{{ img.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}" 
                          class="w-full h-full object-cover">
@@ -46,39 +46,39 @@
         
         <!-- Product Details Column -->
         <div>
-            <!-- Product Name (big) -->
-            <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-4">{{ product.name }}</h1>
+            <!-- Product Name -->
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{{ product.name }}</h1>
             
-            <!-- Price (medium, muted) -->
+            <!-- Price -->
             <div class="mb-6">
-                <span class="text-2xl font-normal text-[#111111]">₦{{ product.price }}</span>
+                <span class="text-2xl font-bold text-[#dc2626]">₦{{ product.price }}</span>
                 {% if product.compare_price %}
-                <span class="text-lg text-[#8E8E93] line-through ml-2">₦{{ product.compare_price }}</span>
+                <span class="text-lg text-[#666666] line-through ml-2">₦{{ product.compare_price }}</span>
                 {% endif %}
                 {% if product.get_discount_percentage > 0 %}
-                <span class="text-[#FF5A1F] text-sm font-medium bg-[#FF5A1F]/10 px-2 py-1 ml-2">
+                <span class="text-white text-sm font-bold bg-[#dc2626] px-2 py-1 ml-2">
                     -{{ product.get_discount_percentage }}%
                 </span>
                 {% endif %}
             </div>
             
-            <!-- Short description (1-2 lines max) -->
+            <!-- Short description -->
             {% if product.short_description %}
             <div class="mb-8">
-                <p class="text-[#8E8E93] text-base font-light leading-relaxed">{{ product.short_description }}</p>
+                <p class="text-[#cccccc] text-base font-light leading-relaxed">{{ product.short_description }}</p>
             </div>
             {% endif %}
 
             <!-- Fit Selection (for cargo jeans) -->
             {% if product.category == 'cargo-jeans' %}
             <div class="mb-6">
-                <label class="block text-[#111111] text-sm mb-3">FIT</label>
+                <label class="block text-white text-sm mb-3">FIT</label>
                 <div class="flex flex-wrap gap-2">
                     {% for fit_value, fit_label in FIT_CHOICES %}
                     <label class="flex items-center">
                         <input type="radio" name="fit_type" value="{{ fit_value }}"
                                class="hidden peer" {% if product.fit_type == fit_value %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#8E8E93]/30 text-[#111111] text-sm cursor-pointer peer-checked:border-[#111111] peer-checked:bg-[#111111] peer-checked:text-[#F7F7F7] transition-colors duration-300">
+                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
                             {{ fit_label }}
                         </span>
                     </label>
@@ -87,10 +87,10 @@
             </div>
             {% endif %}
 
-            <!-- Size Selection (clean buttons) -->
+            <!-- Size Selection -->
             {% if product.get_available_sizes_list %}
             <div class="mb-6">
-                <label class="block text-[#111111] text-sm mb-3">
+                <label class="block text-white text-sm mb-3">
                     {% if product.has_detailed_measurements %}
                     WAIST SIZE
                     {% else %}
@@ -102,7 +102,7 @@
                     <label class="flex items-center">
                         <input type="radio" name="size" value="{{ size }}" 
                                class="hidden peer" {% if forloop.first %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#8E8E93]/30 text-[#111111] text-sm cursor-pointer peer-checked:border-[#111111] peer-checked:bg-[#111111] peer-checked:text-[#F7F7F7] transition-colors duration-300">
+                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
                             {{ size }}
                         </span>
                     </label>
@@ -111,16 +111,16 @@
             </div>
             {% endif %}
 
-            <!-- Color Selection (if needed) -->
+            <!-- Color Selection -->
             {% if product.get_available_colors_list %}
             <div class="mb-6">
-                <label class="block text-[#111111] text-sm mb-3">COLOR</label>
+                <label class="block text-white text-sm mb-3">COLOR</label>
                 <div class="flex flex-wrap gap-2">
                     {% for color in product.get_available_colors_list %}
                     <label class="flex items-center">
                         <input type="radio" name="color" value="{{ color }}" 
                                class="hidden peer" {% if forloop.first %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#8E8E93]/30 text-[#111111] text-sm cursor-pointer peer-checked:border-[#111111] peer-checked:bg-[#111111] peer-checked:text-[#F7F7F7] transition-colors duration-300">
+                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
                             {{ color }}
                         </span>
                     </label>
@@ -129,25 +129,25 @@
             </div>
             {% endif %}
 
-            <!-- Quantity (simple +/- without spinner arrows) -->
+            <!-- Quantity -->
             <div class="mb-6">
-                <label class="block text-[#111111] text-sm mb-3">QUANTITY</label>
+                <label class="block text-white text-sm mb-3">QUANTITY</label>
                 <div class="flex items-center w-32">
                     <button type="button" 
-                            class="decrease-quantity w-10 h-10 border border-r-0 border-[#8E8E93]/30 flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] transition-colors duration-300">
+                            class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                         −
                     </button>
                     <input type="number" name="quantity" value="1" min="1" 
-                           class="flex-1 h-10 border border-[#8E8E93]/30 text-center text-[#111111] bg-transparent quantity-input"
+                           class="flex-1 h-10 border border-[#333333] text-center text-white bg-black quantity-input"
                            readonly style="-moz-appearance: textfield;">
                     <button type="button" 
-                            class="increase-quantity w-10 h-10 border border-l-0 border-[#8E8E93]/30 flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] transition-colors duration-300">
+                            class="increase-quantity w-10 h-10 border border-l-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                         +
                     </button>
                 </div>
             </div>
 
-            <!-- Add to Cart button (accent color, full width) -->
+            <!-- Add to Cart button -->
             {% if user.is_authenticated %}
             <form method="POST" action="{% url 'add_to_cart' product.id %}" class="mb-8" id="add-to-cart-form">
                 {% csrf_token %}
@@ -157,7 +157,7 @@
                 <input type="hidden" name="quantity" value="1" id="quantity-input-hidden">
                 
                 <button type="submit" 
-                        class="w-full bg-[#FF5A1F] text-[#111111] text-base font-medium py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-center add-to-cart-btn"
+                        class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-base font-bold py-4 px-6 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-center add-to-cart-btn border border-[#dc2626]"
                         {% if not product.is_in_stock %}disabled{% endif %}>
                     {% if product.is_in_stock %}
                         ADD TO CART
@@ -169,17 +169,17 @@
             {% else %}
             <div class="mb-8">
                 <a href="{% url 'login' %}" 
-                   class="block w-full border border-[#8E8E93]/30 text-[#111111] text-base font-medium py-4 px-6 hover:border-[#8E8E93] hover:text-[#FF5A1F] transition-colors duration-300 text-center">
+                   class="block w-full border border-[#dc2626] text-[#dc2626] text-base font-bold py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 text-center">
                     LOGIN TO PURCHASE
                 </a>
             </div>
             {% endif %}
 
-            <!-- Product Description (full description) -->
+            <!-- Product Description -->
             {% if product.description %}
-            <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
-                <h3 class="text-[#111111] text-sm font-medium mb-4">DESCRIPTION</h3>
-                <div class="text-[#8E8E93] text-sm font-light leading-relaxed">
+            <div class="mt-8 pt-8 border-t border-[#333333]">
+                <h3 class="text-white text-sm font-bold mb-4 tracking-widest">DESCRIPTION</h3>
+                <div class="text-[#cccccc] text-sm leading-relaxed">
                     {{ product.description|linebreaks }}
                 </div>
             </div>
@@ -187,150 +187,153 @@
 
             <!-- Detailed Measurements for Cargo Jeans & Sweatpants -->
             {% if product.has_detailed_measurements %}
-            <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
-                <h3 class="text-[#111111] text-sm font-medium mb-4">SIZE & MEASUREMENTS</h3>
+            <div class="mt-8 pt-8 border-t border-[#333333]">
+                <h3 class="text-white text-sm font-bold mb-4 tracking-widest">SIZE & MEASUREMENTS</h3>
                 <div class="space-y-2">
                     {% for measurement_name, measurement_value in product.get_measurements_dict.items %}
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-[#8E8E93] text-sm">{{ measurement_name }}:</span>
-                        <span class="text-[#111111] text-sm">{{ measurement_value }}</span>
+                    <div class="flex justify-between items-center py-2 border-b border-[#333333]">
+                        <span class="text-[#cccccc] text-sm">{{ measurement_name }}:</span>
+                        <span class="text-white text-sm font-medium">{{ measurement_value }}</span>
                     </div>
                     {% endfor %}
                 </div>
-                <p class="text-[#8E8E93] text-xs mt-4">
-                    All measurements in inches. Refer to our <a href="{% url 'size_guide' %}" class="text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300">size guide</a> for help.
+                <p class="text-[#666666] text-xs mt-4">
+                    All measurements in inches. Refer to our <a href="{% url 'size_guide' %}" class="text-[#dc2626] hover:text-white transition-colors duration-300">size guide</a> for help.
                 </p>
             </div>
             {% endif %}
 
             <!-- Product Features -->
-            <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
+            <div class="mt-8 pt-8 border-t border-[#333333]">
                 <div class="grid grid-cols-3 gap-8">
                     <div>
-                        <div class="text-[#111111] text-sm font-medium mb-1">Shipping</div>
-                        <div class="text-[#8E8E93] text-sm">Free over ₦50,000</div>
+                        <div class="text-white text-sm font-bold mb-1 tracking-widest">SHIPPING</div>
+                        <div class="text-[#cccccc] text-sm">Free over ₦50,000</div>
                     </div>
                     <div>
-                        <div class="text-[#111111] text-sm font-medium mb-1">Returns</div>
-                        <div class="text-[#8E8E93] text-sm">30 days</div>
+                        <div class="text-white text-sm font-bold mb-1 tracking-widest">RETURNS</div>
+                        <div class="text-[#cccccc] text-sm">30 days</div>
                     </div>
                     <div>
-                        <div class="text-[#111111] text-sm font-medium mb-1">Payment</div>
-                        <div class="text-[#8E8E93] text-sm">Secured by Paystack</div>
+                        <div class="text-white text-sm font-bold mb-1 tracking-widest">PAYMENT</div>
+                        <div class="text-[#cccccc] text-sm">Secured by Paystack</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Reviews Section - SIMPLE VERSION -->
-<div class="mt-16 pt-16 border-t border-[#8E8E93]/20">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold text-[#111111]">REVIEWS</h2>
-        {%  if user.is_authenticated %}
-        <button id="write-review-toggle" 
-                class="text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
-            Write a review
-        </button>
-        {% endif %}
-    </div>
-    
-    <!-- Review Form (Hidden by default) -->
-    <div id="review-form-container" class="hidden mb-8">
-        {%  if user.is_authenticated %}
-        <form method="POST" action="{% url 'add_review' product.id %}" class="space-y-4">
-            {% csrf_token %}
-            <div>
-                <label class="block text-[#111111] text-sm mb-2">Rating</label>
-                <div class="flex space-x-1">
-                    {% for i in "54321" %}
-                    <label class="cursor-pointer">
-                        <input type="radio" name="rating" value="{{ forloop.counter }}" class="hidden peer" required>
-                        <span class="text-2xl text-[#8E8E93]/30 peer-checked:text-[#FF5A1F] hover:text-[#FF5A1F]/70 transition-colors duration-300">★</span>
-                    </label>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div>
-                <label class="block text-[#111111] text-sm mb-2">Your Review</label>
-                <textarea name="comment" 
-                          rows="3" 
-                          class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300"
-                          placeholder="Share your thoughts about this product..."
-                          required></textarea>
-            </div>
-            
-            <div class="flex justify-end">
-                <button type="button" 
-                        id="cancel-review"
-                        class="border border-[#8E8E93]/30 text-[#111111] px-4 py-2 text-sm hover:border-[#8E8E93] transition-colors duration-300 mr-2">
-                    Cancel
-                </button>
-                <button type="submit" 
-                        class="bg-[#FF5A1F] text-[#111111] px-6 py-2 text-sm font-medium hover:bg-[#FF5A1F]/90 transition-colors duration-300">
-                    Submit Review
-                </button>
-            </div>
-        </form>
-        {% else %}
-        <div class="text-center py-8">
-            <p class="text-[#8E8E93] mb-4">Please <a href="{% url 'login' %}" class="text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300">log in</a> to write a review.</p>
-        </div>
-        {% endif %}
-
-    </div>
-    
-    {% if product.reviews.all %}
-    <!-- Show reviews without complex calculations -->
-    <div class="space-y-6">
-        <div class="mb-6">
-            <div class="flex items-center space-x-4">
-                <span class="text-3xl font-bold text-[#111111]">
-                    <!-- We'll handle this in JavaScript or view -->
-                    Reviews
-                </span>
-                <span class="text-[#8E8E93] text-sm">{{ product.reviews.count }} review{{ product.reviews.count|pluralize }}</span>
-            </div>
+    <!-- Reviews Section -->
+    <div class="mt-16 pt-16 border-t border-[#333333]">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-white">REVIEWS</h2>
+            {%  if user.is_authenticated %}
+            <button id="write-review-toggle" 
+                    class="text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
+                WRITE A REVIEW
+            </button>
+            {% endif %}
         </div>
         
-        {% for review in product.reviews.all|slice:":3" %}
-        <div class="border-b border-[#8E8E93]/10 pb-6 last:border-0">
-            <div class="flex justify-between items-start mb-2">
+        <!-- Review Form (Hidden by default) -->
+        <div id="review-form-container" class="hidden mb-8">
+            {%  if user.is_authenticated %}
+            <form method="POST" action="{% url 'add_review' product.id %}" class="space-y-4">
+                {% csrf_token %}
                 <div>
-                    <div class="text-[#111111] font-medium">{{ review.user.get_full_name|default:review.user.username }}</div>
-                    <div class="flex">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %}
-                            <span class="text-[#FF5A1F] text-sm">★</span>
-                            {% else %}
-                            <span class="text-[#8E8E93]/30 text-sm">★</span>
-                            {% endif %}
+                    <label class="block text-white text-sm mb-2">RATING</label>
+                    <div class="flex space-x-1">
+                        {% for i in "54321" %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rating" value="{{ forloop.counter }}" class="hidden peer" required>
+                            <span class="text-2xl text-[#333333] peer-checked:text-[#dc2626] hover:text-[#dc2626] transition-all duration-300">★</span>
+                        </label>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="text-[#8E8E93] text-sm">{{ review.created_at|date:"F j, Y" }}</div>
+                
+                <div>
+                    <label class="block text-white text-sm mb-2">YOUR REVIEW</label>
+                    <textarea name="comment" 
+                              rows="3" 
+                              class="w-full border border-[#333333] text-white px-4 py-3 text-sm bg-black focus:outline-none focus:border-[#dc2626] transition-all duration-300"
+                              placeholder="Share your thoughts about this product..."
+                              required></textarea>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="button" 
+                            id="cancel-review"
+                            class="border border-[#333333] text-[#cccccc] px-4 py-2 text-sm hover:border-[#dc2626] hover:text-white transition-all duration-300 mr-2">
+                        CANCEL
+                    </button>
+                    <button type="submit" 
+                            class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-6 py-2 text-sm font-bold transition-all duration-300 border border-[#dc2626]">
+                        SUBMIT REVIEW
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-[#cccccc] mb-4">Please <a href="{% url 'login' %}" class="text-[#dc2626] hover:text-white transition-colors duration-300">log in</a> to write a review.</p>
             </div>
-            <p class="text-[#8E8E93] text-sm leading-relaxed">{{ review.comment }}</p>
+            {% endif %}
         </div>
-        {% endfor %}
+        
+        {% if product.reviews.all %}
+        <!-- Show reviews -->
+        <div class="space-y-6">
+            <div class="mb-6">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl font-bold text-white">
+                        Reviews
+                    </span>
+                    <span class="text-[#cccccc] text-sm">{{ product.reviews.count }} review{{ product.reviews.count|pluralize }}</span>
+                </div>
+            </div>
+            
+            {% for review in product.reviews.all|slice:":3" %}
+            <div class="border-b border-[#333333] pb-6 last:border-0">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="text-white font-bold">{{ review.user.get_full_name|default:review.user.username }}</div>
+                        <div class="flex">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                <span class="text-[#dc2626] text-sm">★</span>
+                                {% else %}
+                                <span class="text-[#333333] text-sm">★</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="text-[#666666] text-sm">{{ review.created_at|date:"F j, Y" }}</div>
+                </div>
+                <p class="text-[#cccccc] text-sm leading-relaxed">{{ review.comment }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if product.reviews.count > 3 %}
+        <div class="mt-6 text-center">
+            <a href="#" class="text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
+                LOAD MORE REVIEWS
+            </a>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- No reviews yet -->
+        <div class="text-center py-8">
+            <!-- <div class="w-16 h-16 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[#666666]">rate_review</span>
+            </div> -->
+            <p class="text-[#cccccc] mb-4">NO REVIEWS YET. BE THE FIRST TO REVIEW THIS PRODUCT!</p>
+        </div>
+        {% endif %}
     </div>
-    
-    {% if product.reviews.count > 3 %}
-    <div class="mt-6 text-center">
-        <a href="#" class="text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
-            Load more reviews
-        </a>
-    </div>
-    {% endif %}
-    
-    {% else %}
-    <!-- No reviews yet -->
-    <div class="text-center py-8">
-        <p class="text-[#8E8E93] mb-4">No reviews yet. Be the first to review this product!</p>
-    </div>
-    {% endif %}
 </div>
+
 <style>
     /* Hide number input spinners */
     input[type="number"]::-webkit-inner-spin-button,
@@ -354,6 +357,11 @@
     
     .main-image, .hover-image {
         transition: opacity 0.5s ease;
+    }
+    
+    /* Active thumbnail border */
+    .thumbnail-image.active {
+        border-color: #dc2626 !important;
     }
 </style>
 
@@ -384,13 +392,15 @@
                     hoverImg.src = newImageSrc;
                 }
                 
-                // Update active thumbnail border
+                // Update active thumbnail
                 document.querySelectorAll('.thumbnail-image').forEach(t => {
-                    t.classList.remove('border-[#111111]');
-                    t.classList.add('border-transparent');
+                    t.classList.remove('active');
+                    t.classList.remove('border-[#dc2626]');
+                    t.classList.add('border-[#333333]');
                 });
-                this.classList.remove('border-transparent');
-                this.classList.add('border-[#111111]');
+                this.classList.add('active');
+                this.classList.remove('border-[#333333]');
+                this.classList.add('border-[#dc2626]');
             });
         });
 
@@ -491,33 +501,50 @@
                     if (data.success) {
                         // Success animation
                         addToCartBtn.textContent = 'ADDED ✓';
-                        addToCartBtn.style.backgroundColor = '#10B981'; // Green color
+                        addToCartBtn.style.backgroundColor = '#10B981';
+                        addToCartBtn.style.borderColor = '#10B981';
                         
-                        // Update cart count in navbar if exists
-                        const cartCount = document.querySelector('nav .relative span.bg-\\[\\#FF5A1F\\]');
-                        if (cartCount) {
-                            cartCount.textContent = data.cart_total_items || 1;
+                        // Update cart count in navbar
+                        const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
+                        if (cartBadge) {
+                            cartBadge.textContent = data.cart_total_items || 1;
+                            // Animate cart badge
+                            cartBadge.classList.add('animate-pulse');
+                            setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
                         }
+                        
+                        // Show success message
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
+                        messageDiv.textContent = 'Added to cart!';
+                        document.body.appendChild(messageDiv);
+                        
+                        // Remove message after 2 seconds
+                        setTimeout(() => messageDiv.remove(), 2000);
                         
                         // Reset button after 1.5 seconds
                         setTimeout(() => {
                             addToCartBtn.textContent = originalText;
-                            addToCartBtn.style.backgroundColor = originalBg;
+                            addToCartBtn.style.backgroundColor = '';
+                            addToCartBtn.style.borderColor = '';
                             addToCartBtn.disabled = false;
                         }, 1500);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Reset button on error
+                    // Show error
                     addToCartBtn.textContent = 'ERROR - TRY AGAIN';
-                    addToCartBtn.style.backgroundColor = '#EF4444'; // Red color
+                    addToCartBtn.style.backgroundColor = '#EF4444';
+                    addToCartBtn.style.borderColor = '#EF4444';
                     
+                    // Reset button after 2 seconds
                     setTimeout(() => {
                         addToCartBtn.textContent = originalText;
-                        addToCartBtn.style.backgroundColor = originalBg;
+                        addToCartBtn.style.backgroundColor = '';
+                        addToCartBtn.style.borderColor = '';
                         addToCartBtn.disabled = false;
-                    }, 1500);
+                    }, 2000);
                 });
             });
         }

@@ -3,87 +3,81 @@
 
 {% block content %}
 <!-- SECTION 1 — Hero -->
-<section class="min-h-[90vh] lg:min-h-[90vh] bg-[#F7F7F7] flex items-center overflow-hidden">
+<section class="min-h-[90vh] lg:min-h-[90vh] bg-black flex items-center overflow-hidden">
     <div class="w-full">
         <!-- Mobile: Carousel of latest products from each category -->
-       <!-- Mobile: Carousel of latest products from each category -->
-<div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
+        <div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
+            {% if hero_products %}
+            <div id="mobileHeroCarousel" class="absolute inset-0">
+                {% for product in hero_products %}
+                <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-[1800ms] ease-in-out"
+                     style="background-image: url('{{ product.image.url }}');
+                            background-size: cover;
+                            background-position: center top;">
 
-    {% if hero_products %}
-    <div id="mobileHeroCarousel" class="absolute inset-0">
-        {% for product in hero_products %}
-        <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-[1800ms] ease-in-out"
-             style="background-image: url('{{ product.image.url }}');
-                    background-size: cover;
-                    background-position: center top;">
+                    <!-- Solid overlay -->
+                    <div class="absolute inset-0 bg-black/40"></div>
 
-            <!-- Gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/80"></div>
-
-            <!-- Category Tag -->
-            <div class="absolute top-5 left-5 z-20 text-[10px] tracking-widest text-white/80 bg-black/50 px-3 py-1">
-                {{ product.get_category_display|upper }}
+                    <!-- Category Tag -->
+                    <div class="absolute top-5 left-5 z-20 text-[10px] tracking-widest text-white bg-black/80 px-3 py-1 border border-[#333333]">
+                        {{ product.get_category_display|upper }}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
+
+            <!-- CTA Overlay -->
+            <div class="absolute inset-0 z-30 flex flex-col items-center justify-end pb-10 space-y-4 text-center">
+                <a href="{% url 'product_list' %}"
+                   class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-10 py-4 text-lg font-bold tracking-wide transition-colors border border-[#dc2626]">
+                    SHOP NEW ARRIVALS
+                </a>
+            </div>
+
+            <!-- Indicators -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+                {% for product in hero_products %}
+                <span class="hero-dot w-2 h-2 rounded-full bg-[#333333]"></span>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="w-full h-full bg-[#111111] flex items-center justify-center">
+                <span class="text-[#666666] text-lg">Hero Image</span>
+            </div>
+            {% endif %}
         </div>
-        {% endfor %}
-    </div>
-
-    <!-- CTA Overlay -->
-    <div class="absolute inset-0 z-30 flex flex-col items-center justify-end pb-10 space-y-4 text-center">
-        <a href="{% url 'product_list' %}"
-           class="bg-[#FF5A1F] hover:bg-[#E04A1B] text-white px-10 py-4 text-lg font-medium tracking-wide transition-colors">
-            Shop New Arrivals
-        </a>
-
-        <!-- <a href="{% url 'product_list' %}"
-           class="text-white/80 text-xs tracking-widest border-b border-transparent hover:border-white/60 transition-all">
-            SHOP COLLECTION
-        </a> -->
-    </div>
-
-    <!-- Indicators -->
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
-        {% for product in hero_products %}
-        <span class="hero-dot w-2 h-2 rounded-full bg-white/40"></span>
-        {% endfor %}
-    </div>
-
-    {% else %}
-    <div class="w-full h-full bg-[#111111]/10 flex items-center justify-center">
-        <span class="text-[#111111]/30 text-lg">Hero Image</span>
-    </div>
-    {% endif %}
-</div>
-
-
         
-        <!-- Desktop: Two Column Layout (UNCHANGED) -->
+        <!-- Desktop: Two Column Layout -->
         <div class="hidden lg:grid lg:grid-cols-2 h-[90vh]">
             <!-- Left: Text Content -->
-            <div class="flex items-center p-8 lg:p-12">
+            <div class="flex items-center p-8 lg:p-12 bg-black">
                 <div class="max-w-lg space-y-6 lg:space-y-8">
                     <!-- Headline -->
-                    <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-[#111111] leading-none">
-                        Everyday street.<br>Elevated.
+                    <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white leading-none">
+                        EVERYDAY STREET.<br><span class="text-[#dc2626]">ELEVATED.</span>
                     </h1>
                     
                     <!-- Subtext -->
-                    <p class="text-lg md:text-xl text-[#111111]/70 leading-relaxed max-w-md">
+                    <p class="text-lg md:text-xl text-[#cccccc] leading-relaxed max-w-md">
                         Minimal fits for daily wear.
                     </p>
+                    
+                    <!-- Red divider -->
+                    <div class="w-20 h-1 bg-[#dc2626]"></div>
                     
                     <!-- Button -->
                     <div class="pt-4">
                         <a href="{% url 'product_list' %}" 
-                           class="inline-block bg-[#FF5A1F] hover:bg-[#E04A1B] text-[#F7F7F7] px-8 py-4 text-lg font-medium tracking-wide transition-colors duration-300">
-                            Shop New Arrivals
+                           class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-4 text-lg font-bold tracking-wider transition-colors border border-[#dc2626]">
+                            SHOP NEW ARRIVALS
                         </a>
                     </div>
                 </div>
             </div>
             
             <!-- Right: Full-height Image Column -->
-            <div class="relative h-full overflow-hidden group">
+            <div class="relative h-full overflow-hidden group bg-black">
                 {% if latest_product %}
                     <a href="{% url 'product_detail' latest_product.slug %}" class="block h-full w-full">
                         <div class="relative w-full h-full">
@@ -91,16 +85,18 @@
                             <div class="absolute inset-0 overflow-hidden">
                                 <img src="{{ latest_product.image.url }}" 
                                      alt="{{ latest_product.name }}" 
-                                     class="w-full h-full object-cover object-center min-w-full min-h-full group-hover:scale-105 transition-all duration-700 transform group-hover:shadow-2xl group-hover:shadow-[#111111]/20 group-hover:translate-y-[-8px]">
+                                     class="w-full h-full object-cover object-center min-w-full min-h-full group-hover:scale-105 transition-all duration-700">
+                                <!-- Red tint overlay on hover -->
+                                <div class="absolute inset-0 bg-[#dc2626]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             </div>
-                            <!-- Gradient Overlay -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#111111]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <!-- Red corner accent -->
+                            <div class="absolute top-0 right-0 w-32 h-32 border-t border-r border-[#dc2626]/20"></div>
                         </div>
                     </a>
                 {% else %}
                     <!-- Fallback placeholder -->
-                    <div class="w-full h-full bg-[#111111]/10 flex items-center justify-center">
-                        <span class="text-[#111111]/30 text-lg">Latest Product Image</span>
+                    <div class="w-full h-full bg-[#111111] flex items-center justify-center">
+                        <span class="text-[#666666] text-lg">Latest Product Image</span>
                     </div>
                 {% endif %}
             </div>
@@ -109,46 +105,53 @@
 </section>
 
 <!-- SECTION 2 — Featured Products -->
-<section class="py-20 bg-[#111111]">
+<section class="py-20 bg-black">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-[#F7F7F7]">NEW ARRIVALS</h2>
-            <p class="text-[#8E8E93] text-sm tracking-wide">Fresh additions to the collection</p>
+            <div class="inline-flex items-center mb-4">
+                <div class="w-8 h-0.5 bg-[#dc2626] mr-3"></div>
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">NEW ARRIVALS</h2>
+                <div class="w-8 h-0.5 bg-[#dc2626] ml-3"></div>
+            </div>
+            <p class="text-[#dc2626] text-sm tracking-widest uppercase font-bold">Fresh additions to the collection</p>
         </div>
 
         {% if new_arrivals %}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for product in new_arrivals|slice:":6" %}
-            <div class="group relative">
+            <div class="group relative bg-[#111111] border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
                 <a href="{% url 'product_detail' product.slug %}" class="block">
-                    <div class="aspect-square overflow-hidden bg-[#1A1A1A]">
+                    <div class="aspect-square overflow-hidden bg-black">
                         {% if product.image %}
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         {% else %}
-                            <div class="w-full h-full flex items-center justify-center">
-                                <span class="text-[#8E8E93] text-sm">IMAGE COMING SOON</span>
+                            <div class="w-full h-full flex items-center justify-center bg-[#111111]">
+                                <span class="text-[#666666] text-sm">IMAGE COMING SOON</span>
                             </div>
                         {% endif %}
                         
                         <!-- Hover Add to Cart -->
-                        <div class="absolute inset-0 bg-[#111111]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <form method="POST" action="{% url 'add_to_cart' product.id %}" 
                                   class="transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                 {% csrf_token %}
                                 <button type="submit" 
-                                        class="bg-[#F7F7F7] text-[#111111] hover:bg-[#FF5A1F] hover:text-[#F7F7F7] px-8 py-3 text-sm tracking-widest font-medium transition-colors duration-300">
+                                        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-3 text-sm tracking-widest font-bold transition-all duration-300 border border-[#dc2626]">
                                     ADD TO CART
                                 </button>
                             </form>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
-                        <h3 class="text-sm font-medium tracking-wide text-[#F7F7F7]">{{ product.name }}</h3>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-[#F7F7F7] font-medium">₦{{ product.price }}</span>
-                            <span class="text-xs text-[#8E8E93] tracking-wide">{{ product.get_category_display|upper }}</span>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold tracking-wide text-white mb-2">{{ product.name }}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#dc2626] font-bold text-xl">₦{{ product.price }}</span>
+                            {% if product.compare_price %}
+                            <span class="text-[#666666] line-through text-sm">₦{{ product.compare_price }}</span>
+                            {% endif %}
+                            <span class="text-xs text-[#dc2626] tracking-wide bg-black px-2 py-1 border border-[#333333]">{{ product.get_category_display|upper }}</span>
                         </div>
                     </div>
                 </a>
@@ -158,16 +161,16 @@
         
         <div class="text-center mt-16">
             <a href="{% url 'product_list' %}?sort=newest" 
-               class="inline-block border border-[#8E8E93] text-[#8E8E93] hover:border-[#F7F7F7] hover:text-[#F7F7F7] px-8 py-3 transition-colors duration-300 text-sm tracking-widest">
+               class="inline-block border-2 border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-10 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
                 VIEW ALL PRODUCTS
             </a>
         </div>
         
         {% else %}
         <div class="text-center py-12">
-            <p class="text-[#8E8E93] mb-6">No new arrivals available</p>
+            <p class="text-[#666666] mb-6">No new arrivals available</p>
             <a href="{% url 'product_list' %}" 
-               class="inline-block border border-[#8E8E93] text-[#8E8E93] hover:border-[#F7F7F7] hover:text-[#F7F7F7] px-6 py-2 transition-colors duration-300 text-sm tracking-widest">
+               class="inline-block border border-[#333333] text-[#666666] hover:border-[#dc2626] hover:text-[#dc2626] px-6 py-2 transition-colors duration-300 text-sm tracking-widest">
                 BROWSE COLLECTION
             </a>
         </div>
@@ -176,20 +179,30 @@
 </section>
 
 <!-- SECTION 3 — Brand Statement -->
-<section class="py-32 bg-[#F7F7F7]">
+<section class="py-32 bg-black border-t border-[#333333]">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl text-[#111111] leading-tight">
-            Guided by vision.<br>Driven by style.
-        </h2>
+        <div class="mb-8">
+            <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-[#dc2626] text-2xl font-bold">V</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl text-white leading-tight font-bold">
+                <span class="text-[#dc2626]">GUIDED</span> BY VISION.<br>
+                <span class="text-[#dc2626]">DRIVEN</span> BY STYLE.
+            </h2>
+        </div>
+        <p class="text-[#cccccc] text-lg mt-6 max-w-xl mx-auto">
+            Where premium craftsmanship meets urban innovation. 
+            Each piece is designed for those who demand excellence in every detail.
+        </p>
     </div>
 </section>
 
-<!-- SECTION 4 — Reviews (Added Back) -->
-<section class="py-20 bg-[#111111] border-t border-[#2A2A2A] overflow-hidden">
+<!-- SECTION 4 — Reviews -->
+<section class="py-20 bg-black border-t border-[#333333] overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-[#F7F7F7]">REVIEWS</h2>
-            <p class="text-[#8E8E93] text-sm tracking-wide">What our community says</p>
+            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-white">CLIENT TESTIMONIALS</h2>
+            <p class="text-[#dc2626] text-sm tracking-widest uppercase font-bold">What our community says</p>
         </div>
 
         <!-- Carousel Container -->
@@ -197,34 +210,34 @@
             <div class="flex transition-transform duration-500 ease-in-out" id="reviewsCarousel">
                 {% for review in store_reviews|slice:":10" %}
                 <div class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
-                    <div class="border border-[#2A2A2A] p-8 h-full hover:border-[#8E8E93] transition-colors duration-300">
+                    <div class="bg-[#1a1a1a] border border-[#333333] p-8 h-full hover:border-[#dc2626] transition-all duration-300 rounded-lg">
                         <div class="flex items-center mb-6">
-                            <div class="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center text-[#8E8E93]">
+                            <div class="w-12 h-12 bg-black border border-[#dc2626] rounded-full flex items-center justify-center text-white font-bold text-lg">
                                 {{ review.user.username|first|upper }}
                             </div>
                             <div class="ml-4">
-                                <h4 class="font-medium text-sm text-[#F7F7F7]">
+                                <h4 class="font-semibold text-sm text-white">
                                     {% if review.user.first_name %}
                                         {{ review.user.first_name }}
                                     {% else %}
                                         {{ review.user.username }}
                                     {% endif %}
                                 </h4>
-                                <div class="flex items-center text-[#FF5A1F] mt-1">
+                                <div class="flex items-center text-[#dc2626] mt-1">
                                     {% for i in review.get_star_rating %}★{% endfor %}
                                     {% for i in review.get_empty_stars %}☆{% endfor %}
                                 </div>
                             </div>
                         </div>
-                        <p class="text-[#8E8E93] text-sm leading-relaxed mb-6">"{{ review.comment|truncatechars:120 }}"</p>
-                        <div class="border-t border-[#2A2A2A] pt-4">
-                            <span class="text-xs text-[#8E8E93]">{{ review.created_at|date:"M d, Y" }}</span>
+                        <p class="text-[#cccccc] text-sm leading-relaxed mb-6 italic">"{{ review.comment|truncatechars:120 }}"</p>
+                        <div class="border-t border-[#333333] pt-4">
+                            <span class="text-xs text-[#666666]">{{ review.created_at|date:"M d, Y" }}</span>
                         </div>
                     </div>
                 </div>
                 {% empty %}
                 <div class="w-full text-center py-12">
-                    <p class="text-[#8E8E93]">Be the first to review</p>
+                    <p class="text-[#666666]">Be the first to review</p>
                 </div>
                 {% endfor %}
             </div>
@@ -232,8 +245,8 @@
 
         <!-- Review Form -->
         <div class="max-w-md mx-auto mt-20">
-            <div class="border border-[#2A2A2A] p-8 hover:border-[#8E8E93] transition-colors duration-300">
-                <h3 class="text-center text-lg font-medium mb-8 tracking-wide text-[#F7F7F7]">SHARE YOUR EXPERIENCE</h3>
+            <div class="bg-[#1a1a1a] border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 rounded-lg">
+                <h3 class="text-center text-lg font-bold mb-8 tracking-wide text-white">SHARE YOUR EXPERIENCE</h3>
                 
                 {% if user.is_authenticated %}
                 <form method="POST" action="{% url 'submit_review' %}" class="space-y-6">
@@ -245,7 +258,7 @@
                             {% for i in "54321" %}
                             <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
                                    {% if forloop.first %}checked{% endif %}>
-                            <label for="star{{ i }}" class="text-2xl cursor-pointer text-[#2A2A2A] hover:text-[#FF5A1F] transition-colors star-label" data-rating="{{ i }}">★</label>
+                            <label for="star{{ i }}" class="text-2xl cursor-pointer text-[#333333] hover:text-[#dc2626] transition-colors star-label" data-rating="{{ i }}">★</label>
                             {% endfor %}
                         </div>
                     </div>
@@ -253,22 +266,22 @@
                     <!-- Comment -->
                     <div>
                         <textarea name="comment" required 
-                                  class="w-full bg-[#111111] border border-[#2A2A2A] text-[#F7F7F7] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] resize-none placeholder-[#8E8E93]"
+                                  class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] rounded resize-none placeholder-[#666666]"
                                   rows="4"
                                   placeholder="Your review..."></textarea>
                     </div>
 
                     <button type="submit" 
-                            class="w-full bg-[#111111] border border-[#8E8E93] text-[#F7F7F7] hover:bg-[#FF5A1F] hover:border-[#FF5A1F] py-3 text-sm tracking-widest transition-all duration-300">
+                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white py-3 text-sm tracking-widest font-bold transition-all duration-300 border border-[#dc2626]">
                         SUBMIT REVIEW
                     </button>
                 </form>
                 
                 {% else %}
                 <div class="text-center py-6">
-                    <p class="text-[#8E8E93] mb-6 text-sm">Sign in to share your review</p>
+                    <p class="text-[#666666] mb-6 text-sm">Sign in to share your review</p>
                     <a href="{% url 'login' %}" 
-                       class="inline-block border border-[#8E8E93] text-[#8E8E93] hover:border-[#F7F7F7] hover:text-[#F7F7F7] px-6 py-2 transition-colors duration-300 text-sm tracking-widest">
+                       class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-2 transition-all duration-300 text-sm tracking-widest font-bold">
                         SIGN IN
                     </a>
                 </div>
@@ -279,21 +292,21 @@
 </section>
 
 <!-- FINAL CTA -->
-<section class="py-20 bg-[#111111] border-t border-[#2A2A2A]">
+<section class="py-20 bg-black border-t border-[#333333]">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-6 text-[#F7F7F7]">ELEVATE YOUR STREETWEAR</h2>
-        <p class="text-[#8E8E93] mb-10 text-sm tracking-wide max-w-md mx-auto">
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-6 text-white">ELEVATE YOUR STREETWEAR GAME</h2>
+        <p class="text-[#dc2626] mb-10 text-sm tracking-widest uppercase font-bold max-w-md mx-auto">
             Premium quality meets distinctive style
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{% url 'product_list' %}" 
-               class="border border-[#8E8E93] text-[#F7F7F7] hover:bg-[#F7F7F7] hover:text-[#111111] hover:border-[#F7F7F7] px-8 py-3 transition-all duration-300 text-sm tracking-widest font-medium">
+               class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold border border-[#dc2626]">
                 SHOP COLLECTION
             </a>
             
             {% if not user.is_authenticated %}
             <a href="{% url 'register' %}" 
-               class="border border-[#8E8E93] text-[#8E8E93] hover:border-[#F7F7F7] hover:text-[#F7F7F7] px-8 py-3 transition-all duration-300 text-sm tracking-widest">
+               class="border-2 border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
                 CREATE ACCOUNT
             </a>
             {% endif %}
@@ -322,56 +335,18 @@
 
     /* Star Rating Styles */
     .star-input:checked + .star-label {
-        color: #FF5A1F !important;
+        color: #dc2626 !important;
     }
 
     .star-label:hover {
-        color: #FF5A1F !important;
+        color: #dc2626 !important;
     }
-</style>
 
-<!-- Add Mobile Hero Carousel Styles -->
-<style>
-    /* Mobile Hero Carousel Styles */
-    #mobileCarouselInner {
-        width: calc(100% * {{ hero_products|length }});
-    }
-    
-    /* Perfect image fitting */
-    #mobileHeroCarousel img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-    }
-    
     /* Active indicator styling */
-    .carousel-indicator.active {
-        background-color: #FFFFFF;
-        transform: scale(1.2);
-    }
-    
-    /* Navigation button hover effects */
-    #prevBtn:hover, #nextBtn:hover {
-        transform: translateY(-50%) scale(1.1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Ensure carousel fills container */
-    #mobileHeroCarousel {
-        height: 100%;
-        width: 100%;
-    }
-    
-    /* Smooth transitions for all carousel elements */
-    #mobileCarouselInner,
-    .carousel-indicator,
-    #prevBtn,
-    #nextBtn {
-        transition: all 0.3s ease-in-out;
+    .hero-dot.bg-white {
+        background-color: #dc2626 !important;
     }
 </style>
-
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -397,76 +372,73 @@ document.addEventListener('DOMContentLoaded', () => {
         showSlide(index);
     }, 5000);
 });
-</script>
 
-<script>    
-    // ========== Reviews Carousel (EXISTING CODE) ==========
-    const reviewsCarousel = document.getElementById('reviewsCarousel');
-    if (reviewsCarousel) {
-        const carouselItems = reviewsCarousel.children;
-        let currentIndex = 0;
-        
-        function updateReviewsCarousel() {
-            let itemsPerView;
-            if (window.innerWidth >= 1024) {
-                itemsPerView = 3;
-            } else if (window.innerWidth >= 768) {
-                itemsPerView = 2;
-            } else {
-                itemsPerView = 1;
-            }
-            
-            const totalItems = Math.ceil(carouselItems.length / itemsPerView);
-            const translateX = -currentIndex * (100 / itemsPerView);
-            reviewsCarousel.style.transform = `translateX(${translateX}%)`;
+// ========== Reviews Carousel ==========
+const reviewsCarousel = document.getElementById('reviewsCarousel');
+if (reviewsCarousel) {
+    const carouselItems = reviewsCarousel.children;
+    let currentIndex = 0;
+    
+    function updateReviewsCarousel() {
+        let itemsPerView;
+        if (window.innerWidth >= 1024) {
+            itemsPerView = 3;
+        } else if (window.innerWidth >= 768) {
+            itemsPerView = 2;
+        } else {
+            itemsPerView = 1;
         }
         
-        function nextReviewsSlide() {
-            let itemsPerView;
-            if (window.innerWidth >= 1024) {
-                itemsPerView = 3;
-            } else if (window.innerWidth >= 768) {
-                itemsPerView = 2;
-            } else {
-                itemsPerView = 1;
-            }
-            
-            const totalItems = Math.ceil(carouselItems.length / itemsPerView);
-            currentIndex = (currentIndex + 1) % totalItems;
-            updateReviewsCarousel();
+        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+        const translateX = -currentIndex * (100 / itemsPerView);
+        reviewsCarousel.style.transform = `translateX(${translateX}%)`;
+    }
+    
+    function nextReviewsSlide() {
+        let itemsPerView;
+        if (window.innerWidth >= 1024) {
+            itemsPerView = 3;
+        } else if (window.innerWidth >= 768) {
+            itemsPerView = 2;
+        } else {
+            itemsPerView = 1;
         }
         
-        // Auto-advance carousel
-        let reviewsInterval = setInterval(nextReviewsSlide, 4000);
-        
-        // Pause on hover
-        reviewsCarousel.addEventListener('mouseenter', () => clearInterval(reviewsInterval));
-        reviewsCarousel.addEventListener('mouseleave', () => {
-            reviewsInterval = setInterval(nextReviewsSlide, 4000);
-        });
-        
-        // Responsive updates
-        window.addEventListener('resize', updateReviewsCarousel);
+        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+        currentIndex = (currentIndex + 1) % totalItems;
         updateReviewsCarousel();
     }
     
-    // ========== Star Rating (EXISTING CODE) ==========
-    const starInputs = document.querySelectorAll('.star-input');
-    const starLabels = document.querySelectorAll('.star-label');
+    // Auto-advance carousel
+    let reviewsInterval = setInterval(nextReviewsSlide, 4000);
     
-    starInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const rating = this.value;
-            
-            // Update star colors
-            starLabels.forEach(label => {
-                const labelRating = label.getAttribute('data-rating');
-                if (labelRating <= rating) {
-                    label.style.color = '#FF5A1F';
-                } else {
-                    label.style.color = '#2A2A2A';
-                }
-            });
+    // Pause on hover
+    reviewsCarousel.addEventListener('mouseenter', () => clearInterval(reviewsInterval));
+    reviewsCarousel.addEventListener('mouseleave', () => {
+        reviewsInterval = setInterval(nextReviewsSlide, 4000);
+    });
+    
+    // Responsive updates
+    window.addEventListener('resize', updateReviewsCarousel);
+    updateReviewsCarousel();
+}
+
+// ========== Star Rating ==========
+const starInputs = document.querySelectorAll('.star-input');
+const starLabels = document.querySelectorAll('.star-label');
+
+starInputs.forEach(input => {
+    input.addEventListener('change', function() {
+        const rating = this.value;
+        
+        // Update star colors
+        starLabels.forEach(label => {
+            const labelRating = label.getAttribute('data-rating');
+            if (labelRating <= rating) {
+                label.style.color = '#dc2626';
+            } else {
+                label.style.color = '#333333';
+            }
         });
     });
 });

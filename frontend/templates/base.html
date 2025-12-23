@@ -17,6 +17,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
         }
         
         /* Custom scrollbar */
@@ -25,16 +27,16 @@
         }
         
         ::-webkit-scrollbar-track {
-            background: #F7F7F7;
+            background: #111111;
         }
         
         ::-webkit-scrollbar-thumb {
-            background: #8E8E93;
+            background: #dc2626;
             border-radius: 4px;
         }
         
         ::-webkit-scrollbar-thumb:hover {
-            background: #FF5A1F;
+            background: #b91c1c;
         }
 
         /* Bouncing dots animation */
@@ -50,6 +52,16 @@
         .animate-bounce-delay {
             animation: bounce 0.6s infinite ease-in-out;
         }
+
+        /* Material icons color fix */
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+            color: inherit;
+        }
     </style>
 
     <style>
@@ -59,27 +71,27 @@
     </style>
     
 </head>
-<body class="bg-[#F7F7F7] text-[#111111] min-h-screen flex flex-col">
+<body class="bg-black text-white min-h-screen flex flex-col">
     <!-- Preloader -->
-    <div id="preloader" class="fixed inset-0 bg-[#B5B5B3] flex items-center justify-center z-[9999] transition-opacity duration-500">
+    <div id="preloader" class="fixed inset-0 bg-black flex items-center justify-center z-[9999] transition-opacity duration-500">
         <div class="text-center">
-            <!-- VULOR Text -->
-            <div class="text-6xl md:text-7xl font-black tracking-tighter text-[#111111] mb-8">
+            <!-- VULOR Text - Removed gradient -->
+            <div class="text-6xl md:text-7xl font-black tracking-tighter text-[#dc2626] mb-8">
                 VULOR
             </div>
             
-            <!-- 4 Bouncing Dots -->
+            <!-- 4 Bouncing Dots in red -->
             <div class="flex justify-center space-x-2">
-                <div class="w-3 h-3 bg-[#FF5A1F] rounded-full animate-bounce-delay" style="animation-delay: 0s"></div>
-                <div class="w-3 h-3 bg-[#FF5A1F] rounded-full animate-bounce-delay" style="animation-delay: 0.1s"></div>
-                <div class="w-3 h-3 bg-[#FF5A1F] rounded-full animate-bounce-delay" style="animation-delay: 0.2s"></div>
-                <div class="w-3 h-3 bg-[#FF5A1F] rounded-full animate-bounce-delay" style="animation-delay: 0.3s"></div>
+                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0s"></div>
+                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.1s"></div>
+                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.2s"></div>
+                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.3s"></div>
             </div>
         </div>
     </div>
 
-            <!-- Navigation -->
-    <nav class="bg-[#040404] border-b border-[#2A2A2A] sticky top-0 z-50">
+    <!-- Navigation -->
+    <nav class="bg-black border-b border-[#333333] sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
@@ -87,38 +99,37 @@
                     <a href="{% url 'home' %}" class="flex items-center space-x-3 group">
                         <img src="{% static 'images/photo_2025-06-30_12-29-30.jpg' %}" 
                              alt="VULOR Logo" 
-                             class="h-10 w-auto transition-opacity duration-300 group-hover:opacity-80">
-                        <!-- <span class="text-xl font-bold tracking-tight text-[#F7F7F7]">VULOR</span> -->
+                             class="h-10 w-auto transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
                     </a>
                 </div>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{% url 'product_list' %}" 
-                       class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors duration-300 text-sm tracking-wide">
+                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
                         SHOP
                     </a>
                     
                     {% if user.is_authenticated %}
                         <a href="{% url 'profile_view' %}" 
-                           class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors duration-300 text-sm tracking-wide">
+                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
                             PROFILE
                         </a>
                         
                         <a href="{% url 'orders:order_history' %}" 
-                           class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors duration-300 text-sm tracking-wide">
+                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
                             ORDERS
                         </a>
                         
                         <!-- Cart with Badge -->
                         <div class="relative">
                             <a href="{% url 'view_cart' %}" 
-                               class="hover:text-[#8E8E93] transition-colors">
-                                <span class="material-symbols-outlined text-lg text-[#F7F7F7]">
+                               class="hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110">
+                                <span class="material-symbols-outlined text-lg">
                                     shopping_cart
                                 </span>
                                 {% if cart_total_items > 0 %}
-                                    <span class="absolute -top-2 -right-2 bg-[#FF5A1F] text-[#111111] text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border border-[#111111]">
+                                    <span class="absolute -top-2 -right-2 bg-[#dc2626] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border border-white">
                                         {{ cart_total_items }}
                                     </span>
                                 {% endif %}
@@ -126,17 +137,17 @@
                         </div>
 
                         <a href="/accounts/logout/" 
-                           class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors ml-2">
-                            <span class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors text-sm tracking-wide">LOGOUT</span>
+                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
+                            LOGOUT
                         </a>
                         
                     {% else %}
                         <a href="{% url 'login' %}" 
-                           class="text-[#8E8E93] hover:text-[#F7F7F7] transition-colors text-sm tracking-wide">
+                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
                             LOGIN
                         </a>
                         <a href="{% url 'register' %}" 
-                           class="bg-[#111111] border border-[#8E8E93] text-[#F7F7F7] hover:bg-[#FF5A1F] hover:border-[#FF5A1F] px-4 py-2 text-sm tracking-wide transition-all duration-300">
+                           class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-6 py-2 text-sm tracking-wider font-bold transition-all duration-300 transform hover:scale-105">
                             SIGN UP
                         </a>
                     {% endif %}
@@ -145,7 +156,7 @@
                 <!-- Mobile menu button - Fixed Hamburger -->
                 <div class="md:hidden">
                     <button id="mobile-menu-button" 
-                            class="text-[#8E8E93] hover:text-[#F7F7F7] p-2 transition-colors duration-300 relative w-10 h-10 flex items-center justify-center">
+                            class="text-[#dc2626] hover:text-white p-2 transition-all duration-300 relative w-10 h-10 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-lg border border-[#333333] hover:border-[#dc2626]">
                         <span class="sr-only">Open menu</span>
                         <!-- Hamburger Icon (Default) -->
                         <svg id="hamburger-icon" class="h-6 w-6 absolute transition-all duration-300" 
@@ -163,12 +174,11 @@
 
             <!-- Mobile Menu with Animation - Centered Items -->
             <div id="mobile-menu" 
-                 class="md:hidden absolute top-full left-0 right-0 bg-[#111111] border-t border-[#2A2A2A] overflow-hidden transition-all duration-300 ease-in-out"
+                 class="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-t border-[#333333] overflow-hidden transition-all duration-300 ease-in-out"
                  style="max-height: 0; opacity: 0;">
                 <div class="px-4 py-6 space-y-3 flex flex-col items-center">
                     <a href="{% url 'product_list' %}" 
-                       class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                        <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">storefront</span> -->
+                       class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                         SHOP
                     </a>
                     
@@ -176,11 +186,10 @@
                         <!-- Cart with centered badge -->
                         <div class="relative">
                             <a href="{% url 'view_cart' %}" 
-                               class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                                <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">shopping_cart</span> -->
+                               class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                                 CART
                                 {% if cart_total_items > 0 %}
-                                    <span class="ml-2 bg-[#FF5A1F] text-[#111111] text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold border-2 border-[#111111] animate-pulse">
+                                    <span class="ml-2 bg-[#dc2626] text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold border-2 border-white animate-pulse">
                                         {{ cart_total_items }}
                                     </span>
                                 {% endif %}
@@ -188,32 +197,27 @@
                         </div>
                         
                         <a href="{% url 'profile_view' %}" 
-                           class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                            <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">person</span> -->
+                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                             PROFILE
                         </a>
                         
                         <a href="{% url 'orders:order_history' %}" 
-                           class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                            <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">receipt</span> -->
+                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                             ORDERS
                         </a>
                         
                         <a href="/accounts/logout/" 
-                           class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                            <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">logout</span> -->
+                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                             LOGOUT
                         </a>
                         
                     {% else %}
                         <a href="{% url 'login' %}" 
-                           class="w-auto px-8 py-3 text-[#8E8E93] hover:text-[#F7F7F7] hover:bg-[#1A1A1A] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px]">
-                            <!-- <span class="material-symbols-outlined align-middle mr-3 text-lg">login</span> -->
+                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
                             LOGIN
                         </a>
                         <a href="{% url 'register' %}" 
-                           class="w-auto px-8 py-3 bg-[#111111] border border-[#8E8E93] text-[#F7F7F7] hover:bg-[#FF5A1F] hover:border-[#FF5A1F] rounded-lg transition-all duration-300 text-sm tracking-wide text-center transform hover:scale-[1.02] min-w-[200px] flex items-center justify-center">
-                            <!-- <span class="material-symbols-outlined align-middle mr-2 text-lg">person_add</span> -->
+                           class="w-auto px-8 py-3 bg-[#dc2626] text-white hover:bg-[#b91c1c] rounded-lg transition-all duration-300 text-sm tracking-wider font-bold text-center transform hover:scale-[1.02] min-w-[200px] flex items-center justify-center">
                             SIGN UP
                         </a>
                     {% endif %}
@@ -226,7 +230,7 @@
     {% if messages %}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
             {% for message in messages %}
-                <div class="bg-[#FF5A1F] text-[#111111] p-4 mb-4 text-sm tracking-wide font-medium">
+                <div class="bg-[#dc2626] text-white p-4 mb-4 text-sm tracking-wide font-bold border border-[#dc2626]">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -240,72 +244,84 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#F7F7F7] border-t border-[#8E8E93]/20 mt-20">
+    <footer class="bg-black border-t border-[#333333] mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->
                 <div class="space-y-4">
                     <div>
-                        <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-[#111111]">VULOR</a>
-                        <p class="text-[#8E8E93] text-xs mt-2 tracking-wide">PREMIUM STREETWEAR</p>
+                        <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-white">VULOR</a>
+                        <p class="text-[#dc2626] text-xs mt-2 tracking-widest uppercase font-bold">PREMIUM STREETWEAR</p>
+                        <p class="text-[#666666] text-sm mt-3 max-w-xs">
+                            Redefining urban fashion with premium craftsmanship and bold design.
+                        </p>
                     </div>
                 </div>
 
                 <!-- Shop -->
                 <div class="space-y-4">
-                    <h3 class="text-sm font-medium tracking-widest text-[#8E8E93]">SHOP</h3>
+                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">SHOP</h3>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'product_list' %}?category=hoodies" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">Hoodies</a></li>
-                        <li><a href="{% url 'product_list' %}?category=tee-shirts" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">T-Shirts</a></li>
-                        <li><a href="{% url 'product_list' %}?category=tank-tops" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">Tank Tops</a></li>
-                        <li><a href="{% url 'product_list' %}?category=cargo-jeans" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">Cargo Jeans</a></li>
+                        <li><a href="{% url 'product_list' %}?category=hoodies" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Hoodies</a></li>
+                        <li><a href="{% url 'product_list' %}?category=tee-shirts" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">T-Shirts</a></li>
+                        <li><a href="{% url 'product_list' %}?category=tank-tops" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Tank Tops</a></li>
+                        <li><a href="{% url 'product_list' %}?category=cargo-jeans" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Cargo Jeans</a></li>
                     </ul>
                 </div>
 
                 <!-- Company -->
                 <div class="space-y-4">
-                    <h3 class="text-sm font-medium tracking-widest text-[#8E8E93]">COMPANY</h3>
+                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">COMPANY</h3>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'about' %}" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">About</a></li>
-                        <li><a href="{% url 'contact' %}" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">Contact</a></li>
-                        <li><a href="{% url 'size_guide' %}" class="text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">Size Guide</a></li>
+                        <li><a href="{% url 'about' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">About</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Contact</a></li>
+                        <li><a href="{% url 'size_guide' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Size Guide</a></li>
                     </ul>
                 </div>
 
                 <!-- Contact -->
                 <div class="space-y-4">
-                    <h3 class="text-sm font-medium tracking-widest text-[#8E8E93]">CONTACT</h3>
-                    <div class="space-y-2">
-                        <a href="mailto:info@vulor.com" class="block text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">info@vulor.com</a>
-                        <a href="https://wa.me/2348123456789" class="block text-sm text-[#8E8E93] hover:text-[#111111] transition-colors tracking-wide">+234 812 345 6789</a>
+                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">CONTACT</h3>
+                    <div class="space-y-3">
+                        <a href="mailto:info@vulor.com" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
+                            <!-- <span class="material-symbols-outlined align-middle mr-2 text-sm">mail</span> -->
+                            info@vulor.com
+                        </a>
+                        <a href="https://wa.me/2348123456789" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
+                            <!-- <span class="material-symbols-outlined align-middle mr-2 text-sm">phone</span> -->
+                            +234 812 345 6789
+                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Social Links -->
-            <div class="border-t border-[#8E8E93]/20 mt-8 pt-8">
+            <div class="border-t border-[#333333] mt-8 pt-8">
                 <div class="flex justify-center space-x-6">
                     <a href="https://instagram.com/vulor" 
-                       class="text-[#8E8E93] hover:text-[#111111] transition-colors">
+                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
+                        <!-- <span class="material-symbols-outlined mr-2">photo_camera</span> -->
                         Instagram
                     </a>
                     <a href="https://twitter.com/vulor" 
-                       class="text-[#8E8E93] hover:text-[#111111] transition-colors">
+                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
+                        <!-- <span class="material-symbols-outlined mr-2">bolt</span> -->
                         Twitter
                     </a>
                 </div>
             </div>
 
             <!-- Copyright -->
-            <div class="border-t border-[#8E8E93]/20 mt-8 pt-8 text-center">
-                <p class="text-xs text-[#8E8E93] tracking-wide">&copy; 2025 VULOR. All rights reserved.</p>
+            <div class="border-t border-[#333333] mt-8 pt-8 text-center">
+                <p class="text-xs text-[#666666] tracking-wide">&copy; 2025 VULOR. All rights reserved.</p>
+                <p class="text-xs text-[#333333] mt-2">Designed with passion for urban fashion.</p>
             </div>
         </div>
     </footer>
 
     <!-- Scroll to Top Button -->
     <button id="scrollToTop" 
-            class="fixed bottom-8 right-8 bg-[#111111] text-[#F7F7F7] p-3 shadow-lg transition-all duration-300 opacity-0 transform translate-y-10 z-40 hover:bg-[#FF5A1F]">
+            class="fixed bottom-8 right-8 bg-[#dc2626] text-white p-3 shadow-xl transition-all duration-300 opacity-0 transform translate-y-10 z-40 hover:bg-[#b91c1c] rounded-full">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
         </svg>
@@ -319,7 +335,7 @@
             setTimeout(function() {
                 preloader.style.opacity = '0';
                 preloader.style.visibility = 'hidden';
-            }, 1500); // Show for 1.5 seconds
+            }, 1500);
         });
 
         // Fallback: hide preloader after 3 seconds max
@@ -330,21 +346,6 @@
                 preloader.style.visibility = 'hidden';
             }
         }, 3000);
-
-        // // Mobile menu functionality
-        // document.getElementById('mobile-menu-button').addEventListener('click', function() {
-        //     const menu = document.getElementById('mobile-menu');
-        //     menu.classList.toggle('hidden');
-        // });
-
-        // // Close mobile menu when clicking outside
-        // document.addEventListener('click', function(event) {
-        //     const menu = document.getElementById('mobile-menu');
-        //     const button = document.getElementById('mobile-menu-button');
-        //     if (!menu.contains(event.target) && !button.contains(event.target) && !menu.classList.contains('hidden')) {
-        //         menu.classList.add('hidden');
-        //     }
-        // });
 
         // Scroll to Top Functionality
         const scrollToTopButton = document.getElementById('scrollToTop');
@@ -369,7 +370,7 @@
         });
     </script>
 
-           <script>
+    <script>
         // Mobile menu functionality with animations
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -479,6 +480,14 @@
                 item.style.opacity = '0';
                 item.style.transform = 'translateY(-10px)';
                 item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            });
+            
+            // Add hover effects to all interactive elements
+            const interactiveElements = document.querySelectorAll('a, button, .hover\\:text-\\[\\#dc2626\\]');
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    el.classList.add('transition-all', 'duration-300');
+                });
             });
         });
     </script>

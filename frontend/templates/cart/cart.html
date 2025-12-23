@@ -4,16 +4,16 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-12">
-    <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-12 text-center">CART</h1>
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-12 text-center">CART</h1>
     
     {% if cart.items.all %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Cart Items -->
         <div class="lg:col-span-2">
             {% for item in cart.items.all %}
-            <div class="border-b border-[#8E8E93]/20 py-8 flex flex-col md:flex-row items-start gap-6">
+            <div class="border-b border-[#333333] py-8 flex flex-col md:flex-row items-start gap-6">
                 <!-- Product Image -->
-                <div class="w-32 h-32 bg-[#F7F7F7] overflow-hidden flex-shrink-0">
+                <div class="w-32 h-32 bg-black border border-[#333333] overflow-hidden flex-shrink-0">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
                          class="w-full h-full object-cover">
                 </div>
@@ -22,46 +22,46 @@
                 <div class="flex-1 min-w-0">
                     <!-- Product Name and Remove -->
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-[#111111] text-lg font-normal">{{ item.product.name }}</h3>
-                        <!-- Remove link (small, gray) -->
+                        <h3 class="text-white text-lg font-bold">{{ item.product.name }}</h3>
+                        <!-- Remove link -->
                         <form method="POST" action="{% url 'remove_from_cart' item.id %}">
                             {% csrf_token %}
                             <button type="submit" 
-                                    class="text-[#8E8E93] text-sm hover:text-[#111111] transition-colors duration-300">
-                                Remove
+                                    class="text-[#666666] text-sm hover:text-[#dc2626] transition-all duration-300">
+                                REMOVE
                             </button>
                         </form>
                     </div>
                     
                     <!-- Size -->
                     {% if item.size %}
-                    <div class="text-[#8E8E93] text-sm mb-2">Size: {{ item.size }}</div>
+                    <div class="text-[#cccccc] text-sm mb-2">Size: {{ item.size }}</div>
                     {% endif %}
                     
                     <!-- Price -->
-                    <div class="text-[#111111] text-lg font-normal mb-4">₦{{ item.product.price }}</div>
+                    <div class="text-[#dc2626] text-lg font-bold mb-4">₦{{ item.product.price }}</div>
                     
-                    <!-- Quantity Controls (same as product_detail) -->
+                    <!-- Quantity Controls -->
                     <div class="flex items-center">
-                        <label class="text-[#111111] text-sm mr-4">QUANTITY</label>
+                        <label class="text-white text-sm mr-4">QUANTITY</label>
                         <div class="flex items-center w-32">
                             <form method="POST" action="{% url 'update_cart_item' item.id %}" class="flex items-center">
                                 {% csrf_token %}
                                 <button type="button" 
-                                        class="decrease-quantity w-10 h-10 border border-r-0 border-[#8E8E93]/30 flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] transition-colors duration-300">
+                                        class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                                     −
                                 </button>
                                 <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
-                                       class="flex-1 h-10 border border-[#8E8E93]/30 text-center text-[#111111] bg-transparent quantity-display"
+                                       class="flex-1 h-10 border border-[#333333] text-center text-white bg-black quantity-display"
                                        readonly style="-moz-appearance: textfield;">
                                 <button type="button" 
-                                        class="increase-quantity w-10 h-10 border border-l-0 border-[#8E8E93]/30 flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] transition-colors duration-300">
+                                        class="increase-quantity w-10 h-10 border border-l-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                                     +
                                 </button>
                                 <!-- Hidden update button -->
                                 <button type="submit" 
-                                        class="hidden update-btn ml-4 text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
-                                    Update
+                                        class="hidden update-btn ml-4 text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
+                                    UPDATE
                                 </button>
                             </form>
                         </div>
@@ -70,61 +70,68 @@
                 
                 <!-- Item Total -->
                 <div class="md:text-right mt-4 md:mt-0">
-                    <div class="text-[#111111] text-lg font-normal">₦{{ item.total_price }}</div>
+                    <div class="text-[#dc2626] text-lg font-bold">₦{{ item.total_price }}</div>
                 </div>
             </div>
             {% endfor %}
         </div>
         
         <!-- Order Summary -->
-        <div class="border border-[#8E8E93]/30 p-6 h-fit lg:sticky lg:top-8">
-            <h2 class="text-[#111111] text-lg font-normal mb-6">ORDER SUMMARY</h2>
+        <div class="bg-black border border-[#333333] p-6 h-fit lg:sticky lg:top-8">
+            <h2 class="text-white text-lg font-bold mb-6 tracking-widest">ORDER SUMMARY</h2>
             
             <!-- Summary Details -->
             <div class="space-y-4 mb-8">
-                <div class="flex justify-between text-[#111111] text-sm">
-                    <span>Subtotal</span>
-                    <span>₦{{ cart.total_price }}</span>
+                <div class="flex justify-between text-[#cccccc] text-sm">
+                    <span>SUBTOTAL</span>
+                    <span class="text-white">₦{{ cart.total_price }}</span>
                 </div>
                 
                 <!-- Shipping placeholder -->
-                <div class="flex justify-between text-[#8E8E93] text-sm border-b border-[#8E8E93]/20 pb-4">
-                    <span>Shipping</span>
-                    <span>Calculated at checkout</span>
+                <div class="flex justify-between text-[#666666] text-sm border-b border-[#333333] pb-4">
+                    <span>SHIPPING</span>
+                    <span>CALCULATED AT CHECKOUT</span>
                 </div>
                 
                 <!-- Total -->
-                <div class="flex justify-between text-[#111111] text-lg font-normal pt-4">
-                    <span>Total</span>
-                    <span>₦{{ cart.total_price }}</span>
+                <div class="flex justify-between text-white text-lg font-bold pt-4">
+                    <span>TOTAL</span>
+                    <span class="text-[#dc2626]">₦{{ cart.total_price }}</span>
                 </div>
             </div>
             
-            <!-- Checkout Button (accent color, full width) -->
+            <!-- Checkout Button -->
             <a href="{% url 'orders:checkout' %}" 
-               class="block w-full bg-[#FF5A1F] text-[#111111] text-center py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300 mb-4">
+               class="block w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-center py-4 px-6 transition-all duration-300 mb-4 font-bold border border-[#dc2626]">
                 PROCEED TO CHECKOUT
             </a>
             
             <!-- Continue Shopping -->
             <a href="{% url 'product_list' %}" 
-               class="block w-full border border-[#8E8E93]/30 text-[#111111] text-center py-4 px-6 hover:border-[#8E8E93] hover:text-[#FF5A1F] transition-colors duration-300">
+               class="block w-full border border-[#dc2626] text-[#dc2626] text-center py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">
                 CONTINUE SHOPPING
             </a>
+            
+            <!-- Secure Payment Notice -->
+            <div class="mt-6 pt-6 border-t border-[#333333]">
+                <p class="text-[#666666] text-xs text-center">
+                    SECURE PAYMENT PROCESSED BY PAYSTACK
+                </p>
+            </div>
         </div>
     </div>
     {% else %}
     <!-- Empty Cart State -->
     <div class="text-center py-20">
-        <div class="mb-6">
-            <!-- <span class="material-symbols-outlined text-[#8E8E93] text-6xl">
+        <div class="w-20 h-20 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-[#666666] text-3xl">
                 shopping_bag
-            </span> -->
+            </span>
         </div>
-        <h2 class="text-[#111111] text-2xl font-normal mb-4">Your cart is empty</h2>
-        <p class="text-[#8E8E93] mb-8">Start shopping to add items to your cart</p>
+        <h2 class="text-white text-2xl font-bold mb-4">YOUR CART IS EMPTY</h2>
+        <p class="text-[#cccccc] mb-8">START SHOPPING TO ADD ITEMS TO YOUR CART</p>
         <a href="{% url 'product_list' %}" 
-           class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-8 py-3 transition-colors duration-300 text-sm tracking-wide">
+           class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
             SHOP NOW
         </a>
     </div>
@@ -141,6 +148,11 @@
     
     input[type="number"] {
         -moz-appearance: textfield;
+    }
+    
+    /* Sticky summary on scroll */
+    .lg\:sticky {
+        position: sticky;
     }
 </style>
 
@@ -159,8 +171,11 @@
                     input.value = parseInt(input.value) - 1;
                 }
                 
-                // Show update button
-                updateBtn.classList.remove('hidden');
+                // Show update button with animation
+                if (updateBtn) {
+                    updateBtn.classList.remove('hidden');
+                    updateBtn.classList.add('animate-pulse');
+                }
             });
         });
 
@@ -194,12 +209,31 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Success - reload page to update totals
-                        window.location.reload();
+                        // Success - show success message and reload
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
+                        messageDiv.textContent = 'Cart updated!';
+                        document.body.appendChild(messageDiv);
+                        
+                        // Remove message after 2 seconds
+                        setTimeout(() => messageDiv.remove(), 2000);
+                        
+                        // Reload page to update totals
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    // Show error message
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
+                    messageDiv.textContent = 'Update failed. Try again.';
+                    document.body.appendChild(messageDiv);
+                    
+                    setTimeout(() => messageDiv.remove(), 3000);
+                    
                     // Reset button
                     this.textContent = originalText;
                     this.disabled = false;
@@ -238,17 +272,43 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Success - reload page
-                            window.location.reload();
+                            // Show success message
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
+                            messageDiv.textContent = 'Item removed!';
+                            document.body.appendChild(messageDiv);
+                            
+                            setTimeout(() => messageDiv.remove(), 2000);
+                            
+                            // Reload page
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        // Show error message
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
+                        messageDiv.textContent = 'Remove failed. Try again.';
+                        document.body.appendChild(messageDiv);
+                        
+                        setTimeout(() => messageDiv.remove(), 3000);
+                        
                         // Reset button
                         button.textContent = originalText;
                         button.disabled = false;
                     });
                 }
+            });
+        });
+
+        // Add hover effects to all interactive elements
+        const interactiveElements = document.querySelectorAll('a, button, input[type="button"]');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.classList.add('transition-all', 'duration-300');
             });
         });
     });
