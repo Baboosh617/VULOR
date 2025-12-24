@@ -4,11 +4,11 @@
 {% block title %}About - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-16">
+<div class="max-w-6xl mx-auto px-4 py-16 bg-black">
     <!-- SECTION 1: Hero Statement -->
     <div class="text-center mb-20">
-        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-6">Built for everyday confidence.</h1>
-        <p class="text-[#8E8E93] text-lg max-w-2xl mx-auto leading-relaxed">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">BUILT FOR EVERYDAY CONFIDENCE.</h1>
+        <p class="text-[#dc2626] text-lg max-w-2xl mx-auto leading-relaxed tracking-wider">
             VULOR creates minimal streetwear designed to feel good, look sharp, and last.
         </p>
     </div>
@@ -17,18 +17,18 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
         <!-- Left: Text -->
         <div class="space-y-6">
-            <h2 class="text-2xl font-normal text-[#111111]">Why VULOR exists</h2>
-            <div class="space-y-4 text-[#111111]/80 leading-relaxed">
-                <p class="text-[#111111]/80 leading-relaxed">
+            <h2 class="text-2xl font-bold text-white tracking-wide">WHY VULOR EXISTS</h2>
+            <div class="space-y-4 text-[#cccccc] leading-relaxed border-l-2 border-[#dc2626] pl-6 py-2">
+                <p class="leading-relaxed">
                     Welcome to VULOR - where confidence meets comfort.
                 </p>
-                <p class="text-[#111111]/80 leading-relaxed">
+                <p class="leading-relaxed">
                     We believe good clothing doesn't need to shout. VULOR is about clean design, quality materials, and pieces you can wear anywhere — every day.
                 </p>
-                <p class="text-[#111111]/80 leading-relaxed">
+                <p class="leading-relaxed">
                     No trends chasing. No overdesign. Just solid fits that work.
                 </p>
-                <p class="text-[#111111]/80 leading-relaxed">
+                <p class="leading-relaxed">
                     Born from the streets and driven by purpose, Vulor represents the grind, the vision, and the courage to build something from the ground up. We keep our designs original, our prices fair, and our mission simple — to bring quality streetwear that anyone can own, wear, and be proud of.
                 </p>
             </div>
@@ -36,7 +36,7 @@
 
         <!-- Right: Modified Slideshow -->
         <div class="bg-transparent">
-            <div class="slideshow-container relative overflow-hidden">
+            <div class="slideshow-container relative overflow-hidden border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
                 <!-- Slides -->
                 <div class="slide fade">
                     <img src="{% static 'images/logo-1.jpg' %}" 
@@ -63,25 +63,25 @@
                          alt="VULOR Community" class="w-full h-96 object-cover">
                 </div>
 
-                <!-- Minimal Navigation -->
-                <button class="slideshow-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm text-[#111111] p-2 rounded-full hover:bg-white transition-all">
+                <!-- Navigation -->
+                <button class="slideshow-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
-                <button class="slideshow-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm text-[#111111] p-2 rounded-full hover:bg-white transition-all">
+                <button class="slideshow-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
 
-                <!-- Minimal Dots -->
+                <!-- Dots -->
                 <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
                 </div>
             </div>
         </div>
@@ -91,34 +91,37 @@
     <div class="mb-20">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Value 1 -->
-            <div class="text-center">
-                <h3 class="text-[#111111] text-lg font-normal mb-4">Minimal by design</h3>
-                <p class="text-[#8E8E93] text-sm leading-relaxed">
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MINIMAL BY DESIGN</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
                     Clean silhouettes. Thoughtful details. Nothing extra.
                 </p>
-                <p class="text-[#8E8E93] text-sm leading-relaxed mt-2">
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Premium materials and meticulous craftsmanship in every piece we create.
                 </p>
             </div>
 
             <!-- Value 2 -->
-            <div class="text-center">
-                <h3 class="text-[#111111] text-lg font-normal mb-4">Made to last</h3>
-                <p class="text-[#8E8E93] text-sm leading-relaxed">
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MADE TO LAST</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
                     Quality fabrics and construction you can trust.
                 </p>
-                <p class="text-[#8E8E93] text-sm leading-relaxed mt-2">
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Exclusive designs with limited runs to ensure uniqueness and collectibility.
                 </p>
             </div>
 
             <!-- Value 3 -->
-            <div class="text-center">
-                <h3 class="text-[#111111] text-lg font-normal mb-4">Everyday wear</h3>
-                <p class="text-[#8E8E93] text-sm leading-relaxed">
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">EVERYDAY WEAR</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
                     Pieces that fit real life, not just photos.
                 </p>
-                <p class="text-[#8E8E93] text-sm leading-relaxed mt-2">
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Building a global community of streetwear enthusiasts who share our passion.
                 </p>
             </div>
@@ -126,28 +129,28 @@
     </div>
 
     <!-- SECTION 4: Nigerian Context -->
-    <div class="text-center mb-20 max-w-2xl mx-auto">
-        <h2 class="text-2xl font-normal text-[#111111] mb-6">Designed with real life in mind</h2>
-        <p class="text-[#8E8E93] leading-relaxed">
+    <div class="text-center mb-20 max-w-2xl mx-auto border-t border-[#333333] pt-12">
+        <h2 class="text-2xl font-bold text-white mb-6 tracking-wider">DESIGNED WITH REAL LIFE IN MIND</h2>
+        <p class="text-[#cccccc] leading-relaxed">
             From daily movement to long days out, our pieces are made to handle everyday wear — wherever you are.
         </p>
     </div>
 
     <!-- SECTION 5: Soft CTA -->
-    <div class="text-center">
-        <h2 class="text-2xl font-normal text-[#111111] mb-8">Wear it your way.</h2>
+    <div class="text-center border-t border-[#333333] pt-12">
+        <h2 class="text-2xl font-bold text-white mb-8 tracking-wider">WEAR IT YOUR WAY.</h2>
         <a href="{% url 'product_list' %}" 
-           class="inline-block bg-[#FF5A1F] text-[#111111] text-base font-medium py-3 px-8 hover:bg-[#FF5A1F]/90 transition-colors duration-300">
-            Shop VULOR
+           class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider py-3 px-8 transition-all duration-300 border border-[#dc2626]">
+            SHOP VULOR
         </a>
     </div>
 
-    <!-- Our Mission Section (kept from original, restyled) -->
-    <div class="mt-24 pt-12 border-t border-[#8E8E93]/20">
+    <!-- Our Mission Section -->
+    <div class="mt-24 pt-12 border-t border-[#333333]">
         <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-[#111111] text-lg font-normal mb-6">Our Mission</h2>
-            <p class="text-[#8E8E93] leading-relaxed">
-                Join the movement. Own your style. Own Vulor.
+            <h2 class="text-white text-lg font-bold mb-6 tracking-wider">OUR MISSION</h2>
+            <p class="text-[#dc2626] text-xl leading-relaxed tracking-wider font-bold">
+                JOIN THE MOVEMENT. OWN YOUR STYLE. OWN VULOR.
             </p>
         </div>
     </div>
@@ -173,6 +176,12 @@
     animation-name: fade;
     animation-duration: 1.5s;
 }
+
+/* Active dot styling */
+.dot.active {
+    opacity: 1 !important;
+    background-color: #dc2626 !important;
+}
 </style>
 
 <script>
@@ -191,14 +200,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide all slides
         for (let i = 0; i < slides.length; i++) {
             slides[i].style.display = "none";
-            dots[i].classList.remove('opacity-100');
-            dots[i].classList.add('opacity-50');
+            dots[i].classList.remove('active');
+            dots[i].classList.remove('bg-[#dc2626]');
+            dots[i].classList.add('bg-[#333333]');
         }
         
         // Show current slide and update dot
         slides[slideIndex].style.display = "block";
-        dots[slideIndex].classList.remove('opacity-50');
-        dots[slideIndex].classList.add('opacity-100');
+        dots[slideIndex].classList.add('active');
+        dots[slideIndex].classList.remove('bg-[#333333]');
+        dots[slideIndex].classList.add('bg-[#dc2626]');
     }
 
     function nextSlide() {
@@ -215,17 +226,34 @@ document.addEventListener('DOMContentLoaded', function() {
     showSlides(slideIndex);
 
     // Auto-advance every 5 seconds
-    setInterval(nextSlide, 5000);
+    let slideshowInterval = setInterval(nextSlide, 5000);
+
+    // Pause on hover
+    const slideshowContainer = document.querySelector('.slideshow-container');
+    slideshowContainer.addEventListener('mouseenter', () => clearInterval(slideshowInterval));
+    slideshowContainer.addEventListener('mouseleave', () => {
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
 
     // Event listeners for buttons
-    if (nextButton) nextButton.addEventListener('click', nextSlide);
-    if (prevButton) prevButton.addEventListener('click', prevSlide);
+    if (nextButton) nextButton.addEventListener('click', () => {
+        nextSlide();
+        clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
+    if (prevButton) prevButton.addEventListener('click', () => {
+        prevSlide();
+        clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
 
     // Event listeners for dots
     for (let i = 0; i < dots.length; i++) {
         dots[i].addEventListener('click', function() {
             slideIndex = i;
             showSlides(slideIndex);
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(nextSlide, 5000);
         });
     }
 });

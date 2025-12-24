@@ -3,11 +3,11 @@
 {% block title %}Contact - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
+<div class="max-w-6xl mx-auto px-4 py-12 bg-black">
     <!-- SECTION 1: Header -->
     <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-4">CONTACT VULOR</h1>
-        <p class="text-[#8E8E93] text-sm">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">CONTACT VULOR</h1>
+        <p class="text-[#cccccc] text-sm">
             Questions about orders, sizing, or delivery? We've got you.
         </p>
     </div>
@@ -15,13 +15,13 @@
     <!-- SECTION 2: Contact Options -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
         <!-- LEFT: Contact Info -->
-        <div>
+        <div class="space-y-8">
             <div class="space-y-6">
                 <!-- Email -->
                 <div>
-                    <div class="text-[#8E8E93] text-sm mb-1">EMAIL</div>
-                    <div class="text-[#111111] text-base">
-                        <a href="mailto:support@vulor.com" class="hover:text-[#FF5A1F] transition-colors duration-300">
+                    <div class="text-[#666666] text-sm mb-1 tracking-wider">EMAIL</div>
+                    <div class="text-white text-base">
+                        <a href="mailto:support@vulor.com" class="hover:text-[#dc2626] transition-colors duration-300 font-medium">
                             support@vulor.com
                         </a>
                     </div>
@@ -29,9 +29,9 @@
 
                 <!-- Phone / WhatsApp -->
                 <div>
-                    <div class="text-[#8E8E93] text-sm mb-1">PHONE / WHATSAPP</div>
-                    <div class="text-[#111111] text-base">
-                        <a href="https://wa.me/2348000000000" class="hover:text-[#FF5A1F] transition-colors duration-300">
+                    <div class="text-[#666666] text-sm mb-1 tracking-wider">PHONE / WHATSAPP</div>
+                    <div class="text-white text-base">
+                        <a href="https://wa.me/2348000000000" class="hover:text-[#dc2626] transition-colors duration-300 font-medium">
                             +234 800 000 0000
                         </a>
                     </div>
@@ -39,24 +39,34 @@
 
                 <!-- Location -->
                 <div>
-                    <div class="text-[#8E8E93] text-sm mb-1">LOCATION</div>
-                    <div class="text-[#111111] text-base">Kaduna, Nigeria</div>
+                    <div class="text-[#666666] text-sm mb-1 tracking-wider">LOCATION</div>
+                    <div class="text-white text-base font-medium">Kaduna, Nigeria</div>
                 </div>
 
                 <!-- Support Hours -->
                 <div>
-                    <div class="text-[#8E8E93] text-sm mb-1">SUPPORT HOURS</div>
-                    <div class="text-[#111111] text-base">Mon – Sat, 9am – 6pm</div>
+                    <div class="text-[#666666] text-sm mb-1 tracking-wider">SUPPORT HOURS</div>
+                    <div class="text-white text-base font-medium">Mon – Sat, 9am – 6pm</div>
                 </div>
+            </div>
+            
+            <!-- Red accent divider -->
+            <div class="pt-6 border-t border-[#333333]">
+                <p class="text-[#cccccc] text-sm mb-4">Need help faster?</p>
+                <a href="https://wa.me/2348000000000" 
+                   class="inline-flex items-center bg-[#111111] hover:bg-[#dc2626] text-white px-6 py-3 border border-[#333333] hover:border-[#dc2626] transition-all duration-300 group">
+                    <span class="text-sm font-bold tracking-wider">WHATSAPP CHAT</span>
+                    <span class="ml-3 transform group-hover:translate-x-1 transition-transform duration-300 text-[#dc2626] group-hover:text-white">→</span>
+                </a>
             </div>
         </div>
 
         <!-- RIGHT: Contact Form -->
-        <div class="border border-[#8E8E93]/30 p-8 bg-white">
+        <div class="border border-[#333333] p-8 bg-[#111111] hover:border-[#dc2626] transition-all duration-300">
             {% if messages %}
                 {% for message in messages %}
                     {% if 'contact' in message.tags %}
-                    <div class="mb-6 p-4 bg-[#10B981]/10 text-[#111111] text-sm">
+                    <div class="mb-6 p-4 bg-[#dc2626]/10 border border-[#dc2626]/30 text-white text-sm">
                         {{ message }}
                     </div>
                     {% endif %}
@@ -68,44 +78,44 @@
                 
                 <!-- Full Name -->
                 <div>
-                    <label class="block text-[#111111] text-sm mb-2">FULL NAME</label>
+                    <label class="block text-white text-sm mb-2 tracking-wider">FULL NAME</label>
                     <input type="text" name="full_name" required 
-                           class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                           class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 placeholder-[#666666]"
                            placeholder="Your full name">
                 </div>
 
                 <!-- Email Address -->
                 <div>
-                    <label class="block text-[#111111] text-sm mb-2">EMAIL ADDRESS</label>
+                    <label class="block text-white text-sm mb-2 tracking-wider">EMAIL ADDRESS</label>
                     <input type="email" name="email" required 
-                           class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                           class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 placeholder-[#666666]"
                            placeholder="you@example.com">
                 </div>
 
                 <!-- Subject Dropdown -->
                 <div>
-                    <label class="block text-[#111111] text-sm mb-2">SUBJECT</label>
+                    <label class="block text-white text-sm mb-2 tracking-wider">SUBJECT</label>
                     <select name="subject" required 
-                            class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent">
-                        <option value="" disabled selected>Select a subject</option>
-                        <option value="order_issue">Order issue</option>
-                        <option value="delivery">Delivery</option>
-                        <option value="product_question">Product question</option>
-                        <option value="other">Other</option>
+                            class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 appearance-none">
+                        <option value="" disabled selected class="text-[#666666]">Select a subject</option>
+                        <option value="order_issue" class="bg-black text-white">Order issue</option>
+                        <option value="delivery" class="bg-black text-white">Delivery</option>
+                        <option value="product_question" class="bg-black text-white">Product question</option>
+                        <option value="other" class="bg-black text-white">Other</option>
                     </select>
                 </div>
 
                 <!-- Message -->
                 <div>
-                    <label class="block text-[#111111] text-sm mb-2">MESSAGE</label>
+                    <label class="block text-white text-sm mb-2 tracking-wider">MESSAGE</label>
                     <textarea name="message" rows="4" required 
-                              class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                              class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 resize-none placeholder-[#666666]"
                               placeholder="How can we help you?"></textarea>
                 </div>
 
                 <!-- Button -->
                 <button type="submit" 
-                        class="w-full bg-[#FF5A1F] text-[#111111] text-base font-medium py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300">
+                        class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider py-4 px-6 transition-all duration-300 border border-[#dc2626]">
                     SEND MESSAGE
                 </button>
             </form>
@@ -113,19 +123,19 @@
     </div>
 
     <!-- SECTION 3: Order Help Shortcut -->
-    <div class="text-center border-t border-[#8E8E93]/20 pt-12">
-        <p class="text-[#8E8E93] text-sm mb-4">
+    <div class="text-center border-t border-[#333333] pt-12">
+        <p class="text-[#cccccc] text-sm mb-4 tracking-wider">
             Already placed an order?
         </p>
         {% if user.is_authenticated %}
         <a href="{% url 'orders:order_history' %}" 
-           class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
+           class="inline-flex items-center group text-white hover:text-[#dc2626] transition-colors duration-300 text-sm tracking-wider">
             <span>View your order details</span>
             <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
         </a>
         {% else %}
         <a href="{% url 'login' %}" 
-           class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
+           class="inline-flex items-center group text-white hover:text-[#dc2626] transition-colors duration-300 text-sm tracking-wider">
             <span>Log in to view your order details</span>
             <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
         </a>
@@ -134,21 +144,21 @@
 </div>
 
 <!-- Success Modal (hidden by default) -->
-<div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white p-8 max-w-md mx-4 border border-[#8E8E93]/30">
+<div id="successModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+    <div class="bg-[#111111] p-8 max-w-md mx-4 border border-[#333333]">
         <div class="text-center">
             <div class="mb-4">
-                <span class="material-symbols-outlined text-[#10B981] text-4xl">
-                    check_circle
-                </span>
+                <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto">
+                    <span class="text-[#dc2626] text-2xl font-bold">✓</span>
+                </div>
             </div>
-            <h3 class="text-[#111111] text-lg font-normal mb-2">Message sent</h3>
-            <p class="text-[#8E8E93] text-sm mb-6">
+            <h3 class="text-white text-lg font-bold mb-2 tracking-wider">MESSAGE SENT</h3>
+            <p class="text-[#cccccc] text-sm mb-6">
                 We'll get back to you within 24 hours.
             </p>
             <button onclick="closeSuccessModal()" 
-                    class="border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-6 py-2 transition-colors duration-300 text-sm">
-                Close
+                    class="border border-[#333333] text-white hover:border-[#dc2626] hover:text-[#dc2626] px-8 py-3 transition-all duration-300 text-sm tracking-wider font-bold">
+                CLOSE
             </button>
         </div>
     </div>
@@ -197,6 +207,7 @@
             // Show loading state
             submitButton.textContent = 'SENDING...';
             submitButton.disabled = true;
+            submitButton.classList.add('opacity-80');
             
             // In a real implementation, this would be handled by Django backend
             // For now, we'll simulate a successful submission
@@ -204,8 +215,40 @@
             setTimeout(() => {
                 submitButton.textContent = originalText;
                 submitButton.disabled = false;
+                submitButton.classList.remove('opacity-80');
             }, 2000);
         });
     }
+
+    // Custom select styling enhancement
+    document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('focus', function() {
+            this.parentElement.classList.add('ring-1', 'ring-[#dc2626]');
+        });
+        select.addEventListener('blur', function() {
+            this.parentElement.classList.remove('ring-1', 'ring-[#dc2626]');
+        });
+    });
 </script>
+
+<style>
+    /* Custom select dropdown styling */
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1.25rem;
+        padding-right: 2.5rem;
+    }
+    
+    select option {
+        background-color: #111111;
+        color: white;
+    }
+    
+    select option:checked {
+        background-color: #dc2626;
+        color: white;
+    }
+</style>
 {% endblock %}

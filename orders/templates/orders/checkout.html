@@ -3,15 +3,15 @@
 {% block title %}Checkout - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
-    <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-12 text-center">CHECKOUT</h1>
+<div class="max-w-6xl mx-auto px-4 py-12 bg-black">
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-12 text-center tracking-wide">CHECKOUT</h1>
     
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- LEFT COLUMN: Delivery Details -->
         <div>
             <!-- Delivery Information -->
-            <div class="mb-12">
-                <h2 class="text-[#111111] text-lg font-normal mb-6">DELIVERY INFORMATION</h2>
+            <div class="mb-12 border border-[#333333] bg-[#111111] p-8 rounded-lg hover:border-[#dc2626] transition-all duration-300">
+                <h2 class="text-white text-lg font-bold mb-6 tracking-wider">DELIVERY INFORMATION</h2>
                 
                 <form method="POST" id="checkoutForm" action="{% url 'orders:checkout' %}">
                     {% csrf_token %}
@@ -19,127 +19,126 @@
                     <div class="space-y-4">
                         <!-- Full Name -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">FULL NAME</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">FULL NAME</label>
                             <input type="text" name="full_name" required 
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                    placeholder="John Doe">
                         </div>
 
                         <!-- Phone Number -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">PHONE NUMBER</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">PHONE NUMBER</label>
                             <input type="tel" name="phone_number" required 
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                    placeholder="08012345678">
                         </div>
 
                         <!-- Email -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">EMAIL</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">EMAIL</label>
                             <input type="email" name="email" required 
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                    placeholder="you@example.com">
                         </div>
 
                         <!-- Address Line -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">ADDRESS</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">ADDRESS</label>
                             <input type="text" name="address_line" required 
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                    placeholder="Street address, apartment, suite, etc.">
                         </div>
 
                         <!-- State Dropdown -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">STATE</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">STATE</label>
                             <select name="state" required 
                                     id="stateSelect"
-                                    class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent">
-                                <option value="" disabled selected>Select your state</option>
+                                    class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded appearance-none">
+                                <option value="" disabled selected class="text-[#666666]">Select your state</option>
                                 <!-- Kaduna Zone -->
-                                <option value="Kaduna">Kaduna</option>
+                                <option value="Kaduna" class="bg-black text-white">Kaduna</option>
                                 
                                 <!-- North Zone -->
-                                <option value="Kano">Kano</option>
-                                <option value="Zaria">Zaria</option>
-                                <option value="Jos">Jos</option>
-                                <option value="Katsina">Katsina</option>
-                                <option value="Sokoto">Sokoto</option>
-                                <option value="Kebbi">Kebbi</option>
-                                <option value="Zamfara">Zamfara</option>
-                                <option value="Bauchi">Bauchi</option>
-                                <option value="Gombe">Gombe</option>
-                                <option value="Yobe">Yobe</option>
-                                <option value="Borno">Borno</option>
-                                <option value="Adamawa">Adamawa</option>
-                                <option value="Taraba">Taraba</option>
-                                <option value="Niger">Niger</option>
-                                <option value="Plateau">Plateau</option>
-                                <option value="Nasarawa">Nasarawa</option>
-                                <option value="Kogi">Kogi</option>
-                                <option value="Benue">Benue</option>
-                                <option value="Kwara">Kwara</option>
+                                <option value="Kano" class="bg-black text-white">Kano</option>
+                                <option value="Zaria" class="bg-black text-white">Zaria</option>
+                                <option value="Jos" class="bg-black text-white">Jos</option>
+                                <option value="Katsina" class="bg-black text-white">Katsina</option>
+                                <option value="Sokoto" class="bg-black text-white">Sokoto</option>
+                                <option value="Kebbi" class="bg-black text-white">Kebbi</option>
+                                <option value="Zamfara" class="bg-black text-white">Zamfara</option>
+                                <option value="Bauchi" class="bg-black text-white">Bauchi</option>
+                                <option value="Gombe" class="bg-black text-white">Gombe</option>
+                                <option value="Yobe" class="bg-black text-white">Yobe</option>
+                                <option value="Borno" class="bg-black text-white">Borno</option>
+                                <option value="Adamawa" class="bg-black text-white">Adamawa</option>
+                                <option value="Taraba" class="bg-black text-white">Taraba</option>
+                                <option value="Niger" class="bg-black text-white">Niger</option>
+                                <option value="Plateau" class="bg-black text-white">Plateau</option>
+                                <option value="Nasarawa" class="bg-black text-white">Nasarawa</option>
+                                <option value="Kogi" class="bg-black text-white">Kogi</option>
+                                <option value="Benue" class="bg-black text-white">Benue</option>
+                                <option value="Kwara" class="bg-black text-white">Kwara</option>
                                 
                                 <!-- West Zone -->
-                                <option value="Lagos">Lagos</option>
-                                <option value="Ibadan">Ibadan</option>
-                                <option value="Abeokuta">Abeokuta</option>
-                                <option value="Akure">Akure</option>
-                                <option value="Osogbo">Osogbo</option>
-                                <option value="Ado-Ekiti">Ado-Ekiti</option>
-                                <option value="Ilorin">Ilorin</option>
-                                <option value="Oyo">Oyo</option>
-                                <option value="Ogun">Ogun</option>
-                                <option value="Ondo">Ondo</option>
-                                <option value="Osun">Osun</option>
-                                <option value="Ekiti">Ekiti</option>
+                                <option value="Lagos" class="bg-black text-white">Lagos</option>
+                                <option value="Ibadan" class="bg-black text-white">Ibadan</option>
+                                <option value="Abeokuta" class="bg-black text-white">Abeokuta</option>
+                                <option value="Akure" class="bg-black text-white">Akure</option>
+                                <option value="Osogbo" class="bg-black text-white">Osogbo</option>
+                                <option value="Ado-Ekiti" class="bg-black text-white">Ado-Ekiti</option>
+                                <option value="Ilorin" class="bg-black text-white">Ilorin</option>
+                                <option value="Oyo" class="bg-black text-white">Oyo</option>
+                                <option value="Ogun" class="bg-black text-white">Ogun</option>
+                                <option value="Ondo" class="bg-black text-white">Ondo</option>
+                                <option value="Osun" class="bg-black text-white">Osun</option>
+                                <option value="Ekiti" class="bg-black text-white">Ekiti</option>
                                 
                                 <!-- East Zone -->
-                                <option value="Enugu">Enugu</option>
-                                <option value="Owerri">Owerri</option>
-                                <option value="Onitsha">Onitsha</option>
-                                <option value="Awka">Awka</option>
-                                <option value="Abakaliki">Abakaliki</option>
-                                <option value="Umuahia">Umuahia</option>
-                                <option value="Abia">Abia</option>
-                                <option value="Anambra">Anambra</option>
-                                <option value="Ebonyi">Ebonyi</option>
-                                <option value="Enugu">Enugu</option>
-                                <option value="Imo">Imo</option>
+                                <option value="Enugu" class="bg-black text-white">Enugu</option>
+                                <option value="Owerri" class="bg-black text-white">Owerri</option>
+                                <option value="Onitsha" class="bg-black text-white">Onitsha</option>
+                                <option value="Awka" class="bg-black text-white">Awka</option>
+                                <option value="Abakaliki" class="bg-black text-white">Abakaliki</option>
+                                <option value="Umuahia" class="bg-black text-white">Umuahia</option>
+                                <option value="Abia" class="bg-black text-white">Abia</option>
+                                <option value="Anambra" class="bg-black text-white">Anambra</option>
+                                <option value="Ebonyi" class="bg-black text-white">Ebonyi</option>
+                                <option value="Imo" class="bg-black text-white">Imo</option>
                                 
                                 <!-- South-South Zone -->
-                                <option value="Port Harcourt">Port Harcourt</option>
-                                <option value="Uyo">Uyo</option>
-                                <option value="Calabar">Calabar</option>
-                                <option value="Yenagoa">Yenagoa</option>
-                                <option value="Asaba">Asaba</option>
-                                <option value="Warri">Warri</option>
-                                <option value="Benin">Benin</option>
-                                <option value="Akwa Ibom">Akwa Ibom</option>
-                                <option value="Bayelsa">Bayelsa</option>
-                                <option value="Cross River">Cross River</option>
-                                <option value="Delta">Delta</option>
-                                <option value="Edo">Edo</option>
-                                <option value="Rivers">Rivers</option>
+                                <option value="Port Harcourt" class="bg-black text-white">Port Harcourt</option>
+                                <option value="Uyo" class="bg-black text-white">Uyo</option>
+                                <option value="Calabar" class="bg-black text-white">Calabar</option>
+                                <option value="Yenagoa" class="bg-black text-white">Yenagoa</option>
+                                <option value="Asaba" class="bg-black text-white">Asaba</option>
+                                <option value="Warri" class="bg-black text-white">Warri</option>
+                                <option value="Benin" class="bg-black text-white">Benin</option>
+                                <option value="Akwa Ibom" class="bg-black text-white">Akwa Ibom</option>
+                                <option value="Bayelsa" class="bg-black text-white">Bayelsa</option>
+                                <option value="Cross River" class="bg-black text-white">Cross River</option>
+                                <option value="Delta" class="bg-black text-white">Delta</option>
+                                <option value="Edo" class="bg-black text-white">Edo</option>
+                                <option value="Rivers" class="bg-black text-white">Rivers</option>
                             </select>
                         </div>
 
                         <!-- City / LGA -->
                         <div>
-                            <label class="block text-[#111111] text-sm mb-2">CITY / LGA</label>
+                            <label class="block text-white text-sm mb-2 tracking-wider">CITY / LGA</label>
                             <input type="text" name="city" required 
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#8E8E93] transition-colors duration-300 bg-transparent"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                    placeholder="e.g., Ikeja, Kaduna North">
                         </div>
                     </div>
 
                     <!-- Shipping Section -->
-                    <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
-                        <h3 class="text-[#111111] text-sm font-normal mb-4">SHIPPING METHOD</h3>
+                    <div class="mt-8 pt-8 border-t border-[#333333]">
+                        <h3 class="text-white text-sm font-bold mb-4 tracking-wider">SHIPPING METHOD</h3>
                         
                         <!-- Shipping display that updates based on state -->
-                        <div id="shippingDisplay" class="text-[#8E8E93] text-sm italic">
-                            Select your state to calculate shipping
+                        <div id="shippingDisplay" class="text-[#666666] text-sm italic tracking-wider">
+                            SELECT YOUR STATE TO CALCULATE SHIPPING
                         </div>
                         
                         <!-- Hidden shipping fee input -->
@@ -148,14 +147,14 @@
                     </div>
 
                     <!-- Payment Button -->
-                    <div class="mt-8 pt-8 border-t border-[#8E8E93]/20">
+                    <div class="mt-8 pt-8 border-t border-[#333333]">
                         <button type="submit" id="paymentButton"
-                                class="w-full bg-[#FF5A1F] text-[#111111] text-base font-medium py-4 px-6 hover:bg-[#FF5A1F]/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-base font-bold tracking-wider py-4 px-6 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-[#dc2626]">
                             PAY ₦<span id="totalAmount">{{ cart.total_price }}</span>
                         </button>
                         
-                        <p class="text-[#8E8E93] text-xs text-center mt-2">
-                            Secured by Paystack
+                        <p class="text-[#666666] text-xs text-center mt-2 tracking-wider">
+                            SECURED BY PAYSTACK
                         </p>
                     </div>
                 </form>
@@ -164,30 +163,30 @@
 
         <!-- RIGHT COLUMN: Order Summary -->
         <div class="lg:sticky lg:top-8">
-            <div class="border border-[#8E8E93]/30 p-6">
-                <h2 class="text-[#111111] text-lg font-normal mb-6">ORDER SUMMARY</h2>
+            <div class="border border-[#333333] bg-[#111111] p-6 rounded-lg hover:border-[#dc2626] transition-all duration-300">
+                <h2 class="text-white text-lg font-bold mb-6 tracking-wider">ORDER SUMMARY</h2>
                 
                 <!-- Products List -->
                 <div class="space-y-6 mb-8">
                     {% for item in cart.items.all %}
-                    <div class="flex items-start gap-4">
+                    <div class="flex items-start gap-4 group">
                         <!-- Product Thumbnail -->
-                        <div class="w-20 h-20 bg-[#F7F7F7] overflow-hidden flex-shrink-0">
+                        <div class="w-20 h-20 bg-black overflow-hidden flex-shrink-0 border border-[#333333] group-hover:border-[#dc2626] transition-all duration-300">
                             <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                         </div>
                         
                         <!-- Product Details -->
                         <div class="flex-1 min-w-0">
-                            <div class="text-[#111111] text-sm font-normal mb-1">{{ item.product.name }}</div>
+                            <div class="text-white text-sm font-bold mb-1 tracking-wide">{{ item.product.name }}</div>
                             {% if item.size %}
-                            <div class="text-[#8E8E93] text-xs">Size: {{ item.size }}</div>
+                            <div class="text-[#666666] text-xs tracking-wider"><span class="text-[#dc2626] font-bold">SIZE:</span> {{ item.size }}</div>
                             {% endif %}
-                            <div class="text-[#8E8E93] text-xs">Qty: {{ item.quantity }}</div>
+                            <div class="text-[#666666] text-xs tracking-wider"><span class="text-[#dc2626] font-bold">QTY:</span> {{ item.quantity }}</div>
                         </div>
                         
                         <!-- Price -->
-                        <div class="text-[#111111] text-sm font-normal whitespace-nowrap">
+                        <div class="text-white text-sm font-bold whitespace-nowrap tracking-wider">
                             ₦{{ item.total_price }}
                         </div>
                     </div>
@@ -195,25 +194,25 @@
                 </div>
 
                 <!-- Divider -->
-                <div class="border-t border-[#8E8E93]/20 mb-6"></div>
+                <div class="border-t border-[#333333] mb-6"></div>
 
                 <!-- Order Totals -->
                 <div class="space-y-3">
                     <!-- Subtotal -->
-                    <div class="flex justify-between text-[#111111] text-sm">
-                        <span>Subtotal</span>
+                    <div class="flex justify-between text-white text-sm tracking-wider">
+                        <span>SUBTOTAL</span>
                         <span>₦<span id="subtotal">{{ cart.total_price }}</span></span>
                     </div>
                     
                     <!-- Shipping (dynamic) -->
-                    <div class="flex justify-between text-[#111111] text-sm">
-                        <span>Shipping</span>
-                        <span id="shippingLine">Select state</span>
+                    <div class="flex justify-between text-white text-sm tracking-wider">
+                        <span>SHIPPING</span>
+                        <span id="shippingLine" class="text-[#666666]">SELECT STATE</span>
                     </div>
                     
                     <!-- Total -->
-                    <div class="flex justify-between text-[#111111] text-lg font-normal pt-4 border-t border-[#8E8E93]/20">
-                        <span>Total</span>
+                    <div class="flex justify-between text-[#dc2626] text-lg font-bold pt-4 border-t border-[#333333] tracking-wider">
+                        <span>TOTAL</span>
                         <span>₦<span id="orderTotal">{{ cart.total_price }}</span></span>
                     </div>
                 </div>
@@ -222,13 +221,45 @@
             <!-- Continue Shopping Link -->
             <div class="mt-4 text-center">
                 <a href="{% url 'product_list' %}" 
-                   class="inline-block text-[#111111] text-sm hover:text-[#FF5A1F] transition-colors duration-300">
-                    Continue Shopping
+                   class="inline-block text-[#dc2626] hover:text-white text-sm tracking-wider font-bold transition-all duration-300 group">
+                    CONTINUE SHOPPING
+                    <span class="ml-1 transform group-hover:translate-x-1 transition-transform duration-300">→</span>
                 </a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Custom select dropdown styling */
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1.25rem;
+        padding-right: 2.5rem;
+    }
+    
+    select option {
+        background-color: #111111;
+        color: white;
+    }
+    
+    select option:checked {
+        background-color: #dc2626;
+        color: white;
+    }
+
+    /* Animation for shipping display */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .shipping-update {
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -312,7 +343,7 @@
 
         // Calculate totals
         function updateTotals() {
-            const subtotal = parseFloat(subtotalElement.textContent) || 0;
+            const subtotal = parseFloat(subtotalElement.textContent.replace(/,/g, '')) || 0;
             const shippingFee = parseFloat(shippingFeeInput.value) || 0;
             const total = subtotal + shippingFee;
             
@@ -322,6 +353,12 @@
             // Update shipping line display
             if (shippingFee > 0) {
                 shippingLine.innerHTML = `₦${shippingFee.toLocaleString('en-US')}`;
+                shippingLine.classList.remove('text-[#666666]');
+                shippingLine.classList.add('text-white');
+            } else {
+                shippingLine.innerHTML = 'SELECT STATE';
+                shippingLine.classList.remove('text-white');
+                shippingLine.classList.add('text-[#666666]');
             }
         }
 
@@ -335,18 +372,24 @@
                 const deliveryDays = shippingInfo.days;
                 const zone = shippingInfo.zone;
                 
-                // Update shipping display
+                // Update shipping display with animation
+                shippingDisplay.classList.add('shipping-update');
                 shippingDisplay.innerHTML = `
-                    <div class="text-[#111111] text-sm">
-                        Shipping (Kaduna → ${selectedState})
+                    <div class="text-white text-sm tracking-wider">
+                        SHIPPING (KADUNA → ${selectedState.toUpperCase()})
                     </div>
-                    <div class="text-[#111111] text-lg font-normal mt-1">
+                    <div class="text-[#dc2626] text-lg font-bold mt-1 tracking-wider">
                         ₦${shippingPrice.toLocaleString('en-US')}
                     </div>
-                    <div class="text-[#8E8E93] text-xs mt-1">
-                        Estimated delivery: ${deliveryDays} business days
+                    <div class="text-[#666666] text-xs mt-1 tracking-wider">
+                        ESTIMATED DELIVERY: ${deliveryDays} BUSINESS DAYS
                     </div>
                 `;
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    shippingDisplay.classList.remove('shipping-update');
+                }, 300);
                 
                 // Update hidden inputs
                 shippingFeeInput.value = shippingPrice;
@@ -357,14 +400,21 @@
                 
                 // Enable payment button
                 paymentButton.disabled = false;
+                paymentButton.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
                 // Reset if no state selected
-                shippingDisplay.innerHTML = '<div class="text-[#8E8E93] text-sm italic">Select your state to calculate shipping</div>';
+                shippingDisplay.classList.add('shipping-update');
+                shippingDisplay.innerHTML = '<div class="text-[#666666] text-sm italic tracking-wider">SELECT YOUR STATE TO CALCULATE SHIPPING</div>';
+                
+                setTimeout(() => {
+                    shippingDisplay.classList.remove('shipping-update');
+                }, 300);
+                
                 shippingFeeInput.value = 0;
                 shippingZoneInput.value = '';
-                shippingLine.innerHTML = 'Select state';
                 updateTotals();
                 paymentButton.disabled = true;
+                paymentButton.classList.add('opacity-50', 'cursor-not-allowed');
             }
         });
 
@@ -375,7 +425,27 @@
             
             if (!state || !shippingZones[state]) {
                 e.preventDefault();
-                alert('Please select a valid state to calculate shipping.');
+                
+                // Add visual feedback
+                stateSelect.classList.add('border-[#dc2626]', 'ring-2', 'ring-[#dc2626]/50');
+                setTimeout(() => {
+                    stateSelect.classList.remove('border-[#dc2626]', 'ring-2', 'ring-[#dc2626]/50');
+                }, 2000);
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'mt-4 p-3 bg-[#dc2626]/10 border border-[#dc2626]/30 text-[#dc2626] text-sm rounded tracking-wider';
+                errorDiv.textContent = 'PLEASE SELECT A VALID STATE TO CALCULATE SHIPPING.';
+                
+                // Remove previous error if exists
+                const existingError = checkoutForm.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                errorDiv.classList.add('error-message');
+                shippingDisplay.parentElement.insertBefore(errorDiv, shippingDisplay);
+                
                 stateSelect.focus();
                 return false;
             }
@@ -384,8 +454,41 @@
             // For now, let it proceed to Paystack
         });
 
+        // Add input focus effects
+        const inputs = checkoutForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('ring-1', 'ring-[#dc2626]', 'rounded');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('ring-1', 'ring-[#dc2626]', 'rounded');
+            });
+        });
+
         // Initialize
         updateTotals();
+        
+        // Add loading state to payment button
+        paymentButton.addEventListener('click', function() {
+            if (!this.disabled) {
+                const originalText = this.innerHTML;
+                this.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                `;
+                this.disabled = true;
+                
+                // In a real application, this would be handled by the form submission
+                // Reset after 3 seconds for demo purposes
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 3000);
+            }
+        });
     });
 </script>
 {% endblock %}

@@ -35,6 +35,25 @@
         }
     }
     
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+        }
+    }
+    
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
     .animate-float-in {
         animation: floatIn 0.8s ease-out forwards;
         opacity: 0;
@@ -50,155 +69,74 @@
         opacity: 0;
     }
     
-    .glass-effect {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    .form-shadow {
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1),
+                    0 10px 25px rgba(0, 0, 0, 0.3);
+        animation: glassFloat 6s ease-in-out infinite;
     }
     
-    .image-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 16px;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .image-container:hover {
-        transform: scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    }
-    
-    .image-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.7s;
-        z-index: 1;
-    }
-    
-    .image-container:hover::before {
-        left: 100%;
-    }
-    
-    .image-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-        padding: 20px;
-        color: white;
-        transform: translateY(100%);
-        transition: transform 0.4s ease;
-        opacity: 0;
-    }
-    
-    .image-container:hover .image-overlay {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    
-    .pulse-button {
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.4);
-        }
-        70% {
-            box-shadow: 0 0 0 10px rgba(255, 90, 31, 0);
-        }
-        100% {
-            box-shadow: 0 0 0 0 rgba(255, 90, 31, 0);
-        }
+    .form-shadow:hover {
+        box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15),
+                    0 15px 30px rgba(0, 0, 0, 0.4);
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
     }
 </style>
 
-<div class="min-h-screen bg-[#F7F7F7] flex flex-col lg:flex-row">
-    <!-- Left: Hero Image with glassmorphism effects -->
-    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
-        <div class="max-w-md w-full text-center animate-float-in">
-            <p class="text-[#111111] text-lg font-normal mb-4">Step into your fit.</p>
+<div class="min-h-screen bg-black flex items-center justify-center p-4">
+    <!-- Single centered form container -->
+    <div class="max-w-md w-full animate-float-in">
+        <!-- Form card with drop shadow and border -->
+        <div class="form-shadow bg-[#111111] border border-[#333333] p-8 rounded-lg hover:border-[#dc2626] transition-all duration-500 relative overflow-hidden">
+            <!-- Red corner accents -->
+            <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-[#dc2626] rounded-tl-lg"></div>
+            <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#dc2626] rounded-tr-lg"></div>
+            <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#dc2626] rounded-bl-lg"></div>
+            <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-[#dc2626] rounded-br-lg"></div>
             
-            <!-- Glassmorphism container for image -->
-            <div class="glass-effect p-6 rounded-2xl mb-6 transform transition-all duration-300 hover:scale-[1.02]">
-                <div class="image-container">
-                    <img src="{% static 'images/logo-3.jpg' %}" 
-                         alt="VULOR Collection" 
-                         class="w-full h-64 lg:h-80 object-cover rounded-lg">
-                    
-                    <!-- Interactive overlay -->
-                    <div class="image-overlay">
-                        <p class="text-sm font-light">Premium streetwear collection</p>
-                        <p class="text-xs mt-1 opacity-80">Hover to reveal</p>
-                    </div>
+            <!-- VULOR brand mark -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-[#dc2626] text-2xl font-bold">V</span>
                 </div>
                 
-                <!-- Interactive badge -->
-                <div class="mt-4 flex items-center justify-center space-x-2">
-                    <div class="w-3 h-3 rounded-full bg-[#FF5A1F] animate-pulse"></div>
-                    <span class="text-[#8E8E93] text-sm">Featured Collection</span>
+                <!-- Tagline & Header -->
+                <div class="text-center relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#dc2626]/10 to-transparent animate-shimmer" 
+                         style="background-size: 200px 100%; animation: shimmer 3s infinite linear;"></div>
+                    <p class="text-[#dc2626] text-sm mb-2 relative tracking-wider font-bold">STEP INTO YOUR FIT</p>
+                    <h2 class="text-white text-3xl font-bold tracking-wide relative">SIGN IN TO VULOR</h2>
                 </div>
-            </div>
-            
-            <p class="text-[#8E8E93] text-sm animate-float-in-delay">Premium streetwear designed for everyday confidence</p>
-            
-            <!-- Animated stats -->
-            <div class="mt-6 flex justify-center space-x-6 animate-float-in-delay-2">
-                <div class="text-center">
-                    <div class="text-[#111111] text-xl font-normal">500+</div>
-                    <div class="text-[#8E8E93] text-xs">Style Enthusiasts</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-[#111111] text-xl font-normal">98%</div>
-                    <div class="text-[#8E8E93] text-xs">Satisfaction</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right: Login Form -->
-    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
-        <div class="max-w-md w-full space-y-8 animate-float-in">
-            <!-- Tagline & Header with shimmer effect -->
-            <div class="text-center relative">
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF5A1F]/10 to-transparent animate-shimmer" 
-                     style="background-size: 200px 100%; animation: shimmer 3s infinite linear;"></div>
-                <p class="text-[#8E8E93] text-sm mb-2 relative">Step into your fit.</p>
-                <h2 class="text-[#111111] text-3xl font-normal relative">Sign in to VULOR</h2>
+                
+                <p class="text-[#cccccc] text-sm mt-2 animate-float-in-delay">
+                    Premium streetwear designed for everyday confidence
+                </p>
             </div>
             
             <!-- Error Messages -->
             {% if form.errors %}
-            <div class="bg-red-50 border border-red-200 text-[#111111] p-4 rounded-lg text-sm animate-float-in-delay">
+            <div class="bg-[#dc2626]/10 border border-[#dc2626]/30 text-white p-4 rounded-lg text-sm mb-6 animate-float-in-delay">
                 <p>Your username and password didn't match. Please try again.</p>
             </div>
             {% endif %}
 
             <!-- Login Form -->
-            <form class="mt-8 space-y-6" method="POST" action="{% url 'account_login' %}">
+            <form class="space-y-6" method="POST" action="{% url 'account_login' %}">
                 {% csrf_token %}
                 <input type="hidden" name="remember" value="true">
                 
                 <div class="space-y-4 animate-float-in-delay">
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="username" class="block text-[#111111] text-sm mb-2">Email</label>
+                        <label for="username" class="block text-white text-sm mb-2 tracking-wider">EMAIL</label>
                         <input id="username" name="username" type="text" required 
-                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                placeholder="you@example.com">
                     </div>
                     
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="password" class="block text-[#111111] text-sm mb-2">Password</label>
+                        <label for="password" class="block text-white text-sm mb-2 tracking-wider">PASSWORD</label>
                         <input id="password" name="password" type="password" required 
-                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                placeholder="••••••••">
                     </div>
                 </div>
@@ -206,8 +144,8 @@
                 <!-- Forgot Password Link -->
                 <div class="text-right animate-float-in-delay">
                     <a href="{% url 'account_reset_password' %}" 
-                       class="text-[#8E8E93] text-sm hover:text-[#FF5A1F] transition-all duration-300 transform hover:translate-x-1 inline-flex items-center">
-                        Forgot password? 
+                       class="text-[#666666] text-sm hover:text-[#dc2626] transition-all duration-300 transform hover:translate-x-1 inline-flex items-center tracking-wider">
+                        FORGOT PASSWORD? 
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
@@ -217,22 +155,48 @@
                 <!-- Login Button with pulse animation -->
                 <div class="animate-float-in-delay-2">
                     <button type="submit" 
-                            class="w-full bg-[#FF5A1F] text-[#111111] text-sm font-medium uppercase py-3 px-4 hover:bg-[#FF5A1F]/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5A1F] pulse-button transform hover:scale-[1.02] active:scale-[0.98] rounded-lg">
-                        Login
+                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] pulse-button transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden">
+                        LOGIN
                     </button>
                 </div>
-                
-                <!-- Signup Link -->
-                <div class="text-center animate-float-in-delay-2">
-                    <p class="text-[#8E8E93] text-sm">
-                        Don't have an account? 
-                        <a href="{% url 'account_signup' %}" 
-                           class="text-[#111111] hover:text-[#FF5A1F] font-medium transition-all duration-300 transform hover:scale-105 inline-block">
-                            Sign up here
-                        </a>
-                    </p>
-                </div>
             </form>
+            
+            <!-- Divider -->
+            <div class="my-6 animate-float-in-delay-2">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-[#333333]"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-[#111111] text-[#666666] tracking-wider">OR</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Signup Link -->
+            <div class="text-center animate-float-in-delay-2">
+                <p class="text-[#cccccc] text-sm tracking-wider">
+                    DON'T HAVE AN ACCOUNT?
+                    <a href="{% url 'account_signup' %}" 
+                       class="text-[#dc2626] hover:text-white font-bold transition-all duration-300 transform hover:scale-105 inline-block ml-2 tracking-wider">
+                        SIGN UP HERE
+                    </a>
+                </p>
+            </div>
+            
+            <!-- Community stats -->
+            <div class="mt-8 pt-6 border-t border-[#333333] animate-float-in-delay-2">
+                <div class="flex justify-center space-x-8">
+                    <div class="text-center">
+                        <div class="text-[#dc2626] text-xl font-bold tracking-wider">500+</div>
+                        <div class="text-[#666666] text-xs tracking-wider">STYLE ENTHUSIASTS</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[#dc2626] text-xl font-bold tracking-wider">98%</div>
+                        <div class="text-[#666666] text-xs tracking-wider">SATISFACTION</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -245,10 +209,14 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
             this.parentElement.classList.add('scale-[1.02]');
+            this.parentElement.classList.add('ring-1');
+            this.parentElement.classList.add('ring-[#dc2626]');
         });
         
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('scale-[1.02]');
+            this.parentElement.classList.remove('ring-1');
+            this.parentElement.classList.remove('ring-[#dc2626]');
         });
     });
     
@@ -265,13 +233,14 @@ document.addEventListener('DOMContentLoaded', function() {
             ripple.style.cssText = `
                 position: absolute;
                 border-radius: 50%;
-                background: rgba(255, 255, 255, 0.7);
+                background: rgba(255, 255, 255, 0.4);
                 transform: scale(0);
                 animation: ripple 0.6s linear;
                 width: ${size}px;
                 height: ${size}px;
                 top: ${y}px;
                 left: ${x}px;
+                pointer-events: none;
             `;
             
             this.appendChild(ripple);
@@ -282,21 +251,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add CSS for ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
+    // Form container hover effect
+    const formContainer = document.querySelector('.form-shadow');
+    if (formContainer) {
+        // Initial animation delay
+        setTimeout(() => {
+            formContainer.style.opacity = '1';
+        }, 300);
+    }
+    
+    // Add CSS for ripple animation if not already present
+    if (!document.querySelector('style[data-ripple]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-ripple', 'true');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
             }
-        }
-        button[type="submit"] {
-            position: relative;
-            overflow: hidden;
-        }
-    `;
-    document.head.appendChild(style);
+            .pulse-button {
+                animation: pulse 2s infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 });
 </script>
 {% endblock %}

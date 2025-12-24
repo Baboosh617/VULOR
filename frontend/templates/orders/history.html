@@ -3,11 +3,11 @@
 {% block title %}Order History - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
+<div class="max-w-6xl mx-auto px-4 py-12 bg-black">
     <!-- Page Header -->
-    <div class="mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-[#111111] mb-2">ORDER HISTORY</h1>
-        <p class="text-[#8E8E93] text-sm">Track and review your past orders</p>
+    <div class="mb-12 border-b border-[#333333] pb-6">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 tracking-wide">ORDER HISTORY</h1>
+        <p class="text-[#dc2626] text-sm tracking-wider font-bold">TRACK AND REVIEW YOUR PAST ORDERS</p>
     </div>
 
     {% if orders %}
@@ -15,14 +15,14 @@
     <div class="space-y-4">
         {% for order in orders %}
         <!-- Order Card - Simple horizontal row -->
-        <div class="border border-[#8E8E93]/30 py-6 px-6 hover:border-[#8E8E93]/50 transition-colors duration-300">
+        <div class="border border-[#333333] bg-[#111111] py-6 px-6 hover:border-[#dc2626] transition-all duration-300 hover:bg-[#0a0a0a] group">
             <div class="flex flex-col md:flex-row md:items-center gap-6">
                 <!-- Left: Order ID and Date -->
                 <div class="md:w-1/4">
-                    <div class="text-[#111111] text-base font-normal mb-1">
+                    <div class="text-white text-base font-bold mb-1 tracking-wider">
                         #{{ order.order_number|slice:":8" }}
                     </div>
-                    <div class="text-[#8E8E93] text-sm">
+                    <div class="text-[#666666] text-sm tracking-wider">
                         {{ order.created_at|date:"M j, Y" }}
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                 <div class="md:w-2/4 flex items-center">
                     <div class="flex -space-x-2">
                         {% for item in order.items.all|slice:":3" %}
-                        <div class="w-12 h-12 bg-[#F7F7F7] overflow-hidden rounded border border-[#F7F7F7]">
+                        <div class="w-12 h-12 bg-black overflow-hidden rounded border border-[#333333] group-hover:border-[#dc2626] transition-all duration-300">
                             <img src="{{ item.product.image.url }}" 
                                  alt="{{ item.product.name }}"
                                  class="w-full h-full object-cover">
@@ -39,43 +39,43 @@
                         {% endfor %}
                         
                         {% if order.items.count > 3 %}
-                        <div class="w-12 h-12 bg-[#F7F7F7] rounded border border-[#F7F7F7] flex items-center justify-center">
-                            <span class="text-[#8E8E93] text-xs">+{{ order.items.count|add:"-3" }}</span>
+                        <div class="w-12 h-12 bg-black rounded border border-[#333333] flex items-center justify-center group-hover:border-[#dc2626] transition-all duration-300">
+                            <span class="text-[#dc2626] text-xs font-bold">+{{ order.items.count|add:"-3" }}</span>
                         </div>
                         {% endif %}
                     </div>
                     
                     {% if order.items.count == 0 %}
-                    <div class="text-[#8E8E93] text-sm italic">No items</div>
+                    <div class="text-[#666666] text-sm italic tracking-wider">NO ITEMS</div>
                     {% endif %}
                 </div>
 
                 <!-- Right: Total Price and Status Badge -->
                 <div class="md:w-1/4">
-                    <div class="text-[#111111] text-lg font-normal mb-2">
+                    <div class="text-[#dc2626] text-lg font-bold mb-2 tracking-wider">
                         ₦{{ order.total_amount }}
                     </div>
                     
                     <!-- Status Badge -->
                     {% if order.status == 'delivered' %}
-                    <span class="inline-block bg-[#10B981]/10 text-[#10B981] text-xs px-3 py-1 rounded-full">
-                        Delivered
+                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
+                        DELIVERED
                     </span>
                     {% elif order.status == 'shipped' %}
-                    <span class="inline-block bg-[#3B82F6]/10 text-[#3B82F6] text-xs px-3 py-1 rounded-full">
-                        Shipped
+                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
+                        SHIPPED
                     </span>
                     {% elif order.status == 'processing' %}
-                    <span class="inline-block bg-[#8E8E93]/10 text-[#8E8E93] text-xs px-3 py-1 rounded-full">
-                        Processing
+                    <span class="inline-block bg-[#333333] text-[#666666] text-xs px-3 py-1 rounded-full border border-[#333333] tracking-wider font-bold">
+                        PROCESSING
                     </span>
                     {% elif order.status == 'cancelled' %}
-                    <span class="inline-block bg-[#EF4444]/10 text-[#EF4444] text-xs px-3 py-1 rounded-full">
-                        Cancelled
+                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
+                        CANCELLED
                     </span>
                     {% else %}
-                    <span class="inline-block bg-[#8E8E93]/10 text-[#8E8E93] text-xs px-3 py-1 rounded-full">
-                        {{ order.get_status_display }}
+                    <span class="inline-block bg-[#333333] text-[#666666] text-xs px-3 py-1 rounded-full border border-[#333333] tracking-wider font-bold">
+                        {{ order.get_status_display|upper }}
                     </span>
                     {% endif %}
                 </div>
@@ -83,29 +83,32 @@
                 <!-- Far Right: View Order Button -->
                 <div class="md:w-1/4 text-right">
                     <a href="{% url 'orders:order_detail' order.order_number %}" 
-                       class="inline-flex items-center text-[#111111] hover:text-[#FF5A1F] transition-colors duration-300 text-sm">
-                        View Order
-                        <span class="ml-1 transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                       class="inline-flex items-center text-[#dc2626] hover:text-white transition-all duration-300 text-sm tracking-wider group">
+                        VIEW ORDER
+                        <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300 text-[#dc2626] group-hover:text-white">→</span>
                     </a>
                 </div>
             </div>
+            
+            <!-- Red accent line on hover -->
+            <div class="h-0.5 bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-4"></div>
         </div>
         {% endfor %}
     </div>
     {% else %}
     <!-- Empty State -->
-    <div class="text-center py-20">
+    <div class="text-center py-20 border border-[#333333] bg-[#111111] rounded-lg">
         <div class="mb-6">
-            <span class="material-symbols-outlined text-[#8E8E93] text-6xl">
-                receipt_long
-            </span>
+            <div class="w-20 h-20 border-2 border-[#333333] rounded-full flex items-center justify-center mx-auto">
+                <span class="text-[#dc2626] text-3xl font-bold">0</span>
+            </div>
         </div>
-        <h2 class="text-[#111111] text-2xl font-normal mb-4">No orders yet</h2>
-        <p class="text-[#8E8E93] mb-8 max-w-md mx-auto">
-            When you place an order, it'll show up here.
+        <h2 class="text-white text-2xl font-bold mb-4 tracking-wider">NO ORDERS YET</h2>
+        <p class="text-[#cccccc] mb-8 max-w-md mx-auto tracking-wider">
+            WHEN YOU PLACE AN ORDER, IT'LL SHOW UP HERE.
         </p>
         <a href="{% url 'product_list' %}" 
-           class="inline-block border border-[#8E8E93]/30 text-[#111111] hover:border-[#8E8E93] hover:text-[#FF5A1F] px-8 py-3 transition-colors duration-300 text-sm tracking-wide">
+           class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-wider font-bold">
             START SHOPPING
         </a>
     </div>
@@ -113,15 +116,40 @@
 </div>
 
 <style>
-    /* Hover effect for the entire order card */
-    .border-\[\#8E8E93\]\/30:hover {
-        transform: translateY(-1px);
-        transition: all 0.3s ease;
+    /* Custom animations for order cards */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
+
+    /* Stagger animation for order cards */
+    .order-card {
+        animation: slideIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .order-card:nth-child(1) { animation-delay: 0.1s; }
+    .order-card:nth-child(2) { animation-delay: 0.2s; }
+    .order-card:nth-child(3) { animation-delay: 0.3s; }
+    .order-card:nth-child(4) { animation-delay: 0.4s; }
+    .order-card:nth-child(5) { animation-delay: 0.5s; }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Add staggered animation to order cards
+        const orderCards = document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]');
+        orderCards.forEach((card, index) => {
+            card.classList.add('order-card');
+            card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+        });
+
         // Add hover effect to view order links
         document.querySelectorAll('a[href*="order_detail"]').forEach(link => {
             link.addEventListener('mouseenter', function() {
@@ -136,6 +164,19 @@
                 if (arrow) {
                     arrow.style.transform = 'translateX(0)';
                 }
+            });
+        });
+
+        // Add interactive effect to order cards
+        document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 10px 25px rgba(220, 38, 38, 0.1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
             });
         });
     });

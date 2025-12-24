@@ -33,6 +33,24 @@
         75% { transform: translateX(5px); }
     }
     
+    @keyframes glassFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -200px 0;
+        }
+        100% {
+            background-position: 200px 0;
+        }
+    }
+    
     .animate-float-in {
         animation: floatIn 0.8s ease-out forwards;
         opacity: 0;
@@ -48,209 +66,151 @@
         opacity: 0;
     }
     
-    .glass-effect {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    .form-shadow {
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1),
+                    0 10px 25px rgba(0, 0, 0, 0.3);
+        animation: glassFloat 6s ease-in-out infinite;
     }
     
-    .image-container-3d {
-        position: relative;
-        transform-style: preserve-3d;
-        perspective: 1000px;
-        transition: transform 0.5s ease;
-    }
-    
-    .image-container-3d:hover {
-        transform: rotateY(5deg) rotateX(5deg);
-    }
-    
-    .image-container-3d img {
-        transition: transform 0.5s ease;
-    }
-    
-    .image-container-3d:hover img {
-        transform: scale(1.05);
-    }
-    
-    .parallax-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 16px;
-    }
-    
-    .parallax-container img {
-        transition: transform 0.5s ease-out;
-    }
-    
-    .parallax-container:hover img {
-        transform: scale(1.1);
-    }
-    
-    .shake {
-        animation: shake 0.5s ease-in-out;
-    }
-    
-    .password-strength {
-        height: 4px;
+    .form-shadow:hover {
+        box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15),
+                    0 15px 30px rgba(0, 0, 0, 0.4);
+        transform: translateY(-5px);
         transition: all 0.3s ease;
-        animation: progressFill 0.5s ease-out forwards;
     }
     
-    /* Strength indicator colors */
-    .strength-0 { width: 20%; background-color: #ef4444; } /* Red */
-    .strength-1 { width: 40%; background-color: #f97316; } /* Orange */
-    .strength-2 { width: 60%; background-color: #eab308; } /* Yellow */
-    .strength-3 { width: 80%; background-color: #22c55e; } /* Green */
-    .strength-4 { width: 100%; background-color: #10b981; } /* Emerald */
+    /* Strength indicator colors - updated to red theme */
+    .strength-0 { width: 20%; background-color: #dc2626; } /* Red */
+    .strength-1 { width: 40%; background-color: #b91c1c; } /* Darker red */
+    .strength-2 { width: 60%; background-color: #991b1b; } /* Even darker */
+    .strength-3 { width: 80%; background-color: #7f1d1d; } /* Dark red */
+    .strength-4 { width: 100%; background-color: #450a0a; } /* Darkest red */
 </style>
 
-<div class="min-h-screen bg-[#F7F7F7] flex flex-col lg:flex-row">
-    <!-- Left: Hero Image with 3D and parallax effects -->
-    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
-        <div class="max-w-md w-full text-center animate-float-in">
-            <h3 class="text-[#111111] text-2xl font-normal mb-4">Create Your Account</h3>
+<div class="min-h-screen bg-black flex items-center justify-center p-4">
+    <!-- Single centered form container -->
+    <div class="max-w-md w-full animate-float-in">
+        <!-- Form card with drop shadow and border -->
+        <div class="form-shadow bg-[#111111] border border-[#333333] p-8 rounded-lg hover:border-[#dc2626] transition-all duration-500 relative overflow-hidden">
+            <!-- Red corner accents -->
+            <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-[#dc2626] rounded-tl-lg"></div>
+            <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#dc2626] rounded-tr-lg"></div>
+            <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#dc2626] rounded-bl-lg"></div>
+            <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-[#dc2626] rounded-br-lg"></div>
             
-            <!-- Glassmorphism container with 3D effect -->
-            <div class="glass-effect p-6 rounded-2xl mb-6">
-                <div class="image-container-3d parallax-container">
-                    <img src="{% static 'images/logo-2.jpg' %}" 
-                         alt="VULOR Design Process" 
-                         class="w-full h-64 lg:h-80 object-cover rounded-lg"
-                         data-parallax-speed="0.1">
-                    
-                    <!-- Interactive design elements -->
-                    <div class="absolute top-4 right-4 glass-effect rounded-full p-2">
-                        <div class="w-8 h-8 rounded-full bg-[#FF5A1F]/20 flex items-center justify-center">
-                            <span class="text-[#FF5A1F] text-sm">★</span>
-                        </div>
-                    </div>
+            <!-- VULOR brand mark -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-[#dc2626] text-2xl font-bold">V</span>
                 </div>
                 
-                <!-- Interactive design badge -->
-                <div class="mt-4 flex items-center justify-center space-x-3">
-                    <div class="flex space-x-1">
-                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse"></div>
-                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse delay-75"></div>
-                        <div class="w-2 h-2 rounded-full bg-[#FF5A1F] animate-pulse delay-150"></div>
+                <!-- Header -->
+                <div class="text-center relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#dc2626]/10 to-transparent animate-shimmer" 
+                         style="background-size: 200px 100%; animation: shimmer 3s infinite linear;"></div>
+                    <h2 class="text-white text-3xl font-bold tracking-wide relative">JOIN VULOR</h2>
+                    <p class="text-[#dc2626] text-sm mt-2 tracking-wider font-bold relative">CREATE YOUR PREMIUM STREETWEAR ACCOUNT</p>
+                </div>
+                
+                <!-- Animated benefits -->
+                <div class="mt-6 space-y-3 animate-float-in-delay">
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
+                        <span class="text-[#cccccc] text-sm tracking-wider">Early access to new collections</span>
                     </div>
-                    <span class="text-[#8E8E93] text-sm">Exclusive Designs</span>
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
+                        <span class="text-[#cccccc] text-sm tracking-wider">Member-only discounts</span>
+                    </div>
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
+                        <span class="text-[#cccccc] text-sm tracking-wider">Priority customer support</span>
+                    </div>
                 </div>
-            </div>
-            
-            <p class="text-[#8E8E93] text-sm animate-float-in-delay">Join our community of premium streetwear enthusiasts</p>
-            
-            <!-- Animated benefits -->
-            <div class="mt-6 space-y-3 animate-float-in-delay-2">
-                <div class="flex items-center justify-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
-                    <span class="text-[#111111] text-sm">Early access to new collections</span>
-                </div>
-                <div class="flex items-center justify-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
-                    <span class="text-[#111111] text-sm">Member-only discounts</span>
-                </div>
-                <div class="flex items-center justify-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
-                    <span class="text-[#111111] text-sm">Priority customer support</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right: Signup Form with password strength indicator -->
-    <div class="lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
-        <div class="max-w-md w-full space-y-8 animate-float-in">
-            <!-- Header -->
-            <div class="text-center">
-                <h2 class="text-[#111111] text-3xl font-normal">Join VULOR</h2>
-                <p class="text-[#8E8E93] text-sm mt-2">Create your premium streetwear account</p>
             </div>
             
             <!-- Form Errors -->
             {% if form.errors %}
-            <div class="bg-red-50 border border-red-200 text-[#111111] p-4 rounded-lg text-sm animate-float-in-delay">
-                <strong class="block mb-2">Please fix the following errors:</strong>
+            <div class="bg-[#dc2626]/10 border border-[#dc2626]/30 text-white p-4 rounded-lg text-sm mb-6 animate-float-in-delay">
+                <strong class="block mb-2 tracking-wider">PLEASE FIX THE FOLLOWING ERRORS:</strong>
                 <ul class="space-y-1">
                     {% for field in form %}
                         {% for error in field.errors %}
-                            <li class="text-red-600">• {{ field.label }}: {{ error }}</li>
+                            <li class="text-[#dc2626]">• {{ field.label }}: {{ error }}</li>
                         {% endfor %}
                     {% endfor %}
                     {% for error in form.non_field_errors %}
-                        <li class="text-red-600">• {{ error }}</li>
+                        <li class="text-[#dc2626]">• {{ error }}</li>
                     {% endfor %}
                 </ul>
             </div>
             {% endif %}
 
             <!-- Signup Form -->
-            <form class="mt-8 space-y-6" method="POST" action="{% url 'account_signup' %}" id="signupForm">
+            <form class="space-y-6" method="POST" action="{% url 'account_signup' %}" id="signupForm">
                 {% csrf_token %}
                 
                 <div class="space-y-4 animate-float-in-delay">
                     <!-- Name Field -->
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_name" class="block text-[#111111] text-sm mb-2">Name</label>
+                        <label for="id_name" class="block text-white text-sm mb-2 tracking-wider">NAME</label>
                         <input type="text" name="name" id="id_name" required
-                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                placeholder="John Doe"
                                value="{{ form.name.value|default:'' }}">
                     </div>
                     
                     <!-- Email Field -->
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_email" class="block text-[#111111] text-sm mb-2">Email</label>
+                        <label for="id_email" class="block text-white text-sm mb-2 tracking-wider">EMAIL</label>
                         <input type="email" name="email" id="id_email" required
-                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                placeholder="you@example.com"
                                value="{{ form.email.value|default:'' }}">
                     </div>
                     
                     <!-- Password Field with Strength Indicator -->
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_password1" class="block text-[#111111] text-sm mb-2">Password</label>
+                        <label for="id_password1" class="block text-white text-sm mb-2 tracking-wider">PASSWORD</label>
                         <div class="relative">
                             <input type="password" name="password1" id="id_password1" required
-                                   class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)] pr-10"
+                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666] pr-10"
                                    placeholder="Create a password"
                                    oninput="checkPasswordStrength(this.value)">
                             <button type="button" onclick="togglePassword('id_password1')"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8E8E93] hover:text-[#111111] transition-colors duration-300">
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#666666] hover:text-[#dc2626] transition-colors duration-300">
                                 👁️
                             </button>
                         </div>
                         
                         <!-- Password Strength Indicator -->
                         <div class="mt-2 space-y-2">
-                            <div class="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-1 w-full bg-[#333333] rounded-full overflow-hidden">
                                 <div id="passwordStrength" class="password-strength strength-0"></div>
                             </div>
-                            <div id="strengthText" class="text-xs text-[#8E8E93]">Very weak</div>
+                            <div id="strengthText" class="text-xs text-[#666666] tracking-wider">VERY WEAK</div>
                             
                             <!-- Password Requirements -->
                             <div id="passwordRequirements" class="space-y-1 mt-2">
                                 <div class="flex items-center text-xs" id="reqLength">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
-                                    <span class="text-[#8E8E93]">At least 8 characters</span>
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
+                                    <span class="text-[#666666] tracking-wider">At least 8 characters</span>
                                 </div>
                                 <div class="flex items-center text-xs" id="reqUppercase">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
-                                    <span class="text-[#8E8E93]">One uppercase letter</span>
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
+                                    <span class="text-[#666666] tracking-wider">One uppercase letter</span>
                                 </div>
                                 <div class="flex items-center text-xs" id="reqLowercase">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
-                                    <span class="text-[#8E8E93]">One lowercase letter</span>
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
+                                    <span class="text-[#666666] tracking-wider">One lowercase letter</span>
                                 </div>
                                 <div class="flex items-center text-xs" id="reqNumber">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
-                                    <span class="text-[#8E8E93]">One number</span>
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
+                                    <span class="text-[#666666] tracking-wider">One number</span>
                                 </div>
                                 <div class="flex items-center text-xs" id="reqSpecial">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-gray-400">○</span>
-                                    <span class="text-[#8E8E93]">One special character</span>
+                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
+                                    <span class="text-[#666666] tracking-wider">One special character</span>
                                 </div>
                             </div>
                         </div>
@@ -258,33 +218,59 @@
                     
                     <!-- Confirm Password Field -->
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_password2" class="block text-[#111111] text-sm mb-2">Confirm Password</label>
+                        <label for="id_password2" class="block text-white text-sm mb-2 tracking-wider">CONFIRM PASSWORD</label>
                         <input type="password" name="password2" id="id_password2" required
-                               class="w-full border border-[#8E8E93]/30 text-[#111111] px-4 py-3 text-sm focus:outline-none focus:border-[#FF5A1F] transition-all duration-300 bg-transparent rounded-lg focus:shadow-[0_0_0_3px_rgba(255,90,31,0.1)]"
+                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
                                placeholder="Confirm your password"
                                oninput="checkPasswordMatch()">
-                        <div id="passwordMatch" class="text-xs mt-1 hidden"></div>
+                        <div id="passwordMatch" class="text-xs mt-1 hidden tracking-wider"></div>
                     </div>
                 </div>
 
                 <!-- Signup Button -->
                 <div class="animate-float-in-delay-2">
                     <button type="submit" 
-                            class="w-full bg-[#FF5A1F] text-[#111111] text-sm font-medium uppercase py-3 px-4 hover:bg-[#FF5A1F]/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5A1F] transform hover:scale-[1.02] active:scale-[0.98] rounded-lg"
+                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden"
                             id="submitButton">
-                        Sign Up
+                        SIGN UP
                     </button>
+                </div>
+                
+                <!-- Divider -->
+                <div class="my-6 animate-float-in-delay-2">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-[#333333]"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-[#111111] text-[#666666] tracking-wider">OR</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Login Link -->
                 <div class="text-center animate-float-in-delay-2">
-                    <p class="text-[#8E8E93] text-sm">
-                        Already have an account? 
+                    <p class="text-[#cccccc] text-sm tracking-wider">
+                        ALREADY HAVE AN ACCOUNT?
                         <a href="{% url 'account_login' %}" 
-                           class="text-[#111111] hover:text-[#FF5A1F] font-medium transition-all duration-300 transform hover:scale-105 inline-block">
-                            Login here
+                           class="text-[#dc2626] hover:text-white font-bold transition-all duration-300 transform hover:scale-105 inline-block ml-2 tracking-wider">
+                            LOGIN HERE
                         </a>
                     </p>
+                </div>
+                
+                <!-- Community stats -->
+                <div class="mt-8 pt-6 border-t border-[#333333] animate-float-in-delay-2">
+                    <div class="flex justify-center space-x-8">
+                        <div class="text-center">
+                            <div class="text-[#dc2626] text-xl font-bold tracking-wider">500+</div>
+                            <div class="text-[#666666] text-xs tracking-wider">STYLE ENTHUSIASTS</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-[#dc2626] text-xl font-bold tracking-wider">98%</div>
+                            <div class="text-[#666666] text-xs tracking-wider">SATISFACTION</div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -340,8 +326,8 @@ function checkPasswordStrength(password) {
     strengthBar.style.setProperty('--target-width', `${(strength + 1) * 20}%`);
     
     // Update text
-    const texts = ['Very weak', 'Weak', 'Fair', 'Good', 'Strong'];
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981'];
+    const texts = ['VERY WEAK', 'WEAK', 'FAIR', 'GOOD', 'STRONG'];
+    const colors = ['#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a'];
     strengthText.textContent = texts[strength];
     strengthText.style.color = colors[strength];
     
@@ -359,12 +345,12 @@ function updateRequirement(elementId, met) {
     
     if (met) {
         circle.innerHTML = '✓';
-        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-green-500';
-        text.className = 'text-green-600';
+        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-[#dc2626]';
+        text.className = 'text-[#dc2626]';
     } else {
         circle.innerHTML = '○';
-        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-gray-400';
-        text.className = 'text-[#8E8E93]';
+        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-[#666666]';
+        text.className = 'text-[#666666]';
     }
 }
 
@@ -376,37 +362,28 @@ function checkPasswordMatch() {
     
     if (password2.length === 0) {
         matchDiv.classList.add('hidden');
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
         return;
     }
     
     if (password1 === password2) {
-        matchDiv.textContent = '✓ Passwords match';
-        matchDiv.className = 'text-xs mt-1 text-green-600';
+        matchDiv.textContent = '✓ PASSWORDS MATCH';
+        matchDiv.className = 'text-xs mt-1 text-[#dc2626]';
         matchDiv.classList.remove('hidden');
         submitButton.disabled = false;
         submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
-        matchDiv.textContent = '✗ Passwords do not match';
-        matchDiv.className = 'text-xs mt-1 text-red-600 shake';
+        matchDiv.textContent = '✗ PASSWORDS DO NOT MATCH';
+        matchDiv.className = 'text-xs mt-1 text-[#dc2626] shake';
         matchDiv.classList.remove('hidden');
         submitButton.disabled = true;
         submitButton.classList.add('opacity-50', 'cursor-not-allowed');
     }
 }
 
-// Parallax effect for the image
+// Form validation enhancement
 document.addEventListener('DOMContentLoaded', function() {
-    const image = document.querySelector('[data-parallax-speed]');
-    if (image) {
-        document.addEventListener('mousemove', function(e) {
-            const speed = parseFloat(image.getAttribute('data-parallax-speed') || 0.1);
-            const x = (window.innerWidth - e.pageX * speed) / 100;
-            const y = (window.innerHeight - e.pageY * speed) / 100;
-            image.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.1)`;
-        });
-    }
-    
-    // Form validation enhancement
     const form = document.getElementById('signupForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -421,6 +398,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 500);
             }
         });
+    }
+    
+    // Add ripple effect to signup button
+    const signupButton = document.getElementById('submitButton');
+    if (signupButton) {
+        signupButton.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.4);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    }
+    
+    // Add CSS for ripple animation if not already present
+    if (!document.querySelector('style[data-ripple]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-ripple', 'true');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 });
 </script>
