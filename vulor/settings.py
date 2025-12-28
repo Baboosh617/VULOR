@@ -15,9 +15,45 @@ TIME_ZONE = 'UTC'
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+# This checks if we're running on Render (production) or locally
+ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
+
+DEBUG = not ON_RENDER
+
+if ON_RENDER:
+    # Production: Use PostgreSQL on Render
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,
+
+            options={
+                'connect_timeout': 10,  # Fail fast if DB is slow
+                'application_name': 'vulor-app',
+            },
+        )
+    }
+    DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+else:
+    # Development: Use SQLite locally (no PostgreSQL needed)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+    DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+
+
 # Debug settings and Allowed hosts
 SECRET_KEY = os.getenv('SECRET_KEY')
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com', 'vulor-1.onrender.com']
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+else:
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Applications
 INSTALLED_APPS = [
@@ -59,9 +95,18 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
+# Security settings
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
-
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 INSTALLED_APPS += ["channels"]
 
@@ -71,20 +116,23 @@ ASGI_APPLICATION = "backend.asgi.application"
 
 # Optional: In-memory channel layer for development
 
-CHANNEL_LAYERS = {
 
-
-    "default": {
-
-
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-
-
-    },
-
-
-}
-
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
+else:
+    # Production: Use Redis channel layer
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379")],
+            },
+        },
+    }
 
 
 ROOT_URLCONF = 'vulor.urls'
@@ -98,7 +146,6 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -107,36 +154,12 @@ TEMPLATES = [
         },
     },
 ]
+if DEBUG:
+    TEMPLATES[0]['OPTIONS']['context_processors'].append(   
+        'django.template.context_processors.debug',
+    )
 
 WSGI_APPLICATION = 'vulor.wsgi.application'
-
-# This checks if we're running on Render (production) or locally
-ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
-
-DEBUG = not ON_RENDER
-
-if ON_RENDER:
-    # Production: Use PostgreSQL on Render
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=True,
-
-            options={
-                'connect_timeout': 10,  # Fail fast if DB is slow
-                'application_name': 'vulor-app',
-            },
-        )
-    }
-else:
-    # Development: Use SQLite locally (no PostgreSQL needed)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -155,16 +178,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Debug settings
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.vulor.onrender.com",
-    "https://*.vulor.com",
-    "https://*.vulor-1.onrender.com",
-    "https://*.ngrok-free.app",
-    "https://*.ngrok-free.dev",
-    "https://*.victorious-ivan-uncharily.ngrok-free.dev",
-]
-
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.ngrok-free.app",
+        "https://*.ngrok-free.dev",
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.vulor.onrender.com",
+        "https://*.vulor.com",
+        "https://*.vulor-1.onrender.com",
+    ]
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -200,7 +224,7 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 #login/logout redirects
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_LOGOUT_ON_GET = False
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
 

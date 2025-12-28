@@ -8,9 +8,10 @@ from accounts.views import register  # ADD THIS IMPORT
 from services.admin_report_service import send_weekly_sales_report
 from django.http import HttpResponse
 from healthcheck import views as healthcheck_views
+import os
 
 urlpatterns = [
-    path('hadejia-secure-admin/', admin.site.urls),
+    path(os.getenv('ADMIN_URL', 'admin/'), admin.site.urls),
     
     # Authentication URLs - FIXED
     path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
