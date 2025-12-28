@@ -470,25 +470,25 @@
         updateTotals();
         
         // Add loading state to payment button
-        paymentButton.addEventListener('click', function() {
-            if (!this.disabled) {
-                const originalText = this.innerHTML;
-                this.innerHTML = `
-                    <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                `;
-                this.disabled = true;
+        // paymentButton.addEventListener('click', function() {
+        //     if (!this.disabled) {
+        //         const originalText = this.innerHTML;
+        //         this.innerHTML = `
+        //             <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        //                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        //                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        //             </svg>
+        //         `;
+        //         this.disabled = true;
                 
-                // In a real application, this would be handled by the form submission
-                // Reset after 3 seconds for demo purposes
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 3000);
-            }
-        });
+        //         // In a real application, this would be handled by the form submission
+        //         // Reset after 3 seconds for demo purposes
+        //         setTimeout(() => {
+        //             this.innerHTML = originalText;
+        //             this.disabled = false;
+        //         }, 3000);
+        //     }
+        // });
     });
 </script>
 {% endblock %}

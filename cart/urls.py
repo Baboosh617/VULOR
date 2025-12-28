@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from uuid import uuid4
 
 urlpatterns = [
     path('', views.view_cart, name='view_cart'),  
