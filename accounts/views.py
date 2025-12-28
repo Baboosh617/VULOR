@@ -4,9 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 from orders.models import Order
+from django_ratelimit.decorators import ratelimit
 
 UserCreationForm = CustomUserCreationForm
 
+@ratelimit(key='ip', rate='5/m', block=True)
 def register(request):
     """Custom registration view that works with allauth"""
     print("REGISTER VIEW HIT", request.method)
@@ -60,7 +62,7 @@ def size_guide(request):
     return render(request, 'size_guide.html', context)
 
 
-@login_required
+@ratelimit(key='ip', rate='5/m', block=True)
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')

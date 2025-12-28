@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
+from django.core.validators import RegexValidator
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
@@ -12,6 +13,8 @@ class CustomUserCreationForm(UserCreationForm):
     )
     
     username = forms.CharField(
+        validators=[RegexValidator(regex=r'^[\w.@+-]+$', message='Username may contain only letters, digits and @/./+/-/_ characters.')],
+        max_length=150,
         widget=forms.TextInput(attrs={
             'class': 'w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500',
             'placeholder': 'Choose a username'

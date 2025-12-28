@@ -12,5 +12,6 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = UserAdmin.add_fieldsets + (
         (None, {'fields': ('email', 'phone')}),
     )
+    readonly_fields = ('is_superuser',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
