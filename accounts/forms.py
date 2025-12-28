@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from django.core.validators import RegexValidator
+from captcha.fields import CaptchaField
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
@@ -42,3 +43,6 @@ class CustomUserCreationForm(UserCreationForm):
             return user, None  # Return user and no error
         except Exception as e:
             return None, str(e)
+    
+
+    captcha = CaptchaField()    

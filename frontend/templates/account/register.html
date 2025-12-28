@@ -272,6 +272,15 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="mb-4">
+    {{ form.captcha.label_tag }}
+    {{ form.captcha }}
+    {% for error in form.captcha.errors %}
+        <p class="text-red-500 text-sm">{{ error }}</p>
+    {% endfor %}
+</div>
+
             </form>
         </div>
     </div>

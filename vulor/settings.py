@@ -74,6 +74,7 @@ INSTALLED_APPS = [
 
     
     # Local apps
+    'captcha',
     'products',
     'accounts',
     'cart',
@@ -332,3 +333,30 @@ if not DEBUG:
     handler500 = 'error_pages.views.custom_500'
     handler403 = 'error_pages.views.custom_403'
     handler400 = 'error_pages.views.custom_400'
+
+#Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'auth.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django.security.login': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
