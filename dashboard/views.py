@@ -8,6 +8,11 @@ from datetime import timedelta
 from django.utils.timezone import now
 from django.db.models import Sum
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -67,18 +72,32 @@ def dashboard_home(request):
 
 def review_list(request):
     reviews = Review.objects.filter(approved=False).order_by("-created_at")
+
+   
+
+    paginator = Paginator(reviews, 10)
+    page_number = request.GET.get("page")
+    reviews = paginator.get_page(page_number)
+
     return render(request, "dashboard/reviews.html", {"reviews": reviews})
 
+@staff_member_required
 def approve_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
+    if not request.user.is_staff:
+        messages.error(request, "You are not authorized to view this page.")
+        return redirect("dashboard:home")
     review.approved = True
     review.save()
+    logger.info(f"Review {review.id} approved by {request.user.username}")
     messages.success(request, f"Review from {review.user.username} has been approved.")
     return redirect("dashboard:review_list")
 
+@staff_member_required
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     review.delete()
+    logger.info(f"Review {review.id} deleted by {request.user.username}")
     messages.success(request, "Review has been deleted.")
     return redirect("dashboard:review_list")
 
@@ -97,6 +116,7 @@ def order_list(request):
 
     return render(request, "dashboard/orders.html", {"orders": orders, "query": query, "status_filter": status_filter})
 
+@staff_member_required
 def update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     
@@ -108,6 +128,7 @@ def update_order_status(request, order_id):
         order.status = "pending"
         messages.success(request, f"Order #{order.id} marked as pending.")
 
+    logger.info(f"Order {order.id} status updated to {order.status} by {request.user.username}")
     order.save()
     return redirect("dashboard:order_list")
 
@@ -139,9 +160,13 @@ def product_list(request):
         "active_filter": active_filter,
         "category_choices": Product.CATEGORY_CHOICES,
     }
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
     return render(request, "dashboard/products.html", context)
 
 # Add product
+@staff_member_required
 def add_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
@@ -174,6 +199,7 @@ def add_product(request):
                         )
             
             messages.success(request, f'Product "{product.name}" added successfully.')
+            logger.info(f'Product "{product.name}" added by {request.user.username}.')
             return redirect('dashboard:product_list')
         else:
             # Debug: print form errors
@@ -186,8 +212,10 @@ def add_product(request):
         'title': 'Add New Product', 
         'product': None
     }
+    logger.info(f"User {request.user.username} accessed add product page.")
     return render(request, 'dashboard/product_form.html', context)
 
+@staff_member_required
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     alternate_images = ProductImage.objects.filter(product=product)
@@ -221,7 +249,7 @@ def edit_product(request, product_id):
                             alt_text=alt_text,
                             is_main=is_main
                         )
-            
+            logger.info(f'Product "{product.name}" edited by {request.user.username}.')
             messages.success(request, f'Product "{product.name}" updated successfully.')
             return redirect('dashboard:product_list')
         else:
@@ -237,6 +265,7 @@ def edit_product(request, product_id):
     }
     return render(request, 'dashboard/product_form.html', context)
 
+@staff_member_required
 def delete_alternate_image(request, product_id, image_id):
     """Delete an alternate product image"""
     image = get_object_or_404(ProductImage, id=image_id)
@@ -247,6 +276,7 @@ def delete_alternate_image(request, product_id, image_id):
         return redirect('dashboard:product_list')
     
     image.delete()
+    logger.info(f'Alternate image {image_id} for product {product_id} deleted by {request.user.username}.')
     messages.success(request, 'Alternate image deleted successfully.')
     return redirect('dashboard:edit_product', product_id=product_id)
 
@@ -261,23 +291,31 @@ def set_main_alternate_image(request, product_id, image_id):
     image = get_object_or_404(ProductImage, id=image_id)
     image.is_main = True
     image.save()
-    
+    logger.info(f'Alternate image {image_id} for product {product_id} set as main by {request.user.username}.')
     messages.success(request, 'Alternate image set as main.')
     return redirect('dashboard:edit_product', product_id=product_id)
 
 # Delete product
+
+@staff_member_required
 def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product_name = product.name
     product.delete()
+    logger.info(f'Product "{product_name}" deleted by {request.user.username}.')
     messages.success(request, f'Product "{product_name}" deleted successfully.')
     return redirect("dashboard:product_list")
 
+@staff_member_required
 def customer_list(request):
     users = User.objects.filter(is_superuser=False).order_by("-date_joined")
     query = request.GET.get("q")
     if query:
         users = users.filter(username__icontains=query)
+
+    paginator = Paginator(users, 10)
+    page_number = request.GET.get("page")
+    users = paginator.get_page(page_number)
     return render(request, "dashboard/customers.html", {"users": users, "query": query})
 
 # Edit user
@@ -292,12 +330,14 @@ class CustomerForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'border rounded p-2 w-full'}),
         }
 
+@staff_member_required
 def edit_customer(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
         form = CustomerForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
+            logger.info(f"User {user.username} updated by {request.user.username}.")
             messages.success(request, f"User {user.username} updated successfully.")
             return redirect("dashboard:customer_list")
     else:
@@ -305,6 +345,7 @@ def edit_customer(request, user_id):
     
     return render(request, "dashboard/customer_form.html", {"form": form, "user": user})
 
+@staff_member_required
 def toggle_user_active(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if user.is_superuser:
@@ -315,5 +356,6 @@ def toggle_user_active(request, user_id):
     user.save()
     
     status = "activated" if user.is_active else "deactivated"
+    logger.info(f"User {user.username} has been {status} by {request.user.username}.")
     messages.success(request, f"User {user.username} has been {status}.")
     return redirect("dashboard:customer_list")

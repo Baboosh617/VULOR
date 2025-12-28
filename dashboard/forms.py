@@ -2,6 +2,8 @@
 from django import forms
 from products.models import Product
 from products.models import ProductImage
+from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 
 class ProductForm(forms.ModelForm):
     # Custom field for slug
@@ -147,6 +149,13 @@ class ProductForm(forms.ModelForm):
             ]
             for field in measurement_fields:
                 cleaned[field] = ''
+
+        image = self.cleaned_data.get('image')
+        if image:
+            if not image.content_type.startswith('image/'):
+                raise ValidationError('Uploaded file is not a valid image.')
+            if image.size > 10485760: #10 MB
+                raise ValidationError('Image size should not exceed 10 MB.')    
         
         # Size validation
         sizes = cleaned.get('available_sizes', '')
@@ -174,6 +183,8 @@ class ProductForm(forms.ModelForm):
     
     def save(self, commit=True):
         instance = super().save(commit=False)
+
+        instance.slug = slugify(instance.name)
         
         # Handle sizes and colors formatting
         if self.cleaned_data.get('available_sizes'):
