@@ -9,11 +9,12 @@ UserCreationForm = CustomUserCreationForm
 
 def register(request):
     """Custom registration view that works with allauth"""
+    print("REGISTER VIEW HIT", request.method)
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Registration successful!")
             return redirect('home')
         else:

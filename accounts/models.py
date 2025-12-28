@@ -8,6 +8,6 @@ class CustomUser(AbstractUser):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  
-    
+    is_verified = models.BooleanField(default=False)
     def __str__(self):
         return self.email

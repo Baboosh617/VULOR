@@ -16,7 +16,7 @@ env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Debug settings and Allowed hosts
-SECRET_KEY = 'django-insecure-development-key-1234567890-change-in-production'
+SECRET_KEY = os.getenv('SECRET_KEY')
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'victorious-ivan-uncharily.ngrok-free.dev', 'vulor.com', 'vulor.onrender.com', 'vulor-1.onrender.com']
 
 # Applications
@@ -185,8 +185,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/products/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_ALLOW_REGISTRATION = False
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[VULOR] '
 
 #social account settings
@@ -197,6 +198,7 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 #login/logout redirects
+ACCOUNT_SIGNUP_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_ON_GET = True
 LOGOUT_REDIRECT_URL = '/'
