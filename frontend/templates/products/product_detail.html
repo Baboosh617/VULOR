@@ -464,90 +464,90 @@
         }
 
         // Add to cart success animation
-    //     const addToCartForm = document.querySelector('#add-to-cart-form');
-    //     const addToCartBtn = document.querySelector('.add-to-cart-btn');
+        const addToCartForm = document.querySelector('#add-to-cart-form');
+        const addToCartBtn = document.querySelector('.add-to-cart-btn');
         
-    //     if (addToCartForm && addToCartBtn) {
-    //         addToCartForm.addEventListener('submit', function(e) {
-    //             e.preventDefault();
+        if (addToCartForm && addToCartBtn) {
+            addToCartForm.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-    //             if (addToCartBtn.disabled) return;
+                if (addToCartBtn.disabled) return;
                 
-    //             const originalText = addToCartBtn.textContent;
-    //             const originalBg = addToCartBtn.style.backgroundColor;
+                const originalText = addToCartBtn.textContent;
+                const originalBg = addToCartBtn.style.backgroundColor;
                 
-    //             // Show loading state
-    //             addToCartBtn.textContent = 'ADDING...';
-    //             addToCartBtn.disabled = true;
+                // Show loading state
+                addToCartBtn.textContent = 'ADDING...';
+                addToCartBtn.disabled = true;
                 
-    //             // Submit the form
-    //             const formData = new FormData(this);
+                // Submit the form
+                const formData = new FormData(this);
                 
-    //             fetch(this.action, {
-    //                 method: 'POST',
-    //                 body: formData,
-    //                 headers: {
-    //                     'X-Requested-With': 'XMLHttpRequest',
-    //                     'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
-    //                 }
-    //             })
-    //             .then(response => {
-    //                 if (response.ok) {
-    //                     return response.json();
-    //                 }
-    //                 throw new Error('Network response was not ok.');
-    //             })
-    //             .then(data => {
-    //                 if (data.success) {
-    //                     // Success animation
-    //                     addToCartBtn.textContent = 'ADDED ✓';
-    //                     addToCartBtn.style.backgroundColor = '#10B981';
-    //                     addToCartBtn.style.borderColor = '#10B981';
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Success animation
+                        addToCartBtn.textContent = 'ADDED ✓';
+                        addToCartBtn.style.backgroundColor = '#10B981';
+                        addToCartBtn.style.borderColor = '#10B981';
                         
-    //                     // Update cart count in navbar
-    //                     const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
-    //                     if (cartBadge) {
-    //                         cartBadge.textContent = data.cart_total_items || 1;
-    //                         // Animate cart badge
-    //                         cartBadge.classList.add('animate-pulse');
-    //                         setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
-    //                     }
+                        // Update cart count in navbar
+                        const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
+                        if (cartBadge) {
+                            cartBadge.textContent = data.cart_total_items || 1;
+                            // Animate cart badge
+                            cartBadge.classList.add('animate-pulse');
+                            setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
+                        }
                         
-    //                     // Show success message
-    //                     const messageDiv = document.createElement('div');
-    //                     messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
-    //                     messageDiv.textContent = 'Added to cart!';
-    //                     document.body.appendChild(messageDiv);
+                        // Show success message
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
+                        messageDiv.textContent = 'Added to cart!';
+                        document.body.appendChild(messageDiv);
                         
-    //                     // Remove message after 2 seconds
-    //                     setTimeout(() => messageDiv.remove(), 2000);
+                        // Remove message after 2 seconds
+                        setTimeout(() => messageDiv.remove(), 2000);
                         
-    //                     // Reset button after 1.5 seconds
-    //                     setTimeout(() => {
-    //                         addToCartBtn.textContent = originalText;
-    //                         addToCartBtn.style.backgroundColor = '';
-    //                         addToCartBtn.style.borderColor = '';
-    //                         addToCartBtn.disabled = false;
-    //                     }, 1500);
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error:', error);
-    //                 // Show error
-    //                 addToCartBtn.textContent = 'ERROR - TRY AGAIN';
-    //                 addToCartBtn.style.backgroundColor = '#EF4444';
-    //                 addToCartBtn.style.borderColor = '#EF4444';
+                        // Reset button after 1.5 seconds
+                        setTimeout(() => {
+                            addToCartBtn.textContent = originalText;
+                            addToCartBtn.style.backgroundColor = '';
+                            addToCartBtn.style.borderColor = '';
+                            addToCartBtn.disabled = false;
+                        }, 1500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Show error
+                    addToCartBtn.textContent = 'ADDING...';
+                    addToCartBtn.style.backgroundColor = '#EF4444';
+                    addToCartBtn.style.borderColor = '#EF4444';
                     
-    //                 // Reset button after 2 seconds
-    //                 setTimeout(() => {
-    //                     addToCartBtn.textContent = originalText;
-    //                     addToCartBtn.style.backgroundColor = '';
-    //                     addToCartBtn.style.borderColor = '';
-    //                     addToCartBtn.disabled = false;
-    //                 }, 2000);
-    //             });
-    //         });
-    //     }
-    // });
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        addToCartBtn.textContent = originalText;
+                        addToCartBtn.style.backgroundColor = '';
+                        addToCartBtn.style.borderColor = '';
+                        addToCartBtn.disabled = false;
+                    }, 2000);
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}

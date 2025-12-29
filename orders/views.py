@@ -76,11 +76,11 @@ def checkout(request):
                     shipping_fee_decimal = Decimal("3000.00")
 
 
-                if Order.objects.filter(user=request.user, payment_status='pending').exists():
-                    messages.error(request, "You already have a pending order.")
-                    return redirect('view_cart')
+                # if Order.objects.filter(user=request.user, payment_status='pending').exists():
+                #     messages.error(request, "You already have a pending order.")
+                #     return redirect('view_cart')
                 
-                total_amount = calculated_total
+                
                 calculated_total = cart.total_price + shipping_fee_decimal
 
                 if calculated_total <= 0:

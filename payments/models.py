@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 import uuid
 
@@ -47,6 +48,12 @@ class PaymentTransaction(models.Model):
     def __str__(self):
         return f"{self.paystack_reference} - {self.order.order_number}"    
     class Meta:
+            constraints = [
+                models.UniqueConstraint(
+                fields=['order'],
+                condition=models.Q(status__in=['pending', 'initiated']),
+                name='one_active_payment_per_order'
+            )]
             ordering = ['-created_at']
             verbose_name = 'Payment Transaction'
             verbose_name_plural = 'Payment Transactions'
@@ -59,4 +66,4 @@ class PaymentTransaction(models.Model):
     @staticmethod
     def generate_reference():
         # simple unique reference generator
-        return uuid.uuid4().hex[:20]
+        return f"{uuid.uuid4().hex[:12]}-{int(timezone.now().timestamp())}"
