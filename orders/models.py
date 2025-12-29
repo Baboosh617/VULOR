@@ -12,9 +12,13 @@ from services.email_service import (
     send_order_cancelled,
 )
 from accounts.models import CustomUser
+from uuid import uuid4
+from django.core.validators import MinValueValidator
+import logging
 
 User = get_user_model()
 
+logger = logging.getLogger(__name__)
 class Order(models.Model):
 
     # --------- CHOICES ----------
@@ -38,6 +42,8 @@ class Order(models.Model):
     order_number = models.CharField(max_length=20, unique=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
+    inventory_adjusted = models.BooleanField(default=False)
+
     # ✅ Email tracking booleans
     payment_email_sent = models.BooleanField(default=False)
     shipping_email_sent = models.BooleanField(default=False)
@@ -60,7 +66,7 @@ class Order(models.Model):
     shipping_country = models.CharField(max_length=100, default='Nigeria')
     shipping_full_name = models.CharField(max_length=200, blank=True, default='')
 
-    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
     shipping_zone = models.CharField(max_length=50, blank=True, default='')
 
     # --------- CUSTOMER ----------
@@ -103,7 +109,7 @@ class Order(models.Model):
      # Auto-generate order number
      if not self.pk and not self.order_number:
          import time
-         self.order_number = f"VU{self.user.id:06d}{int(time.time())}"
+         self.order_number = f"VU{self.user.id:06d}{int(time.time())}{uuid4().hex[:4]}"
      
      # Skip email logic for NEW orders to prevent the group_send error
      # Save without calling handle_status_change for new orders
@@ -119,21 +125,10 @@ class Order(models.Model):
          if old_status != self.status:
              self.handle_status_change(old_status)
      
-     # Email logic (outside transaction for safety)
-     if self.pk:
-         old = Order.objects.get(pk=self.pk)
-         if old.status != self.status:
-             if self.status == 'shipped':
-                 send_order_shipped(self.user, self)
-             elif self.status == 'delivered':
-                 send_order_delivered(self.user, self)
-             elif self.status == 'cancelled':
-                 send_order_cancelled(self.user, self)
-
             
     def handle_status_change(self, old_status):
         """Handle inventory changes when order status changes"""
-        if old_status != 'completed' and self.status == 'completed':
+        if old_status != self.status and self.payment_status == 'success':
             self.reduce_inventory()
             if not self.payment_email_sent:
                 send_order_confirmation(self.user, self)
@@ -144,8 +139,15 @@ class Order(models.Model):
                 send_admin_order_notification(self)
                 self.admin_notified_new = True
                 self.save(update_fields=['admin_notified_new'])
+        elif old_status != self.status and self.payment_status == 'cancelled':
+            self.restore_inventory()
+            if not self.admin_notified_cancellation:
+                send_admin_order_notification(self)
+                self.admin_notified_cancellation = True
+                self.save(update_fields=['admin_notified_cancellation'])
+
         
-        elif old_status == 'completed' and self.status == 'cancelled':
+        elif old_status == 'success' and self.status == 'cancelled':
             self.restore_inventory()
         
         elif old_status and old_status != self.status:
@@ -153,9 +155,12 @@ class Order(models.Model):
     
     def reduce_inventory(self):
         """Reduce inventory for all items in this order"""
+        if self.inventory_adjusted:
+            return
+
         with transaction.atomic():
             for item in self.items.all():
-                product = item.product
+                product = Product.objects.select_for_update().get(id=item.product.id)
                 quantity = item.quantity
                 
                 # Check if enough stock
@@ -182,6 +187,9 @@ class Order(models.Model):
                     # You could add a low stock email here
                     product.low_stock_email_sent = True
                     product.save(update_fields=['low_stock_email_sent'])
+        logger.info(f"Inventory adjusted for order {self.id}")
+        self.inventory_adjusted = True
+        self.save(update_fields=['inventory_adjusted'])                    
     
     def restore_inventory(self):
         """Restore inventory when order is cancelled"""
