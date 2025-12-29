@@ -49,7 +49,7 @@ class Product(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     image = models.ImageField(upload_to='products/')
     featured = models.BooleanField(default=False)
-    inventory_count = models.IntegerField(default=0)
+    inventory_count = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     is_active = models.BooleanField(default=True)
 
     # image_alt = models.ImageField(upload_to='products/alt/', blank=True, null=True, verbose_name="Alternative Image")
@@ -101,50 +101,23 @@ class Product(models.Model):
         return self.category in ['cargo-jeans', 'sweatpants']
 
     def save(self, *args, **kwargs):
-        # Generate base slug from name
-        if self.name:
+        if not self.slug:
             base_slug = slugify(self.name)
-        else:
-            base_slug = "product"
-        
-        # If this is a new product OR slug is empty
-        if not self.pk or not self.slug:
-            # Find the next available number for this base slug
-            existing_slugs = Product.objects.filter(slug__startswith=base_slug)
-            
-            if existing_slugs.exists():
-                # Find the highest number after the base slug
-                max_number = 0
-                for existing_slug in existing_slugs.values_list('slug', flat=True):
-                    # Check if slug is exactly base_slug (no number)
-                    if existing_slug == base_slug:
-                        max_number = max(max_number, 1)
-                    # Check if slug has a number at the end (e.g., white-tee-1)
-                    elif existing_slug.startswith(f"{base_slug}-"):
-                        try:
-                            # Extract the number after the dash
-                            number_part = existing_slug.split(f"{base_slug}-")[-1]
-                            if number_part.isdigit():
-                                max_number = max(max_number, int(number_part))
-                        except:
-                            pass
-                
-                # If base slug exists or we found numbered slugs, add next number
-                if Product.objects.filter(slug=base_slug).exists() or max_number > 0:
-                    if max_number == 0:
-                        # Base slug exists but no numbered ones yet
-                        self.slug = f"{base_slug}-1"
-                    else:
-                        # Use the next available number
-                        self.slug = f"{base_slug}-{max_number + 1}"
-                else:
-                    # No existing slugs with this base
-                    self.slug = base_slug
-            else:
-                # No existing slugs at all
-                self.slug = base_slug
-        
+            slug = base_slug
+            counter = 1
+
+            while Product.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+
         super().save(*args, **kwargs)
+
+    @property
+    def total_reviews(self):
+        return self.reviews.count()
+
     
     def get_formatted_sizes(self):
         """Return sizes formatted for display based on category"""
@@ -162,6 +135,14 @@ class Product(models.Model):
         if not self.available_colors:
             return []
         return [c.strip() for c in self.available_colors.split(',') if c.strip()]
+    
+    @property
+    def average_rating(self):
+        reviews = self.reviews.filter(approved=True)
+        if reviews.exists():
+            return round(reviews.aggregate(Avg('rating'))['rating__avg'], 1)
+        return 0
+
     
     def get_measurements_dict(self):
         measurements = {}
@@ -182,8 +163,8 @@ class Review(models.Model):
         "products.Product", 
         on_delete=models.CASCADE, 
         related_name="reviews",
-        null=True,      # Allows NULL in the database
-        blank=True      # Allows blank in forms/admin
+        null=True,
+        blank=True
     )
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)], 
@@ -192,20 +173,12 @@ class Review(models.Model):
     comment = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=False)
-
-    @property
-    def average_rating(self):
-        reviews = self.product.reviews.filter(approved=True)
-        if reviews.exists():
-            return reviews.aggregate(Avg('rating'))['rating__avg']
-        return 0
-    
-    @property
-    def total_reviews(self):
-        return self.reviews.count()
     
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'product'], name='unique_review'),
+        ]
     
     def __str__(self):
         if self.product:
@@ -217,10 +190,7 @@ class Review(models.Model):
     
     def get_empty_stars(self):
         return range(5 - self.rating)
-    
-    # Helper method to check if it's a store review
-    def is_store_review(self):
-        return self.product is None
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -240,3 +210,6 @@ class ProductImage(models.Model):
 
     class Meta:
         ordering = ['-is_main', 'created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['product'], condition=models.Q(is_main=True), name='unique_main_image')
+        ]

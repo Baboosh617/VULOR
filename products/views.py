@@ -1,33 +1,28 @@
+import json
+import logging
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from .models import Product
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-import json
 from .models import Review
 from .forms import ReviewForm
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
+from django.core.paginator import Paginator
+from django.db import IntegrityError
+from django_ratelimit.decorators import ratelimit
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
-def home(request):
-    print(f"Current URL: {request.path}")
-    print(f"Method: {request.method}")
-    
-    if request.method == 'POST':
-        print(f"POST data: {request.POST}")
-    
-    # ===== GET LATEST PRODUCT FROM EACH CATEGORY FOR MOBILE CAROUSEL =====
-    # Define your categories (match with your Product model categories)
-    categories = [
-        'cargo-jeans',
-        'sweatpants', 
-        't-shirts',
-        'shorts',
-        'hoodies'
-    ]
+logger = logging.getLogger(__name__)
+
+@cache_page(60 * 5)
+def home(request):    
+    # GET LATEST PRODUCT FROM EACH CATEGORY FOR MOBILE CAROUSEL
     
     # Get the latest active product from each category
     # Get latest product per category for mobile hero
@@ -43,7 +38,7 @@ def home(request):
             hero_products.append(product)
 
     
-    # ===== EXISTING CODE =====
+    
     # Define all variables first (before any redirects)
     new_arrivals = Product.objects.order_by('-created_at')[:6]
     reviews = Review.objects.filter(approved=True)[:4]
@@ -58,21 +53,6 @@ def home(request):
     total_reviews = Review.objects.filter(approved=True).count()
     recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
     
-    # Handle POST requests after variables are defined
-    if request.method == 'POST':
-        if 'submit_review' in request.POST:
-            if not request.user.is_authenticated:
-                messages.error(request, 'Please log in to submit a review.')
-                return redirect('login')
-            
-            form = ReviewForm(request.POST)
-            if form.is_valid():
-                review = form.save(commit=False)
-                review.user = request.user
-                review.save()
-                messages.success(request, 'Thank you for your review! It will be visible after approval.')
-                return redirect('home')
-    
     # Build context with guaranteed defined variables
     context = {
         'store_reviews': store_reviews,
@@ -82,23 +62,32 @@ def home(request):
         'reviews': reviews,
         'review_form': form,
         'latest_product': Product.objects.filter(is_active=True).order_by('-created_at').first(),
-        'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at')[:6],
-        'store_reviews': Review.objects.filter(approved=True).order_by('-created_at')[:10],
+        'new_arrivals': new_arrivals,
+        'store_reviews': store_reviews,
         # Add the hero_products for mobile carousel
         'hero_products': hero_products,
     }
     return render(request, 'index.html', context)
 
 def product_list(request):
-    products = Product.objects.filter(is_active=True)
+    cache_key = f"product_list_{request.GET.get('category')}_{request.GET.get('search')}_{request.GET.get('sort')}_{request.GET.get('page')}"
+    products = cache.get(cache_key)
+    
+    if not products:
+        products = Product.objects.filter(is_active=True)
+        # ... apply filtering, sorting, pagination ...
+        cache.set(cache_key, products, 60*5)  # cache 5 minutes
     
     # Filtering
     category = request.GET.get('category')
     search = request.GET.get('search')
     sort = request.GET.get('sort', 'newest')
     
-    if category:
+    valid_categories = dict(Product.CATEGORY_CHOICES).keys()
+
+    if category in valid_categories:
         products = products.filter(category=category)
+
     
     if search:
         products = products.filter(
@@ -117,6 +106,10 @@ def product_list(request):
         products = products.order_by('-created_at')
     
     categories = Product.CATEGORY_CHOICES
+
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
     
     context = {
         'products': products,
@@ -133,6 +126,10 @@ def product_detail(request, slug):
         category=product.category, 
         is_active=True
     ).exclude(id=product.id)[:4]
+
+    reviews = product.reviews.filter(approved=True).select_related('user')
+    avg_rating = reviews.aggregate(avg=Avg('rating'))['avg']
+
     
     context = {
         'product': product,
@@ -140,37 +137,12 @@ def product_detail(request, slug):
         'sizes': product.get_available_sizes_list(),
         'colors': product.get_available_colors_list(),
         'FIT_CHOICES': Product.FIT_CHOICES,
+        'reviews': reviews,
+        'avg_rating': round(avg_rating, 1) if avg_rating else None,
     }
     return render(request, 'products/product_detail.html', context)
 
-
-@login_required
-def submit_review(request):
-    if request.method == 'POST':
-        if not request.user.is_authenticated:
-            messages.error(request, 'Please log in to submit a review.')
-            return redirect('login')
-        
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.user = request.user
-            
-            # Get the product if it exists
-            product_id = request.POST.get('product_id')
-            if product_id:
-                try:
-                    product = Product.objects.get(id=product_id)
-                    review.product = product
-                except Product.DoesNotExist:
-                    pass  # Leave as store review if product not found
-            
-            review.save()
-            messages.success(request, 'Thank you for your review! It will be visible after approval.')
-    
-    return redirect('home')
-
-
+@ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def add_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -178,17 +150,13 @@ def add_review(request, product_id):
     if request.method != 'POST':
         return redirect('product_detail', slug=product.slug)
 
-    if not request.user.is_authenticated:
-        messages.error(request, 'Please log in to submit a review.')
-        return redirect('login')
-
     rating = request.POST.get('rating')
     comment = request.POST.get('comment')
 
     if not rating or not comment:
         messages.error(request, 'Please provide both rating and comment.')
         return redirect('product_detail', slug=product.slug)
-
+    
     existing_review = Review.objects.filter(
         product=product,
         user=request.user
@@ -200,12 +168,18 @@ def add_review(request, product_id):
         existing_review.save()
         messages.success(request, 'Your review has been updated!')
     else:
-        Review.objects.create(
-            product=product,
-            user=request.user,  # ✅ guaranteed real user
-            rating=rating,
-            comment=comment
-        )
+        try:
+            Review.objects.create(
+                product=product,
+                user=request.user,
+                rating=rating,
+                comment=comment
+            )
+        except Exception as e:
+            logger.error(f"Error adding review: {e}")
+            messages.error(request, 'An error occurred while adding your review. Please try again later.')
+            return redirect('product_detail', slug=product.slug)
+        logger.info(f"User {request.user.username} added a review for {product.name}")
         messages.success(request, 'Thank you for your review!')
 
     return redirect('product_detail', slug=product.slug)

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load cache %}
 
 {% block content %}
 <!-- SECTION 1 — Hero -->
@@ -9,12 +10,13 @@
         <div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
             {% if hero_products %}
             <div id="mobileHeroCarousel" class="absolute inset-0">
+            {% cache 600 hero_products %}
                 {% for product in hero_products %}
                 <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-[1800ms] ease-in-out"
                      style="background-image: url('{{ product.image.url }}');
                             background-size: cover;
                             background-position: center top;">
-
+            {% endcache %}
                     <!-- Soft gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-black/90"></div>
 
@@ -79,6 +81,7 @@
             <!-- Right: Full-height Image Column -->
             <div class="relative h-full overflow-hidden group bg-black">
                 {% if latest_product %}
+                {% cache 600 latest_product %}
                     <a href="{% url 'product_detail' latest_product.slug %}" class="block h-full w-full">
                         <div class="relative w-full h-full">
                             <!-- Main Image Container -->
@@ -93,6 +96,7 @@
                             <div class="absolute top-0 right-0 w-32 h-32 border-t border-r border-[#dc2626]/20"></div>
                         </div>
                     </a>
+                {% endcache %}    
                 {% else %}
                     <!-- Fallback placeholder -->
                     <div class="w-full h-full bg-[#111111] flex items-center justify-center">
@@ -118,6 +122,7 @@
 
         {% if new_arrivals %}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% cache 900 new_arrivals %}
             {% for product in new_arrivals|slice:":6" %}
             <div class="group relative bg-[#111111] border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
                 <a href="{% url 'product_detail' product.slug %}" class="block">
@@ -157,6 +162,7 @@
                 </a>
             </div>
             {% endfor %}
+        {% endcache %}
         </div>
         
         <div class="text-center mt-16">
@@ -182,7 +188,7 @@
 <section class="py-32 bg-black border-t border-[#333333]">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="mb-8">
-            <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-6">
+            <div class="w-16 h-16 border-2 border-[#dc2626] rounded-50 flex items-center justify-center mx-auto mb-6">
                 <span class="text-[#dc2626] text-2xl font-bold">V</span>
             </div>
             <h2 class="text-4xl md:text-5xl text-white leading-tight font-bold">
@@ -208,6 +214,7 @@
         <!-- Carousel Container -->
         <div class="relative overflow-hidden">
             <div class="flex transition-transform duration-500 ease-in-out" id="reviewsCarousel">
+            {% cache 300 store_reviews %}    
                 {% for review in store_reviews|slice:":10" %}
                 <div class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
                     <div class="bg-[#1a1a1a] border border-[#333333] p-8 h-full hover:border-[#dc2626] transition-all duration-300 rounded-lg">
@@ -236,6 +243,7 @@
                     </div>
                 </div>
                 {% empty %}
+            {% endcache %}    
                 <div class="w-full text-center py-12">
                     <p class="text-[#666666]">Be the first to review</p>
                 </div>

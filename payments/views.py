@@ -107,9 +107,10 @@ def get_payment_details(request, order_id):
     if existing and (timezone.now() - existing.created_at).total_seconds() < 1800:
         payment = existing
     else:
+        total_with_shipping = float(order.total_amount + order.shipping_fee)
         payment = PaymentTransaction.objects.create(
             order=order,
-            amount=order.total_amount,
+            amount=total_with_shipping,
             paystack_reference=PaymentTransaction.generate_reference(),
             status='pending',
             metadata={'items_count': order.items.count()}
@@ -123,6 +124,7 @@ def get_payment_details(request, order_id):
         'callback_url': request.build_absolute_uri(
             reverse('payments:verify_payment')
         ),
+        'metadata': {k: float(v) if isinstance(v, Decimal) else v for k, v in payment.metadata.items()}
     }
 
     return JsonResponse({'status': 'success', 'data': data})
