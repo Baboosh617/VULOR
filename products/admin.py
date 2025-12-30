@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Product, Review, ProductImage
 from django.utils.html import format_html
+import logging
+
+logger = logging.getLogger(__name__)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -42,10 +45,10 @@ class ProductAdmin(admin.ModelAdmin):
         ('Variants', {
             'fields': ('available_sizes', 'available_colors')
         }),
-        ('Fit Type (Cargo Jeans Only)', {  # New section for fit type
+        ('Fit Type (Cargo Jeans & Sweatpants)', {  # New section for fit type
             'fields': ('fit_type',),
             'classes': ('collapse',),
-            'description': 'Choose Loose or Fit (only for Cargo Jeans)',
+            'description': 'Choose Loose or Fit (only for Cargo Jeans & Sweatpants)',
         }),
         ('Detailed Measurements (Cargo Jeans & Sweatpants)', {
             'fields': (
@@ -73,7 +76,7 @@ class ProductAdmin(admin.ModelAdmin):
 
         filtered = []
         for title, data in self.base_fieldsets:
-            if title == 'Fit Type (Cargo Jeans Only)' and obj.category != 'cargo-jeans':
+            if title == 'Fit Type (Cargo Jeans & Sweatpants)' and obj.category not in ['cargo-jeans', 'sweatpants']:
                 continue
             if title == 'Detailed Measurements (Cargo Jeans & Sweatpants)' and obj.category not in ['cargo-jeans', 'sweatpants']:
                 continue
@@ -83,10 +86,16 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['user', 'rating', 'approved', 'created_at']
+    list_display = ['user', 'rating', 'approved', 'created_at', 'approved_by',]
     list_filter = ['approved', 'rating', 'created_at']
     search_fields = ['user__username', 'comment']
-    readonly_fields = ['created_at']
+    readonly_fields = ['created_at', 'approved_by']
+
+    def save_model(self, request, obj, form, change):
+        if obj.approved and not obj.approved_by:
+            obj.approved_by = request.user
+        super().save_model(request, obj, form, change)
+        logger.info(f"Review {obj.id} saved by {request.user.username}")
 
 # Inline admin for ProductImage
 class ProductImageInline(admin.TabularInline):

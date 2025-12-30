@@ -20,126 +20,127 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
-@cache_page(60 * 5)
-def home(request):    
-    # GET LATEST PRODUCT FROM EACH CATEGORY FOR MOBILE CAROUSEL
-    
-    # Get the latest active product from each category
-    # Get latest product per category for mobile hero
-    hero_products = []
-    for category, _ in Product.CATEGORY_CHOICES:
-        product = (
-            Product.objects
-            .filter(is_active=True, category=category)
-            .order_by('-created_at')
-            .first()
-        )
-        if product and product.image:
-            hero_products.append(product)
+from django.shortcuts import render
+from django.db.models import Avg
+from django.core.cache import cache
+from .models import Product, Review
+from .forms import ReviewForm
 
-    
-    
-    # Define all variables first (before any redirects)
-    new_arrivals = Product.objects.order_by('-created_at')[:6]
-    reviews = Review.objects.filter(approved=True)[:4]
-    form = ReviewForm()
-    
-    store_reviews = Review.objects.filter(
-        approved=True,
-        product__isnull=True
-    ).order_by('-created_at')[:10]
-    
-    avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
-    total_reviews = Review.objects.filter(approved=True).count()
-    recent_products = Product.objects.filter(is_active=True).order_by('-created_at')[:5]
-    
-    # Build context with guaranteed defined variables
-    context = {
-        'store_reviews': store_reviews,
-        'avg_rating': round(avg_rating, 1) if avg_rating else None,
-        'total_reviews': total_reviews,
-        'recent_products': recent_products,
-        'reviews': reviews,
-        'review_form': form,
-        'latest_product': Product.objects.filter(is_active=True).order_by('-created_at').first(),
-        'new_arrivals': new_arrivals,
-        'store_reviews': store_reviews,
-        # Add the hero_products for mobile carousel
-        'hero_products': hero_products,
-    }
+def home(request):
+    # Cache key for homepage data
+    cache_key = 'home_page_data'
+    context = cache.get(cache_key)
+
+    if not context:
+        # Latest active product per category for mobile carousel
+        hero_products = []
+        for category, _ in Product.CATEGORY_CHOICES:
+            product = (
+                Product.objects
+                .filter(is_active=True, category=category)
+                .order_by('-created_at')
+                .first()
+            )
+            if product and product.image:
+                hero_products.append(product)
+
+        # New arrivals (latest 6)
+        new_arrivals = Product.objects.filter(is_active=True).order_by('-created_at')[:6]
+
+        # Latest product for desktop hero
+        latest_product = Product.objects.filter(is_active=True).order_by('-created_at').first()
+
+        # Store reviews
+        store_reviews = Review.objects.filter(approved=True, product__isnull=True).order_by('-created_at')[:10]
+        avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+        total_reviews = Review.objects.filter(approved=True).count()
+
+        context = {
+            'hero_products': hero_products,
+            'new_arrivals': new_arrivals,
+            'latest_product': latest_product,
+            'store_reviews': store_reviews,
+            'avg_rating': round(avg_rating, 1),
+            'total_reviews': total_reviews,
+        }
+
+        # Cache the homepage data for 10 minutes
+        cache.set(cache_key, context, 60 * 10)
+
+    # Review form is user-specific and must not be cached
+    context['review_form'] = ReviewForm()
     return render(request, 'index.html', context)
 
+
 def product_list(request):
-    cache_key = f"product_list_{request.GET.get('category')}_{request.GET.get('search')}_{request.GET.get('sort')}_{request.GET.get('page')}"
-    products = cache.get(cache_key)
-    
-    if not products:
-        products = Product.objects.filter(is_active=True)
-        # ... apply filtering, sorting, pagination ...
-        cache.set(cache_key, products, 60*5)  # cache 5 minutes
-    
-    # Filtering
     category = request.GET.get('category')
     search = request.GET.get('search')
     sort = request.GET.get('sort', 'newest')
-    
-    valid_categories = dict(Product.CATEGORY_CHOICES).keys()
+    page_number = request.GET.get('page', 1)
 
-    if category in valid_categories:
-        products = products.filter(category=category)
+    # Generate a cache key that considers filters and pagination
+    cache_key = f'product_list_{category}_{search}_{sort}_page_{page_number}'
+    context = cache.get(cache_key)
 
-    
-    if search:
-        products = products.filter(
-            Q(name__icontains=search) | 
-            Q(description__icontains=search)
-        )
-    
-    # Sorting
-    if sort == 'price_low':
-        products = products.order_by('price')
-    elif sort == 'price_high':
-        products = products.order_by('-price')
-    elif sort == 'name':
-        products = products.order_by('name')
-    else:  # newest
-        products = products.order_by('-created_at')
-    
-    categories = Product.CATEGORY_CHOICES
+    if not context:
+        products = Product.objects.filter(is_active=True)
+        valid_categories = dict(Product.CATEGORY_CHOICES).keys()
 
-    paginator = Paginator(products, 10)
-    page_number = request.GET.get('page')
-    products = paginator.get_page(page_number)
-    
-    context = {
-        'products': products,
-        'categories': categories,
-        'current_category': category,
-        'search_query': search,
-        'sort_method': sort,
-    }
+        if category in valid_categories:
+            products = products.filter(category=category)
+
+        if search:
+            products = products.filter(Q(name__icontains=search) | Q(description__icontains=search))
+
+        # Sorting
+        if sort == 'price_low':
+            products = products.order_by('price')
+        elif sort == 'price_high':
+            products = products.order_by('-price')
+        elif sort == 'name':
+            products = products.order_by('name')
+        else:  # newest
+            products = products.order_by('-created_at')
+
+        paginator = Paginator(products, 10)
+        paged_products = paginator.get_page(page_number)
+
+        context = {
+            'products': paged_products,
+            'categories': Product.CATEGORY_CHOICES,
+            'current_category': category,
+            'search_query': search,
+            'sort_method': sort,
+        }
+
+        # Cache for 10 minutes
+        cache.set(cache_key, context, 60 * 10)
+
     return render(request, 'products/product_list.html', context)
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
-    related_products = Product.objects.filter(
-        category=product.category, 
-        is_active=True
-    ).exclude(id=product.id)[:4]
+    cache_key = f'product_detail_{slug}'
+    context = cache.get(cache_key)
 
-    reviews = product.reviews.filter(approved=True).select_related('user')
-    avg_rating = reviews.aggregate(avg=Avg('rating'))['avg']
+    if not context:
+        product = get_object_or_404(Product, slug=slug, is_active=True)
+        related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id)[:4]
+        reviews = product.reviews.filter(approved=True).select_related('user')
+        avg_rating = reviews.aggregate(avg=Avg('rating'))['avg']
 
-    
-    context = {
-        'product': product,
-        'related_products': related_products,
-        'sizes': product.get_available_sizes_list(),
-        'colors': product.get_available_colors_list(),
-        'FIT_CHOICES': Product.FIT_CHOICES,
-        'reviews': reviews,
-        'avg_rating': round(avg_rating, 1) if avg_rating else None,
-    }
+        context = {
+            'product': product,
+            'related_products': related_products,
+            'sizes': product.get_available_sizes_list(),
+            'colors': product.get_available_colors_list(),
+            'FIT_CHOICES': Product.FIT_CHOICES,
+            'reviews': reviews,
+            'avg_rating': round(avg_rating, 1) if avg_rating else None,
+        }
+
+        # Cache for 5 minutes (reviews can change often)
+        cache.set(cache_key, context, 60 * 5)
+
     return render(request, 'products/product_detail.html', context)
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)

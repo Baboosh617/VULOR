@@ -5,6 +5,9 @@ from django.utils.text import slugify
 from django.urls import reverse
 from django.conf import settings
 from django.db.models import Avg
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
@@ -173,6 +176,9 @@ class Review(models.Model):
     comment = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_reviews'
+    )
     
     class Meta:
         ordering = ['-created_at']

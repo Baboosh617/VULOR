@@ -4,6 +4,7 @@ from products.models import Product
 from products.models import ProductImage
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.core.files.uploadedfile import UploadedFile
 
 class ProductForm(forms.ModelForm):
     # Custom field for slug
@@ -133,9 +134,9 @@ class ProductForm(forms.ModelForm):
         category = cleaned.get('category')
         
         # Fit type validation
-        if category == 'cargo-jeans' and not cleaned.get('fit_type'):
-            self.add_error('fit_type', 'Fit type is required for cargo jeans.')
-        elif category != 'cargo-jeans':
+        if category in ['cargo-jeans', 'sweatpants'] and not cleaned.get('fit_type'):
+            self.add_error('fit_type', 'Fit type is required for cargo jeans & sweatpants.')
+        elif category not in ['cargo-jeans', 'sweatpants']:
             cleaned['fit_type'] = None
         
         # Clear measurements if not cargo-jeans or sweatpants
@@ -151,7 +152,7 @@ class ProductForm(forms.ModelForm):
                 cleaned[field] = ''
 
         image = self.cleaned_data.get('image')
-        if image:
+        if image and isinstance(image, UploadedFile):
             if not image.content_type.startswith('image/'):
                 raise ValidationError('Uploaded file is not a valid image.')
             if image.size > 10485760: #10 MB

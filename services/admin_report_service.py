@@ -6,21 +6,27 @@ from django.utils.timezone import now, timedelta
 from orders.models import Order, OrderItem
 from products.models import Product
 from django.http import HttpResponse
+from orders.models import Order
+from django.db.models import DecimalField, ExpressionWrapper
+import os 
+
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 def send_weekly_sales_report():
     start_date = now() - timedelta(days=7)
 
     # Weekly orders
-    orders = OrderItem.objects.filter(order__created_at__gte=start_date)
+    order_items = OrderItem.objects.filter(order__created_at__gte=start_date)
 
 
     # Revenue + total orders
     total_revenue = (
-        OrderItem.objects.filter(order__created_at__gte=start_date)
-        .aggregate(total=Sum(F("quantity") * F("price")))
-        .get("total") or 0
-    )    
-    total_orders = orders.count()
+    OrderItem.objects.filter(order__created_at__gte=start_date)
+            .aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
+        )
+    )["total"] or 0
+)
+    total_orders = (Order.objects.filter(created_at__gte=start_date).count())
 
     # Low stock products
     low_stock_products = Product.objects.filter(inventory_count__lte=5)
@@ -40,7 +46,7 @@ def send_weekly_sales_report():
     )
 
     context = {
-        "orders": orders,
+        "order_items": order_items,
         "total_revenue": total_revenue,
         "total_orders": total_orders,
         "low_stock_products": low_stock_products,

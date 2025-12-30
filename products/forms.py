@@ -1,6 +1,7 @@
 # In your products/forms.py or reviews/forms.py
 from django import forms
 from .models import Review
+from django.core.exceptions import ValidationError
 
 class ReviewForm(forms.ModelForm):
     RATING_CHOICES = [
@@ -30,3 +31,13 @@ class ReviewForm(forms.ModelForm):
         labels = {
             'comment': 'Your Review',
         }
+    def clean_rating(self):
+        rating = int(self.cleaned_data.get('rating'))
+        if rating not in [1, 2, 3, 4, 5]:
+            raise ValidationError("Please select a rating between 1 and 5.")
+        return rating
+    def clean_comment(self):
+        comment = self.cleaned_data.get('comment')
+        if len(comment) < 10:
+            raise ValidationError("Your review must be at least 10 characters long.")
+        return comment

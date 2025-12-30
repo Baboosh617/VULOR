@@ -304,6 +304,7 @@ EMAIL_SUBJECT_PREFIX = '[VULOR] '
 ADMIN_SITE_HEADER = "VULOR Admin Dashboard"
 ADMIN_SITE_TITLE = "VULOR Admin"
 ADMIN_INDEX_TITLE = "Welcome to VULOR Dashboard"
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 # Static files
 STATIC_URL = '/static/'

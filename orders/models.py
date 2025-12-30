@@ -4,12 +4,12 @@ from django.contrib.auth import get_user_model
 from products.models import Product
 from services.email_service import (
     send_order_confirmation,
-    send_order_status_update,
-    send_admin_order_notification,
     send_order_shipped,
     send_order_out_for_delivery,    
     send_order_delivered,
     send_order_cancelled,
+    send_admin_new_order,
+    send_admin_high_value_order,
 )
 from accounts.models import CustomUser
 from uuid import uuid4
@@ -136,22 +136,18 @@ class Order(models.Model):
                 self.save(update_fields=['payment_email_sent'])
             
             if not self.admin_notified_new:
-                send_admin_order_notification(self)
+                send_admin_high_value_order(self)
                 self.admin_notified_new = True
                 self.save(update_fields=['admin_notified_new'])
         elif old_status != self.status and self.payment_status == 'cancelled':
             self.restore_inventory()
-            if not self.admin_notified_cancellation:
-                send_admin_order_notification(self)
-                self.admin_notified_cancellation = True
-                self.save(update_fields=['admin_notified_cancellation'])
+          
 
         
         elif old_status == 'success' and self.status == 'cancelled':
             self.restore_inventory()
         
-        elif old_status and old_status != self.status:
-            send_order_status_update(self, old_status)
+       
     
     def reduce_inventory(self):
         """Reduce inventory for all items in this order"""
