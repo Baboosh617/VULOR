@@ -41,7 +41,7 @@ class CustomUserCreationForm(UserCreationForm):
         """
         try:
             user = self.save()
-            return user, None  # Return user and no error
+            return user, None  
         except Exception as e:
             return None, str(e)
     
