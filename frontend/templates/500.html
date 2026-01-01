@@ -5,20 +5,20 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-black px-4">
     <div class="text-center max-w-md space-y-8">
-        <!-- VULOR Brand Mark -->
+        
         <div class="mb-8">
             <div class="w-20 h-20 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto">
                 <span class="text-[#dc2626] text-3xl font-bold">V</span>
             </div>
         </div>
         
-        <!-- Error Code -->
+        
         <div class="space-y-4">
             <div class="text-9xl font-bold text-white tracking-tighter">500</div>
             <div class="w-24 h-1 bg-gradient-to-r from-transparent via-[#dc2626] to-transparent mx-auto"></div>
         </div>
         
-        <!-- Message -->
+        
         <div class="space-y-4">
             <h1 class="text-2xl font-bold text-white tracking-wide">SERVER ERROR</h1>
             <p class="text-[#cccccc] leading-relaxed tracking-wider">
@@ -26,13 +26,13 @@
             </p>
         </div>
         
-        <!-- Illustration -->
+        
         <div class="py-4">
             <div class="relative mx-auto w-32 h-32">
-                <!-- Server rack illustration -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-24 h-20 border-2 border-[#333333] rounded-lg">
-                        <!-- Server panels -->
+        
                         <div class="flex flex-col h-full">
                             <div class="flex-1 border-b border-[#333333] flex items-center justify-center">
                                 <div class="w-16 h-2 bg-[#333333] rounded"></div>
@@ -45,19 +45,19 @@
                             </div>
                         </div>
                         
-                        <!-- Error indicator lights -->
+        
                         <div class="absolute -top-2 left-2 flex space-x-1">
                             <div class="w-2 h-2 bg-[#dc2626] rounded-full animate-pulse"></div>
                             <div class="w-2 h-2 bg-[#dc2626] rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
                             <div class="w-2 h-2 bg-[#dc2626] rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
                         </div>
                         
-                        <!-- Spark effect -->
+        
                         <div class="absolute top-2 right-2 text-[#dc2626] text-xs">⚡</div>
                     </div>
                 </div>
                 
-                <!-- Glitch effect overlay -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-32 h-32 border-2 border-[#dc2626]/20 rounded-lg opacity-0 animate-glitch"></div>
                 </div>
@@ -65,7 +65,7 @@
             <p class="text-[#666666] text-sm mt-2 tracking-wider">TRY REFRESHING OR COME BACK LATER</p>
         </div>
         
-        <!-- CTA Buttons -->
+        
         <div class="space-y-6">
             <div>
                 <a href="{% url 'home' %}" 
@@ -81,7 +81,7 @@
                 </button>
             </div>
             
-            <!-- Status Indicators -->
+        
             <div class="pt-6 border-t border-[#333333]">
                 <div class="space-y-3">
                     <div class="flex items-center justify-center space-x-2">
@@ -95,7 +95,7 @@
                 </div>
             </div>
             
-            <!-- Contact Option -->
+            
             <div class="pt-6 border-t border-[#333333]">
                 <p class="text-[#666666] text-sm tracking-wider mb-2">STILL HAVING ISSUES?</p>
                 <a href="mailto:support@vulor.com" 
@@ -106,7 +106,7 @@
             </div>
         </div>
         
-        <!-- Error Details (for developers) -->
+        
         <div class="pt-8 border-t border-[#333333]">
             <details class="text-left">
                 <summary class="text-[#666666] text-xs tracking-wider cursor-pointer hover:text-[#dc2626] transition-colors duration-300">
@@ -165,7 +165,7 @@
         50% { background-color: #dc2626; }
     }
     
-    /* Animate the error number */
+    
     .text-9xl {
         position: relative;
         overflow: hidden;
@@ -182,17 +182,17 @@
         animation: errorScan 1.5s linear infinite;
     }
     
-    /* Animate the glitch effect */
+    
     .animate-glitch {
         animation: glitch 4s infinite;
     }
     
-    /* Animate the spark */
+    
     .absolute.top-2.right-2 {
         animation: spark 2s infinite;
     }
     
-    /* Animate server panels */
+    
     .w-16.h-2 {
         animation: serverPanel 3s infinite;
     }
@@ -208,7 +208,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Add ripple effect to main button
+    
         const mainButton = document.querySelector('a[href*="home"]');
         if (mainButton) {
             mainButton.addEventListener('click', function(e) {
@@ -239,7 +239,7 @@
             });
         }
         
-        // Add CSS for ripple animation if not already present
+    
         if (!document.querySelector('style[data-ripple]')) {
             const style = document.createElement('style');
             style.setAttribute('data-ripple', 'true');
@@ -258,7 +258,7 @@
             document.head.appendChild(style);
         }
         
-        // Add hover effect to all buttons
+    
         const buttons = document.querySelectorAll('a, button');
         buttons.forEach(button => {
             button.addEventListener('mouseenter', function() {
@@ -271,13 +271,13 @@
             });
         });
         
-        // Auto-refresh attempt simulation
+    
         const refreshButton = document.querySelector('button[onclick*="reload"]');
         if (refreshButton) {
             refreshButton.addEventListener('click', function() {
                 const originalText = this.textContent;
                 
-                // Show loading state
+    
                 this.innerHTML = `
                     <svg class="animate-spin h-4 w-4 text-current mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -286,20 +286,20 @@
                 `;
                 this.disabled = true;
                 
-                // Simulate server check
+    
                 setTimeout(() => {
-                    // Randomly decide if refresh worked
+    
                     if (Math.random() > 0.3) {
-                        // Success - actually reload
+    
                         window.location.reload();
                     } else {
-                        // Show error message
+    
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'mt-4 p-3 bg-[#111111] border border-[#dc2626]/30 text-[#dc2626] text-xs rounded tracking-wider';
                         errorDiv.textContent = 'STILL ENCOUNTERING ISSUES. TRY AGAIN IN A MOMENT.';
                         errorDiv.style.animation = 'fadeIn 0.5s ease';
                         
-                        // Remove previous message if exists
+    
                         const existingMessage = document.querySelector('.refresh-message');
                         if (existingMessage) {
                             existingMessage.remove();
@@ -308,11 +308,11 @@
                         errorDiv.classList.add('refresh-message');
                         refreshButton.parentElement.appendChild(errorDiv);
                         
-                        // Reset button
+    
                         this.innerHTML = originalText;
                         this.disabled = false;
                         
-                        // Auto-remove message after 5 seconds
+    
                         setTimeout(() => {
                             if (errorDiv.parentElement) {
                                 errorDiv.style.opacity = '0';
@@ -329,7 +329,7 @@
             });
         }
         
-        // Add fadeIn animation if not present
+    
         if (!document.querySelector('style[data-fadein]')) {
             const style = document.createElement('style');
             style.setAttribute('data-fadein', 'true');
@@ -342,14 +342,14 @@
             document.head.appendChild(style);
         }
         
-        // Simulate server status check
+    
         const statusIndicators = document.querySelectorAll('.flex.items-center.justify-center.space-x-2');
         statusIndicators.forEach((indicator, index) => {
             setTimeout(() => {
                 const dot = indicator.querySelector('.w-2.h-2');
                 const text = indicator.querySelector('span');
                 
-                // Change to green if "fixed"
+    
                 if (Math.random() > 0.5) {
                     dot.style.backgroundColor = '#16a34a';
                     text.style.color = '#16a34a';
@@ -361,7 +361,7 @@
             }, 1000 + (index * 1500));
         });
         
-        // Show system recovery message after 5 seconds
+    
         setTimeout(() => {
             const recoveryDiv = document.createElement('div');
             recoveryDiv.className = 'mt-4 p-4 bg-[#111111] border border-[#333333] rounded-lg';
@@ -377,7 +377,7 @@
             
             document.querySelector('.space-y-6').appendChild(recoveryDiv);
             
-            // Add progress animation
+    
             const progressStyle = document.createElement('style');
             progressStyle.textContent = `
                 @keyframes progress {
@@ -387,7 +387,7 @@
             `;
             document.head.appendChild(progressStyle);
             
-            // Fade in animation
+    
             recoveryDiv.style.opacity = '0';
             recoveryDiv.style.transition = 'opacity 0.5s ease';
             setTimeout(() => {

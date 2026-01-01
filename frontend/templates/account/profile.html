@@ -11,7 +11,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- LEFT: Profile Navigation -->
+        <!-- Profile Navigation -->
         <div class="lg:col-span-1">
             <nav class="space-y-1 bg-black border border-[#333333] p-4">
                 <a href="{% url 'profile_view' %}" 
@@ -35,9 +35,9 @@
             </nav>
         </div>
 
-        <!-- RIGHT: Content Area -->
+        <!-- Content Area -->
         <div class="lg:col-span-3">
-            <!-- Success Message -->
+            
             {% if messages %}
             <div class="mb-6">
                 {% for message in messages %}
@@ -48,13 +48,13 @@
             </div>
             {% endif %}
 
-            <!-- SECTION 1: Profile Info -->
+            <!-- Profile Info -->
             <div class="bg-black border border-[#333333] p-8 mb-8">
                 <h2 class="text-white text-sm font-bold mb-6 tracking-widest">PROFILE INFORMATION</h2>
                 
                 <!-- Display current user info -->
                 <div class="space-y-6">
-                    <!-- Full Name -->
+                    
                     <div>
                         <label class="block text-[#dc2626] text-sm mb-2 font-bold">FULL NAME</label>
                         <div class="text-white text-lg font-medium">
@@ -62,13 +62,13 @@
                         </div>
                     </div>
 
-                    <!-- Email (readonly) -->
+                    
                     <div>
                         <label class="block text-[#dc2626] text-sm mb-2 font-bold">EMAIL</label>
                         <div class="text-white text-lg font-medium">{{ user.email }}</div>
                     </div>
 
-                    <!-- Phone Number (if exists) -->
+                    
                     {% if user.phone_number %}
                     <div>
                         <label class="block text-[#dc2626] text-sm mb-2 font-bold">PHONE NUMBER</label>
@@ -76,14 +76,14 @@
                     </div>
                     {% endif %}
 
-                    <!-- Date Joined -->
+                    
                     <div>
                         <label class="block text-[#dc2626] text-sm mb-2 font-bold">MEMBER SINCE</label>
                         <div class="text-white text-lg font-medium">{{ user.date_joined|date:"F j, Y" }}</div>
                     </div>
                 </div>
                 
-                <!-- Note about editing -->
+                
                 <div class="mt-8 pt-6 border-t border-[#333333]">
                     <p class="text-[#666666] text-xs">
                         To update your profile information, please contact support.
@@ -91,7 +91,7 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: Shipping Address (Optional) -->
+            <!-- Shipping Address (Not completely configured yet, ill get back to it)-->
             {% if user.address %}
             <div class="bg-black border border-[#333333] p-8 mb-8">
                 <h2 class="text-white text-sm font-bold mb-6 tracking-widest">DEFAULT SHIPPING ADDRESS</h2>
@@ -105,7 +105,7 @@
             </div>
             {% endif %}
 
-            <!-- SECTION 3: Recent Orders Summary -->
+            <!-- Recent Orders Summary -->
             {% if orders %}
             <div class="bg-black border border-[#333333] p-8 mb-8">
                 <div class="flex justify-between items-start mb-6">
@@ -145,7 +145,7 @@
             </div>
             {% endif %}
 
-            <!-- SECTION 4: Account Stats -->
+            <!-- Account Stats -->
             <div class="bg-black border border-[#333333] p-8 mb-8">
                 <h2 class="text-white text-sm font-bold mb-6 tracking-widest">ACCOUNT OVERVIEW</h2>
                 
@@ -165,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- SECTION 5: Account Actions -->
+            <!-- Account Actions -->
             <div class="bg-black border border-[#333333] p-8">
                 <div class="flex justify-between items-center">
                     <div>
@@ -180,19 +180,19 @@
 </div>
 
 <style>
-    /* Add custom hover effects */
+    
     a, button, .hover-effect {
         transition: all 0.3s ease;
     }
     
-    /* Active nav link indicator */
+    
     .active-nav-link {
         border-left-color: #dc2626;
         color: white;
         padding-left: 1rem;
     }
     
-    /* Hover glow effect for stats boxes */
+    
     .hover\:border-\[\#dc2626\]:hover {
         box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
     }
@@ -200,7 +200,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Highlight current page in navigation
+        
         const currentPath = window.location.pathname;
         const navLinks = document.querySelectorAll('nav a');
         
@@ -212,7 +212,7 @@
             }
         });
         
-        // Add hover effects to all interactive elements
+        
         const interactiveElements = document.querySelectorAll('a, button, .stats-box, .order-item');
         interactiveElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
@@ -220,7 +220,7 @@
             });
         });
         
-        // Animate stats counters if needed
+        
         const stats = document.querySelectorAll('.stats-box');
         stats.forEach(stat => {
             stat.addEventListener('mouseenter', () => {

@@ -8,22 +8,22 @@
     
     {% if cart.items.all %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Cart Items -->
+        
         <div class="lg:col-span-2">
             {% for item in cart.items.all %}
             <div class="border-b border-[#333333] py-8 flex flex-col md:flex-row items-start gap-6">
-                <!-- Product Image -->
+                
                 <div class="w-32 h-32 bg-black border border-[#333333] overflow-hidden flex-shrink-0">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
                          class="w-full h-full object-cover">
                 </div>
                 
-                <!-- Product Info -->
+                
                 <div class="flex-1 min-w-0">
-                    <!-- Product Name and Remove -->
+                    
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="text-white text-lg font-bold">{{ item.product.name }}</h3>
-                        <!-- Remove link -->
+                        
                         <form method="POST" action="{% url 'remove_from_cart' item.id %}">
                             {% csrf_token %}
                             <button type="submit" 
@@ -33,22 +33,23 @@
                         </form>
                     </div>
                     
-                    <!-- Size -->
+                    
                     {% if item.size %}
                     <div class="text-[#cccccc] text-sm mb-2">Size: {{ item.size }}</div>
                     {% endif %}
                     
-                    <!-- Price -->
+                    
                     <div class="text-[#dc2626] text-lg font-bold mb-4">₦{{ item.product.price }}</div>
                     
-                    <!-- Quantity Controls -->
+                    
                     <div class="flex items-center">
                         <label class="text-white text-sm mr-4">QUANTITY</label>
                         <div class="flex items-center w-32">
                             <form method="POST" action="{% url 'update_cart_item' item.id %}" class="flex items-center">
                                 {% csrf_token %}
                                 <button type="button" 
-                                        class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
+                                        class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex 
+                                        items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                                     −
                                 </button>
                                 <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
@@ -58,7 +59,7 @@
                                         class="increase-quantity w-10 h-10 border border-l-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
                                     +
                                 </button>
-                                <!-- Hidden update button -->
+                                
                                 <button type="submit" 
                                         class="hidden update-btn ml-4 text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
                                     UPDATE
@@ -68,7 +69,7 @@
                     </div>
                 </div>
                 
-                <!-- Item Total -->
+                
                 <div class="md:text-right mt-4 md:mt-0">
                     <div class="text-[#dc2626] text-lg font-bold">₦{{ item.total_price }}</div>
                 </div>
@@ -76,45 +77,45 @@
             {% endfor %}
         </div>
         
-        <!-- Order Summary -->
+        
         <div class="bg-black border border-[#333333] p-6 h-fit lg:sticky lg:top-8">
             <h2 class="text-white text-lg font-bold mb-6 tracking-widest">ORDER SUMMARY</h2>
             
-            <!-- Summary Details -->
+            
             <div class="space-y-4 mb-8">
                 <div class="flex justify-between text-[#cccccc] text-sm">
                     <span>SUBTOTAL</span>
                     <span class="text-white">₦{{ cart.total_price }}</span>
                 </div>
                 
-                <!-- Shipping placeholder -->
+                
                 <div class="flex justify-between text-[#666666] text-sm border-b border-[#333333] pb-4">
                     <span>SHIPPING CALCULATED AT CHECKOUT</span>
                 </div>
                 
-                <!-- Total -->
+                
                 <div class="flex justify-between text-white text-lg font-bold pt-4">
                     <span>TOTAL</span>
                     <span class="text-[#dc2626]">₦{{ cart.total_price }}</span>
                 </div>
             </div>
             
-            <!-- Checkout Button -->
+            
              <form method="post" action="{% url 'orders:checkout' %}">
                {% csrf_token %}
 
-            <!-- fields -->
+
 
              <button type="submit" class="block w-full border border-[#dc2626] text-[#dc2626] text-center my-6 py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">PROCEED TO PAYMENT</button>
             </form>
             
-            <!-- Continue Shopping -->
+            
             <a href="{% url 'product_list' %}" 
                class="block w-full border border-[#dc2626] text-[#dc2626] text-center py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">
                 CONTINUE SHOPPING
             </a>
             
-            <!-- Secure Payment Notice -->
+            
             <div class="mt-6 pt-6 border-t border-[#333333]">
                 <p class="text-[#666666] text-xs text-center">
                     SECURE PAYMENT PROCESSED BY PAYSTACK
@@ -123,7 +124,7 @@
         </div>
     </div>
     {% else %}
-    <!-- Empty Cart State -->
+    
     <div class="text-center py-20">
         <div class="w-20 h-20 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="material-symbols-outlined text-[#666666] text-3xl">
@@ -141,7 +142,7 @@
 </div>
 
 <style>
-    /* Hide number input spinners */
+    
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
@@ -152,7 +153,7 @@
         -moz-appearance: textfield;
     }
     
-    /* Sticky summary on scroll */
+    
     .lg\:sticky {
         position: sticky;
     }
@@ -160,7 +161,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Quantity controls with auto-update
+        
         document.querySelectorAll('.increase-quantity, .decrease-quantity').forEach(button => {
             button.addEventListener('click', function() {
                 const form = this.closest('form');
@@ -173,7 +174,7 @@
                     input.value = parseInt(input.value) - 1;
                 }
                 
-                // Show update button with animation
+                
                 if (updateBtn) {
                     updateBtn.classList.remove('hidden');
                     updateBtn.classList.add('animate-pulse');
@@ -181,18 +182,18 @@
             });
         });
 
-        // Auto-submit when update button is shown and clicked
+        
         document.querySelectorAll('.update-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const form = this.closest('form');
                 
-                // Show loading state
+                
                 const originalText = this.textContent;
                 this.textContent = 'UPDATING...';
                 this.disabled = true;
                 
-                // Submit form
+                
                 const formData = new FormData(form);
                 
                 fetch(form.action, {
@@ -211,16 +212,16 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Success - show success message and reload
+                        
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
                         messageDiv.textContent = 'Cart updated!';
                         document.body.appendChild(messageDiv);
                         
-                        // Remove message after 2 seconds
+                        
                         setTimeout(() => messageDiv.remove(), 2000);
                         
-                        // Reload page to update totals
+                        
                         setTimeout(() => {
                             window.location.reload();
                         }, 500);
@@ -228,7 +229,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Show error message
+                    
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
                     messageDiv.textContent = 'Update failed. Try again.';
@@ -236,26 +237,26 @@
                     
                     setTimeout(() => messageDiv.remove(), 3000);
                     
-                    // Reset button
+                    
                     this.textContent = originalText;
                     this.disabled = false;
                 });
             });
         });
 
-        // Remove item with confirmation
+        
         document.querySelectorAll('form[action*="remove_from_cart"]').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 if (confirm('Remove this item from your cart?')) {
-                    // Show loading state
+                    
                     const button = this.querySelector('button');
                     const originalText = button.textContent;
                     button.textContent = 'REMOVING...';
                     button.disabled = true;
                     
-                    // Submit form
+                    
                     const formData = new FormData(this);
                     
                     fetch(this.action, {
@@ -274,7 +275,7 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Show success message
+                            
                             const messageDiv = document.createElement('div');
                             messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
                             messageDiv.textContent = 'Item removed!';
@@ -282,7 +283,7 @@
                             
                             setTimeout(() => messageDiv.remove(), 2000);
                             
-                            // Reload page
+                            
                             setTimeout(() => {
                                 window.location.reload();
                             }, 500);
@@ -290,7 +291,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        // Show error message
+                        
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
                         messageDiv.textContent = 'Remove failed. Try again.';
@@ -298,7 +299,7 @@
                         
                         setTimeout(() => messageDiv.remove(), 3000);
                         
-                        // Reset button
+                        
                         button.textContent = originalText;
                         button.disabled = false;
                     });
@@ -306,7 +307,7 @@
             });
         });
 
-        // Add hover effects to all interactive elements
+        
         const interactiveElements = document.querySelectorAll('a, button, input[type="button"]');
         interactiveElements.forEach(el => {
             el.addEventListener('mouseenter', () => {

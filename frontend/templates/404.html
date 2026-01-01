@@ -5,20 +5,20 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-black px-4">
     <div class="text-center max-w-md space-y-8">
-        <!-- VULOR Brand Mark -->
+        
         <div class="mb-8">
             <div class="w-20 h-20 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto">
                 <span class="text-[#dc2626] text-3xl font-bold">V</span>
             </div>
         </div>
         
-        <!-- Error Code -->
+        
         <div class="space-y-4">
             <div class="text-9xl font-bold text-white tracking-tighter">404</div>
             <div class="w-24 h-1 bg-gradient-to-r from-transparent via-[#dc2626] to-transparent mx-auto"></div>
         </div>
         
-        <!-- Message -->
+        
         <div class="space-y-4">
             <h1 class="text-2xl font-bold text-white tracking-wide">PAGE NOT FOUND</h1>
             <p class="text-[#cccccc] leading-relaxed tracking-wider">
@@ -26,17 +26,17 @@
             </p>
         </div>
         
-        <!-- Illustration -->
+        
         <div class="py-4">
             <div class="relative mx-auto w-32 h-32">
-                <!-- Search illustration -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-24 h-24 border-2 border-[#333333] rounded-full flex items-center justify-center">
-                        <!-- Magnifying glass handle -->
+        
                         <div class="absolute -bottom-4 right-6 w-2 h-8 bg-[#dc2626] transform rotate-45 rounded"></div>
-                        <!-- Magnifying glass lens -->
+        
                         <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center">
-                            <!-- Missing item -->
+        
                             <div class="w-8 h-8 border-2 border-dashed border-[#666666] rounded-full flex items-center justify-center">
                                 <span class="text-[#666666] text-xs">?</span>
                             </div>
@@ -44,7 +44,7 @@
                     </div>
                 </div>
                 
-                <!-- Search rays -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-32 h-32 opacity-20">
                         <div class="absolute inset-0 border-2 border-[#dc2626] rounded-full"></div>
@@ -56,7 +56,7 @@
             <p class="text-[#666666] text-sm mt-2 tracking-wider">MAYBE TRY EXPLORING OUR COLLECTION INSTEAD</p>
         </div>
         
-        <!-- CTA Buttons -->
+        
         <div class="space-y-4">
             <div>
                 <a href="{% url 'home' %}" 
@@ -74,7 +74,7 @@
             </div>
         </div>
         
-        <!-- Search suggestion -->
+        
         <div class="pt-8 border-t border-[#333333]">
             <p class="text-[#666666] text-xs tracking-wider mb-4">CAN'T FIND WHAT YOU'RE LOOKING FOR?</p>
             <form action="{% url 'product_list' %}" method="GET" class="flex gap-2">
@@ -112,7 +112,7 @@
         100% { transform: translateY(200%) rotate(45deg); }
     }
     
-    /* Animate the error number */
+    
     .text-9xl {
         position: relative;
         overflow: hidden;
@@ -129,12 +129,12 @@
         animation: floatScan 2s linear infinite;
     }
     
-    /* Animate the magnifying glass */
+    
     .w-24.h-24.rounded-full {
         animation: searchSpin 10s linear infinite;
     }
     
-    /* Animate the search rays */
+    
     .w-32.h-32 .absolute {
         animation: pulseRay 3s ease-in-out infinite;
     }
@@ -151,7 +151,7 @@
         animation-delay: 2s;
     }
     
-    /* Animate the question mark */
+    
     .rounded-full .text-xs {
         animation: bounceQuestion 2s ease-in-out infinite;
     }
@@ -159,7 +159,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Add ripple effect to main button
+    
         const mainButton = document.querySelector('a[href*="home"]');
         if (mainButton) {
             mainButton.addEventListener('click', function(e) {
@@ -190,7 +190,7 @@
             });
         }
         
-        // Add CSS for ripple animation if not already present
+    
         if (!document.querySelector('style[data-ripple]')) {
             const style = document.createElement('style');
             style.setAttribute('data-ripple', 'true');
@@ -209,7 +209,7 @@
             document.head.appendChild(style);
         }
         
-        // Add hover effect to all buttons
+    
         const buttons = document.querySelectorAll('a, button');
         buttons.forEach(button => {
             button.addEventListener('mouseenter', function() {
@@ -222,7 +222,7 @@
             });
         });
         
-        // Interactive question mark
+    
         const questionMark = document.querySelector('.rounded-full .text-xs');
         if (questionMark) {
             questionMark.addEventListener('click', function() {
@@ -242,12 +242,12 @@
             questionMark.style.cursor = 'pointer';
         }
         
-        // Interactive search form
+    
         const searchInput = document.querySelector('input[name="q"]');
         const searchButton = document.querySelector('button[type="submit"]');
         
         if (searchInput && searchButton) {
-            // Add focus effect
+    
             searchInput.addEventListener('focus', function() {
                 this.parentElement.classList.add('ring-1', 'ring-[#dc2626]', 'rounded');
             });
@@ -256,12 +256,12 @@
                 this.parentElement.classList.remove('ring-1', 'ring-[#dc2626]', 'rounded');
             });
             
-            // Add search animation
+    
             searchButton.addEventListener('click', function(e) {
                 if (!searchInput.value.trim()) {
                     e.preventDefault();
                     
-                    // Shake animation
+    
                     searchInput.classList.add('animate-shake');
                     searchInput.focus();
                     
@@ -272,7 +272,7 @@
                     return false;
                 }
                 
-                // Add loading animation to button
+    
                 const originalHTML = this.innerHTML;
                 this.innerHTML = `
                     <svg class="animate-spin h-4 w-4 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -282,7 +282,7 @@
                 `;
                 this.disabled = true;
                 
-                // In real application, this would be handled by form submission
+                
                 setTimeout(() => {
                     this.innerHTML = originalHTML;
                     this.disabled = false;
@@ -290,7 +290,7 @@
             });
         }
         
-        // Add shake animation if not present
+        
         if (!document.querySelector('style[data-shake]')) {
             const style = document.createElement('style');
             style.setAttribute('data-shake', 'true');
@@ -307,7 +307,7 @@
             document.head.appendChild(style);
         }
         
-        // Show recent products suggestion after 3 seconds
+        
         setTimeout(() => {
             const suggestionDiv = document.createElement('div');
             suggestionDiv.className = 'mt-6 p-4 bg-[#111111] border border-[#333333] rounded-lg';
@@ -331,7 +331,7 @@
             
             document.querySelector('.space-y-8').appendChild(suggestionDiv);
             
-            // Fade in animation
+        
             suggestionDiv.style.opacity = '0';
             suggestionDiv.style.transition = 'opacity 0.5s ease';
             setTimeout(() => {

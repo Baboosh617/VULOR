@@ -6,7 +6,7 @@ from .models import Product
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import Review
+from .models import Review, StoreReview
 from .forms import ReviewForm
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -27,12 +27,12 @@ from .models import Product, Review
 from .forms import ReviewForm
 
 def home(request):
-    # Cache key for homepage data
+    
     cache_key = 'home_page_data'
     context = cache.get(cache_key)
 
     if not context:
-        # Latest active product per category for mobile carousel
+        
         hero_products = []
         for category, _ in Product.CATEGORY_CHOICES:
             product = (
@@ -44,13 +44,13 @@ def home(request):
             if product and product.image:
                 hero_products.append(product)
 
-        # New arrivals (latest 6)
+        
         new_arrivals = Product.objects.filter(is_active=True).order_by('-created_at')[:6]
 
-        # Latest product for desktop hero
+
         latest_product = Product.objects.filter(is_active=True).order_by('-created_at').first()
 
-        # Store reviews
+
         store_reviews = Review.objects.filter(approved=True, product__isnull=True).order_by('-created_at')[:10]
         avg_rating = store_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
         total_reviews = Review.objects.filter(approved=True).count()
@@ -64,10 +64,10 @@ def home(request):
             'total_reviews': total_reviews,
         }
 
-        # Cache the homepage data for 10 minutes
+
         cache.set(cache_key, context, 60 * 10)
 
-    # Review form is user-specific and must not be cached
+
     context['review_form'] = ReviewForm()
     return render(request, 'index.html', context)
 
@@ -78,7 +78,7 @@ def product_list(request):
     sort = request.GET.get('sort', 'newest')
     page_number = request.GET.get('page', 1)
 
-    # Generate a cache key that considers filters and pagination
+
     cache_key = f'product_list_{category}_{search}_{sort}_page_{page_number}'
     context = cache.get(cache_key)
 
@@ -92,14 +92,14 @@ def product_list(request):
         if search:
             products = products.filter(Q(name__icontains=search) | Q(description__icontains=search))
 
-        # Sorting
+
         if sort == 'price_low':
             products = products.order_by('price')
         elif sort == 'price_high':
             products = products.order_by('-price')
         elif sort == 'name':
             products = products.order_by('name')
-        else:  # newest
+        else: 
             products = products.order_by('-created_at')
 
         paginator = Paginator(products, 10)
@@ -113,7 +113,7 @@ def product_list(request):
             'sort_method': sort,
         }
 
-        # Cache for 10 minutes
+        
         cache.set(cache_key, context, 60 * 10)
 
     return render(request, 'products/product_list.html', context)
@@ -138,14 +138,14 @@ def product_detail(request, slug):
             'avg_rating': round(avg_rating, 1) if avg_rating else None,
         }
 
-        # Cache for 5 minutes (reviews can change often)
+        
         cache.set(cache_key, context, 60 * 5)
 
     return render(request, 'products/product_detail.html', context)
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
-def add_review(request, product_id):
+def add_product_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     if request.method != 'POST':
@@ -184,3 +184,13 @@ def add_review(request, product_id):
         messages.success(request, 'Thank you for your review!')
 
     return redirect('product_detail', slug=product.slug)
+
+@login_required
+def add_store_review(request):
+    if request.method == "POST":
+        StoreReview.objects.create(
+            user=request.user,
+            rating=request.POST.get("rating"),
+            comment=request.POST.get("comment"),
+        )
+        return redirect("products:home")

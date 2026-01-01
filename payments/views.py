@@ -25,13 +25,13 @@ from django_ratelimit.decorators import ratelimit
 import logging
 
 logger = logging.getLogger(__name__)
-# 1) Initiate payment and redirect admin -> paystack (used by server-side flow)
+
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def initiate_payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # basic validations
+   
     if order.payment_status == 'success':
         messages.info(request, "Order already paid.")
         return redirect('orders:order_detail', order_number=order.order_number)
@@ -40,7 +40,7 @@ def initiate_payment(request, order_id):
         messages.error(request, "Invalid order amount.")
         return redirect('cart:view_cart')
 
-    # reuse recent pending transaction if exists (optional)
+    
     existing = PaymentTransaction.objects.filter(order=order, status__in=['pending', 'initiated']).order_by('-created_at').first()
     if existing and (timezone.now() - existing.created_at).total_seconds() < 1800:
         payment = existing
@@ -59,7 +59,7 @@ def initiate_payment(request, order_id):
     try:
         response = paystack.initialize_transaction(
             email=order.customer_email,
-            amount=payment.amount_in_kobo,    # kobo
+            amount=payment.amount_in_kobo,   
             reference=payment.paystack_reference,
             callback_url=callback_url,
             metadata={
@@ -68,14 +68,14 @@ def initiate_payment(request, order_id):
             }
         )
     except Exception as e:
-        # network or API error
+       
         payment.status = 'failed'
         payment.metadata['init_error'] = str(e)
         payment.save()
         messages.error(request, "Payment service temporarily unavailable.")
         return redirect('payments:payment_failed', order_id=order.id)
 
-    # process paystack response
+    
     data = response.get('data') or {}
     if response.get('status') and data.get('authorization_url'):
         payment.paystack_access_code = data.get('access_code', '')
@@ -90,13 +90,13 @@ def initiate_payment(request, order_id):
         messages.error(request, "Could not start payment. Try again.")
         return redirect('payments:payment_failed', order_id=order.id)
 
-# 2) API endpoint for front-end JS integration (optional)
+
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def get_payment_details(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # Reuse recent pending transaction
+
     existing = (
         PaymentTransaction.objects
         .filter(order=order, status__in=['pending', 'initiated'])
@@ -131,7 +131,7 @@ def get_payment_details(request, order_id):
 
 
 
-# 3) Verify view — Paystack redirects here after payment
+
 @login_required
 @require_GET
 def verify_payment(request):
@@ -201,19 +201,19 @@ def verify_payment(request):
 
 
     if verification.get('status') and verification['data']['status'] == 'success':
-        # mark payment success
+        
         payment.status = 'success'
         payment.verified_at = timezone.now()
         payment.metadata['verify_data'] = verification['data']
         payment.save()
 
-        # update order
+        
         order = payment.order
         order.payment_status = 'success'
         order.paystack_reference = reference
         order.save()
 
-        # optional: clear cart, send email etc.
+        
         cart = Cart.objects.filter(user=request.user).first()
         if cart:
             CartItem.objects.filter(cart=cart).delete()
@@ -239,7 +239,7 @@ def verify_payment(request):
     
 
 
-# 4) Webhook handler (Paystack posts here) — secure with HMAC SHA512 signature
+
 @csrf_exempt
 @require_POST
 def paystack_webhook(request):
@@ -294,20 +294,20 @@ def paystack_webhook(request):
             if str(meta.get("order_id")) != str(txn.order.id):
                 return HttpResponse(status=400)
 
-            # MARK PAYMENT SUCCESS
+            
             txn.status = "success"
             txn.verified_at = timezone.now()
             txn.metadata = txn.metadata or {}
             txn.metadata["webhook_data"] = data
             txn.save()
 
-            # UPDATE ORDER
+            
             order = txn.order
             order.payment_status = "success"
             order.paystack_reference = reference
             order.save()
 
-            # CLEAR CART
+            
             cart = Cart.objects.filter(user=order.user).first()
             if cart:
                 CartItem.objects.filter(cart=cart).delete()
@@ -317,7 +317,7 @@ def paystack_webhook(request):
 
     return HttpResponse(status=200)
     
-# Success and failure pages
+
 @login_required
 def payment_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)

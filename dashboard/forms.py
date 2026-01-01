@@ -1,4 +1,3 @@
-# dashboard/forms.py
 from django import forms
 from products.models import Product
 from products.models import ProductImage
@@ -7,7 +6,7 @@ from django.utils.text import slugify
 from django.core.files.uploadedfile import UploadedFile
 
 class ProductForm(forms.ModelForm):
-    # Custom field for slug
+    
     slug = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
@@ -73,7 +72,8 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Black,White,Navy'
             }),
             'image': forms.FileInput(attrs={
-                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded '
+                'file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
             }),
             'inventory_count': forms.NumberInput(attrs={
                 'class': 'border rounded p-2 w-full',
@@ -187,7 +187,7 @@ class ProductForm(forms.ModelForm):
 
         instance.slug = slugify(instance.name)
         
-        # Handle sizes and colors formatting
+        
         if self.cleaned_data.get('available_sizes'):
             sizes = self.cleaned_data['available_sizes']
             sizes = [s.strip().upper() for s in sizes.split(',') if s.strip()]

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product, Review, ProductImage
 from orders.models import Order
-from dashboard.forms import ProductForm, ProductImageForm  # Use the one from forms.py
+from dashboard.forms import ProductForm, ProductImageForm  
 from django.contrib.auth import get_user_model
 from django import forms
 from datetime import timedelta
@@ -22,7 +22,7 @@ def dashboard_home(request):
     pending_orders = Order.objects.filter(status="pending").count()
     completed_orders = Order.objects.filter(status="completed").count()
     
-    # Sales stats (last 7 days)
+    # Sales stats
     today = now().date()
     last_week = today - timedelta(days=6)
     sales_last_week = (
@@ -41,7 +41,7 @@ def dashboard_home(request):
     # Products stats
     total_products = Product.objects.count()
 
-    # Low stock products (threshold of 5)
+    # Low stock products stats (Check the stitistacs big man)
     RESTOCK_THRESHOLD = 5
     low_stock_products = Product.objects.filter(inventory_count__lte=RESTOCK_THRESHOLD)
     
@@ -104,12 +104,12 @@ def delete_review(request, review_id):
 def order_list(request):
     orders = Order.objects.all().order_by("-created_at")
 
-    # Search
+    
     query = request.GET.get("q")
     if query:
         orders = orders.filter(user__username__icontains=query)
 
-    # Filter by status
+    
     status_filter = request.GET.get("status")
     if status_filter in ["pending", "completed"]:
         orders = orders.filter(status=status_filter)
@@ -120,7 +120,7 @@ def order_list(request):
 def update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     
-    # Simple toggle example: pending → completed → pending
+    
     if order.status == "pending":
         order.status = "completed"
         messages.success(request, f"Order #{order.id} marked as completed.")
@@ -132,11 +132,11 @@ def update_order_status(request, order_id):
     order.save()
     return redirect("dashboard:order_list")
 
-# List products with search/filter
+
 def product_list(request):
     products = Product.objects.all().order_by("-created_at")
     
-    # Search
+    
     query = request.GET.get("q")
     if query:
         products = products.filter(name__icontains=query)
@@ -165,7 +165,7 @@ def product_list(request):
     products = paginator.get_page(page_number)
     return render(request, "dashboard/products.html", context)
 
-# Add product
+
 @staff_member_required
 def add_product(request):
     if request.method == "POST":
@@ -202,7 +202,7 @@ def add_product(request):
             logger.info(f'Product "{product.name}" added by {request.user.username}.')
             return redirect('dashboard:product_list')
         else:
-            # Debug: print form errors
+            # Debug
             print("Form errors:", form.errors)
     else:
         form = ProductForm()
@@ -234,7 +234,7 @@ def edit_product(request, product_id):
                 is_main_index = request.POST.get('alternate_is_main')
                 
                 for i, image_file in enumerate(files):
-                    if image_file:  # Check if file was actually uploaded
+                    if image_file:  
                         alt_text = alt_texts[i] if i < len(alt_texts) else ''
                         is_main = str(i) == is_main_index
                         
@@ -242,7 +242,7 @@ def edit_product(request, product_id):
                         if is_main:
                             ProductImage.objects.filter(product=product).update(is_main=False)
                         
-                        # Create ProductImage instance
+                        
                         ProductImage.objects.create(
                             product=product,
                             image=image_file,
@@ -270,7 +270,7 @@ def delete_alternate_image(request, product_id, image_id):
     """Delete an alternate product image"""
     image = get_object_or_404(ProductImage, id=image_id)
     
-    # Optional: Verify the image belongs to the product (security check)
+    
     if image.product.id != int(product_id):
         messages.error(request, 'Image does not belong to the specified product.')
         return redirect('dashboard:product_list')
@@ -284,10 +284,10 @@ def set_main_alternate_image(request, product_id, image_id):
     """Set an alternate image as the main product image"""
     product = get_object_or_404(Product, id=product_id)
     
-    # Set all alternate images to not main
+   
     ProductImage.objects.filter(product=product).update(is_main=False)
     
-    # Set the selected image as main
+   
     image = get_object_or_404(ProductImage, id=image_id)
     image.is_main = True
     image.save()
@@ -295,7 +295,7 @@ def set_main_alternate_image(request, product_id, image_id):
     messages.success(request, 'Alternate image set as main.')
     return redirect('dashboard:edit_product', product_id=product_id)
 
-# Delete product
+
 
 @staff_member_required
 def delete_product(request, product_id):
@@ -318,7 +318,7 @@ def customer_list(request):
     users = paginator.get_page(page_number)
     return render(request, "dashboard/customers.html", {"users": users, "query": query})
 
-# Edit user
+
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = User

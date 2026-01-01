@@ -21,7 +21,7 @@
             color: #ffffff;
         }
         
-        /* Custom scrollbar */
+        
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -39,7 +39,7 @@
             background: #b91c1c;
         }
 
-        /* Bouncing dots animation */
+        
         @keyframes bounce {
             0%, 100% {
                 transform: translateY(0);
@@ -53,7 +53,7 @@
             animation: bounce 0.6s infinite ease-in-out;
         }
 
-        /* Material icons color fix */
+        
         .material-symbols-outlined {
             font-variation-settings:
             'FILL' 0,
@@ -72,15 +72,15 @@
     
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
-    <!-- Preloader -->
+
     <div id="preloader" class="fixed inset-0 bg-black flex items-center justify-center z-[9999] transition-opacity duration-500">
         <div class="text-center">
-            <!-- VULOR Text - Removed gradient -->
+
             <div class="text-6xl md:text-7xl font-black tracking-tighter text-[#dc2626] mb-8">
                 VULOR
             </div>
             
-            <!-- 4 Bouncing Dots in red -->
+
             <div class="flex justify-center space-x-2">
                 <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0s"></div>
                 <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.1s"></div>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Navigation -->
+    
     <nav class="bg-black border-b border-[#333333] sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="flex justify-between items-center h-16">
@@ -103,7 +103,7 @@
                     </a>
                 </div>
 
-                <!-- Desktop Menu -->
+    
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{% url 'product_list' %}" 
                        class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
@@ -121,7 +121,7 @@
                             ORDERS
                         </a>
                         
-                        <!-- Cart with Badge -->
+    
                         <div class="relative">
                             <a href="{% url 'view_cart' %}" 
                                class="hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110">
@@ -153,17 +153,17 @@
                     {% endif %}
                 </div>
 
-                <!-- Mobile menu button - Fixed Hamburger -->
+    
                 <div class="md:hidden">
                     <button id="mobile-menu-button" 
                             class="text-[#dc2626] hover:text-white p-2 transition-all duration-300 relative w-10 h-10 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-lg border border-[#333333] hover:border-[#dc2626]">
                         <span class="sr-only">Open menu</span>
-                        <!-- Hamburger Icon (Default) -->
+    
                         <svg id="hamburger-icon" class="h-6 w-6 absolute transition-all duration-300" 
                              fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
-                        <!-- Close Icon (Hidden by default) -->
+    
                         <svg id="close-icon" class="h-6 w-6 absolute transition-all duration-300 opacity-0 rotate-90" 
                              fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-            <!-- Mobile Menu with Animation - Centered Items -->
+    
             <div id="mobile-menu" 
                  class="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-t border-[#333333] overflow-hidden transition-all duration-300 ease-in-out"
                  style="max-height: 0; opacity: 0;">
@@ -183,7 +183,7 @@
                     </a>
                     
                     {% if user.is_authenticated %}
-                        <!-- Cart with centered badge -->
+    
                         <div class="relative">
                             <a href="{% url 'view_cart' %}" 
                                class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
@@ -226,7 +226,7 @@
         </div>
     </nav>
 
-    <!-- Messages -->
+    
     {% if messages %}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
             {% for message in messages %}
@@ -237,13 +237,13 @@
         </div>
     {% endif %}
 
-    <!-- Main Content -->
+    
     <main class="flex-grow">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Footer -->
+    
     <footer class="bg-black border-t border-[#333333] mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -258,7 +258,7 @@
                     </div>
                 </div>
 
-                <!-- Shop -->
+    
                 <div class="space-y-4">
                     <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">SHOP</h3>
                     <ul class="space-y-2">
@@ -269,7 +269,7 @@
                     </ul>
                 </div>
 
-                <!-- Company -->
+    
                 <div class="space-y-4">
                     <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">COMPANY</h3>
                     <ul class="space-y-2">
@@ -279,39 +279,39 @@
                     </ul>
                 </div>
 
-                <!-- Contact -->
+    
                 <div class="space-y-4">
                     <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">CONTACT</h3>
                     <div class="space-y-3">
                         <a href="mailto:info@vulor.com" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
-                            <!-- <span class="material-symbols-outlined align-middle mr-2 text-sm">mail</span> -->
+    
                             info@vulor.com
                         </a>
                         <a href="https://wa.me/2348123456789" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
-                            <!-- <span class="material-symbols-outlined align-middle mr-2 text-sm">phone</span> -->
+    
                             +234 812 345 6789
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Social Links -->
+    
             <div class="border-t border-[#333333] mt-8 pt-8">
                 <div class="flex justify-center space-x-6">
                     <a href="https://instagram.com/vulor" 
                        class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
-                        <!-- <span class="material-symbols-outlined mr-2">photo_camera</span> -->
+    
                         Instagram
                     </a>
                     <a href="https://twitter.com/vulor" 
                        class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
-                        <!-- <span class="material-symbols-outlined mr-2">bolt</span> -->
+    
                         Twitter
                     </a>
                 </div>
             </div>
 
-            <!-- Copyright -->
+    
             <div class="border-t border-[#333333] mt-8 pt-8 text-center">
                 <p class="text-xs text-[#666666] tracking-wide">&copy; 2025 VULOR. All rights reserved.</p>
                 <p class="text-xs text-[#333333] mt-2">Designed with passion for urban fashion.</p>
@@ -319,7 +319,7 @@
         </div>
     </footer>
 
-    <!-- Scroll to Top Button -->
+    
     <button id="scrollToTop" 
             class="fixed bottom-8 right-8 bg-[#dc2626] text-white p-3 shadow-xl transition-all duration-300 opacity-0 transform translate-y-10 z-40 hover:bg-[#b91c1c] rounded-full">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,7 +329,7 @@
     </button>
 
     <script>
-        // Preloader
+    
         window.addEventListener('load', function() {
             const preloader = document.getElementById('preloader');
             setTimeout(function() {
@@ -338,7 +338,7 @@
             }, 1500);
         });
 
-        // Fallback: hide preloader after 3 seconds max
+    
         setTimeout(function() {
             const preloader = document.getElementById('preloader');
             if (preloader) {
@@ -347,10 +347,10 @@
             }
         }, 3000);
 
-        // Scroll to Top Functionality
+    
         const scrollToTopButton = document.getElementById('scrollToTop');
         
-        // Show/hide button based on scroll position
+    
         window.addEventListener('scroll', function() {
             if (window.pageYOffset > 300) {
                 scrollToTopButton.classList.remove('opacity-0', 'translate-y-10');
@@ -361,7 +361,7 @@
             }
         });
 
-        // Smooth scroll to top when button is clicked
+    
         scrollToTopButton.addEventListener('click', function() {
             window.scrollTo({
                 top: 0,
@@ -371,7 +371,7 @@
     </script>
 
     <script>
-        // Mobile menu functionality with animations
+    
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const hamburgerIcon = document.getElementById('hamburger-icon');
@@ -383,17 +383,17 @@
             menuOpen = !menuOpen;
             
             if (menuOpen) {
-                // Open menu with animation
+    
                 mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
                 mobileMenu.style.opacity = '1';
                 
-                // Animate hamburger to X
+    
                 hamburgerIcon.style.opacity = '0';
                 hamburgerIcon.style.transform = 'rotate(-90deg)';
                 closeIcon.style.opacity = '1';
                 closeIcon.style.transform = 'rotate(0deg)';
                 
-                // Staggered animation for menu items
+    
                 const menuItems = mobileMenu.querySelectorAll('a, .relative');
                 menuItems.forEach((item, index) => {
                     item.style.transitionDelay = (index * 0.05) + 's';
@@ -402,17 +402,17 @@
                 });
                 
             } else {
-                // Close menu with animation
+    
                 mobileMenu.style.maxHeight = '0';
                 mobileMenu.style.opacity = '0';
                 
-                // Animate X back to hamburger
+    
                 hamburgerIcon.style.opacity = '1';
                 hamburgerIcon.style.transform = 'rotate(0deg)';
                 closeIcon.style.opacity = '0';
                 closeIcon.style.transform = 'rotate(90deg)';
                 
-                // Reset menu items
+    
                 const menuItems = mobileMenu.querySelectorAll('a, .relative');
                 menuItems.forEach(item => {
                     item.style.opacity = '0';
@@ -422,7 +422,7 @@
             }
         });
 
-        // Close mobile menu when clicking outside
+    
         document.addEventListener('click', function(event) {
             if (menuOpen && 
                 !mobileMenu.contains(event.target) && 
@@ -432,13 +432,13 @@
                 mobileMenu.style.maxHeight = '0';
                 mobileMenu.style.opacity = '0';
                 
-                // Reset hamburger icon
+    
                 hamburgerIcon.style.opacity = '1';
                 hamburgerIcon.style.transform = 'rotate(0deg)';
                 closeIcon.style.opacity = '0';
                 closeIcon.style.transform = 'rotate(90deg)';
                 
-                // Reset menu items
+    
                 const menuItems = mobileMenu.querySelectorAll('a, .relative');
                 menuItems.forEach(item => {
                     item.style.opacity = '0';
@@ -448,7 +448,7 @@
             }
         });
 
-        // Close menu when clicking a link (with delay for animation)
+    
         mobileMenu.addEventListener('click', function(event) {
             if (event.target.tagName === 'A' || event.target.closest('a')) {
                 setTimeout(() => {
@@ -456,13 +456,13 @@
                     mobileMenu.style.maxHeight = '0';
                     mobileMenu.style.opacity = '0';
                     
-                    // Reset hamburger icon
+    
                     hamburgerIcon.style.opacity = '1';
                     hamburgerIcon.style.transform = 'rotate(0deg)';
                     closeIcon.style.opacity = '0';
                     closeIcon.style.transform = 'rotate(90deg)';
                     
-                    // Reset menu items
+    
                     const menuItems = mobileMenu.querySelectorAll('a, .relative');
                     menuItems.forEach(item => {
                         item.style.opacity = '0';
@@ -473,7 +473,7 @@
             }
         });
 
-        // Initialize menu items as hidden
+    
         document.addEventListener('DOMContentLoaded', function() {
             const menuItems = mobileMenu.querySelectorAll('a, .relative');
             menuItems.forEach(item => {
@@ -482,7 +482,6 @@
                 item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             });
             
-            // Add hover effects to all interactive elements
             const interactiveElements = document.querySelectorAll('a, button, .hover\\:text-\\[\\#dc2626\\]');
             interactiveElements.forEach(el => {
                 el.addEventListener('mouseenter', () => {

@@ -6,7 +6,7 @@
 
 {% block content %}
 <style>
-    /* Reuse animations from login page */
+    
     @keyframes floatIn {
         0% {
             opacity: 0;
@@ -79,32 +79,32 @@
         transition: all 0.3s ease;
     }
     
-    /* Strength indicator colors - updated to red theme */
-    .strength-0 { width: 20%; background-color: #dc2626; } /* Red */
-    .strength-1 { width: 40%; background-color: #b91c1c; } /* Darker red */
-    .strength-2 { width: 60%; background-color: #991b1b; } /* Even darker */
-    .strength-3 { width: 80%; background-color: #7f1d1d; } /* Dark red */
-    .strength-4 { width: 100%; background-color: #450a0a; } /* Darkest red */
+    
+    .strength-0 { width: 20%; background-color: #dc2626; } 
+    .strength-1 { width: 40%; background-color: #b91c1c; } 
+    .strength-2 { width: 60%; background-color: #991b1b; } 
+    .strength-3 { width: 80%; background-color: #7f1d1d; } 
+    .strength-4 { width: 100%; background-color: #450a0a; }
 </style>
 
 <div class="min-h-screen bg-black flex items-center justify-center p-4">
-    <!-- Single centered form container -->
+    
     <div class="max-w-md w-full animate-float-in">
-        <!-- Form card with drop shadow and border -->
+        
         <div class="form-shadow bg-[#111111] border border-[#333333] p-8 rounded-lg hover:border-[#dc2626] transition-all duration-500 relative overflow-hidden">
-            <!-- Red corner accents -->
+            
             <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-[#dc2626] rounded-tl-lg"></div>
             <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#dc2626] rounded-tr-lg"></div>
             <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#dc2626] rounded-bl-lg"></div>
             <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-[#dc2626] rounded-br-lg"></div>
             
-            <!-- VULOR brand mark -->
+            
             <div class="text-center mb-8">
                 <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-4">
                     <span class="text-[#dc2626] text-2xl font-bold">V</span>
                 </div>
                 
-                <!-- Header -->
+                
                 <div class="text-center relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#dc2626]/10 to-transparent animate-shimmer" 
                          style="background-size: 200px 100%; animation: shimmer 3s infinite linear;"></div>
@@ -112,8 +112,8 @@
                     <p class="text-[#dc2626] text-sm mt-2 tracking-wider font-bold relative">CREATE YOUR PREMIUM STREETWEAR ACCOUNT</p>
                 </div>
                 
-                <!-- Animated benefits -->
-                <div class="mt-6 space-y-3 animate-float-in-delay">
+                
+                <!-- <div class="mt-6 space-y-3 animate-float-in-delay">
                     <div class="flex items-center justify-center space-x-2">
                         <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
                         <span class="text-[#cccccc] text-sm tracking-wider">Early access to new collections</span>
@@ -126,10 +126,10 @@
                         <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
                         <span class="text-[#cccccc] text-sm tracking-wider">Priority customer support</span>
                     </div>
-                </div>
+                </div> -->
             </div>
             
-            <!-- Form Errors -->
+            
             {% if form.errors %}
             <div class="bg-[#dc2626]/10 border border-[#dc2626]/30 text-white p-4 rounded-lg text-sm mb-6 animate-float-in-delay">
                 <strong class="block mb-2 tracking-wider">PLEASE FIX THE FOLLOWING ERRORS:</strong>
@@ -151,7 +151,7 @@
                 {% csrf_token %}
                 
                 <div class="space-y-4 animate-float-in-delay">
-                    <!-- Name Field -->
+                    
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
                         <label for="id_username" class="block text-white text-sm mb-2 tracking-wider">NAME</label>
                         <input type="text" name="username" id="id_username" required
@@ -160,7 +160,7 @@
                                value="{{ form.username.value|default:'' }}">
                     </div>
                     
-                    <!-- Email Field -->
+                    
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
                         <label for="id_email" class="block text-white text-sm mb-2 tracking-wider">EMAIL</label>
                         <input type="email" name="email" id="id_email" required
@@ -190,8 +190,8 @@
                             </div>
                             <div id="strengthText" class="text-xs text-[#666666] tracking-wider">VERY WEAK</div>
                             
-                            <!-- Password Requirements -->
-                            <div id="passwordRequirements" class="space-y-1 mt-2">
+                            
+                            <!-- <div id="passwordRequirements" class="space-y-1 mt-2">
                                 <div class="flex items-center text-xs" id="reqLength">
                                     <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
                                     <span class="text-[#666666] tracking-wider">At least 8 characters</span>
@@ -212,11 +212,11 @@
                                     <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
                                     <span class="text-[#666666] tracking-wider">One special character</span>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     
-                    <!-- Confirm Password Field -->
+                    
                     <div class="transform transition-all duration-300 hover:scale-[1.02]">
                         <label for="id_password2" class="block text-white text-sm mb-2 tracking-wider">CONFIRM PASSWORD</label>
                         <input type="password" name="password2" id="id_password2" required
@@ -227,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- Signup Button -->
+                
                 <div class="animate-float-in-delay-2">
                     <button type="submit" 
                             class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden"
@@ -236,7 +236,7 @@
                     </button>
                 </div>
                 
-                <!-- Divider -->
+                
                 <div class="my-6 animate-float-in-delay-2">
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center">
@@ -259,25 +259,11 @@
                     </p>
                 </div>
                 
-                <!-- Community stats -->
-                <div class="mt-8 pt-6 border-t border-[#333333] animate-float-in-delay-2">
-                    <div class="flex justify-center space-x-8">
-                        <div class="text-center">
-                            <div class="text-[#dc2626] text-xl font-bold tracking-wider">500+</div>
-                            <div class="text-[#666666] text-xs tracking-wider">STYLE ENTHUSIASTS</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-[#dc2626] text-xl font-bold tracking-wider">98%</div>
-                            <div class="text-[#666666] text-xs tracking-wider">SATISFACTION</div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="mb-4">
-    {{ form.captcha.label_tag }}
-    {{ form.captcha }}
-    {% for error in form.captcha.errors %}
-        <p class="text-red-500 text-sm">{{ error }}</p>
+                    {{ form.captcha.label_tag }}
+                    {{ form.captcha }}
+                    {% for error in form.captcha.errors %}
+                     <p class="text-red-500 text-sm">{{ error }}</p>
     {% endfor %}
 </div>
 
@@ -286,7 +272,7 @@
     </div>
 </div>
 
-<!-- Enhanced Password Toggle & Strength Indicator Script -->
+
 <script>
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
@@ -311,36 +297,36 @@ function checkPasswordStrength(password) {
         special: /[^A-Za-z0-9]/.test(password)
     };
     
-    // Update requirement indicators
+    
     updateRequirement('reqLength', requirements.length);
     updateRequirement('reqUppercase', requirements.uppercase);
     updateRequirement('reqLowercase', requirements.lowercase);
     updateRequirement('reqNumber', requirements.number);
     updateRequirement('reqSpecial', requirements.special);
     
-    // Calculate strength
+    
     if (requirements.length) strength++;
     if (requirements.uppercase) strength++;
     if (requirements.lowercase) strength++;
     if (requirements.number) strength++;
     if (requirements.special) strength++;
     
-    // Update strength indicator
+    
     const strengthBar = document.getElementById('passwordStrength');
     const strengthText = document.getElementById('strengthText');
     
     strengthBar.className = `password-strength strength-${strength}`;
     
-    // Set custom property for animation
+    
     strengthBar.style.setProperty('--target-width', `${(strength + 1) * 20}%`);
     
-    // Update text
+    
     const texts = ['VERY WEAK', 'WEAK', 'FAIR', 'GOOD', 'STRONG'];
     const colors = ['#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a'];
     strengthText.textContent = texts[strength];
     strengthText.style.color = colors[strength];
     
-    // Add shake animation if password is weak
+    
     if (strength < 2 && password.length > 0) {
         strengthBar.classList.add('shake');
         setTimeout(() => strengthBar.classList.remove('shake'), 500);
@@ -409,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add ripple effect to signup button
+    
     const signupButton = document.getElementById('submitButton');
     if (signupButton) {
         signupButton.addEventListener('click', function(e) {
@@ -440,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add CSS for ripple animation if not already present
+    
     if (!document.querySelector('style[data-ripple]')) {
         const style = document.createElement('style');
         style.setAttribute('data-ripple', 'true');

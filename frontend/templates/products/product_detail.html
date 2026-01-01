@@ -5,15 +5,15 @@
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        <!-- Product Image Column -->
+        
         <div>
-            <!-- Main Image -->
+            
             <div class="bg-black border border-[#333333] aspect-[0.9] overflow-hidden mb-4 relative image-container">
                 <img src="{{ product.image.url }}" alt="{{ product.name }}" 
                      id="main-product-image"
                      class="w-full h-full object-cover main-image">
                 
-                <!-- Alternative image that appears on hover (only if alternative images exist) -->
+                
                 {% if product.images.all %}
                     {% with product.images.all|first as first_alt_image %}
                     <img src="{{ first_alt_image.image.url }}" alt="{{ product.name }} alternative view" 
@@ -23,16 +23,16 @@
                 {% endif %}
             </div>
             
-            <!-- Thumbnails (if available) -->
+            
             {% if product.images.all %}
             <div class="flex space-x-2 mt-4">
-                <!-- Main image thumbnail -->
+                
                 <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer thumbnail-image"
                      data-full-image="{{ product.image.url }}">
                     <img src="{{ product.image.url }}" alt="{{ product.name }}" 
                          class="w-full h-full object-cover">
                 </div>
-                <!-- Alternative image thumbnails -->
+                
                 {% for img in product.images.all %}
                 <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer hover:border-[#dc2626] thumbnail-image"
                      data-full-image="{{ img.image.url }}">
@@ -44,12 +44,12 @@
             {% endif %}
         </div>
         
-        <!-- Product Details Column -->
+        
         <div>
-            <!-- Product Name -->
+            
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{{ product.name }}</h1>
             
-            <!-- Price -->
+            
             <div class="mb-6">
                 <span class="text-2xl font-bold text-[#dc2626]">₦{{ product.price }}</span>
                 {% if product.compare_price %}
@@ -62,14 +62,14 @@
                 {% endif %}
             </div>
             
-            <!-- Short description -->
+            
             {% if product.short_description %}
             <div class="mb-8">
                 <p class="text-[#cccccc] text-base font-light leading-relaxed">{{ product.short_description }}</p>
             </div>
             {% endif %}
 
-            <!-- Fit Selection (for cargo jeans) -->
+            
             {% if product.category == 'cargo-jeans' or product.category == 'sweatpants' %}
             <div class="mb-6">
                 <label class="block text-white text-sm mb-3">FIT</label>
@@ -87,7 +87,7 @@
             </div>
             {% endif %}
 
-            <!-- Size Selection -->
+            
             {% if product.get_available_sizes_list %}
             <div class="mb-6">
                 <label class="block text-white text-sm mb-3">
@@ -111,7 +111,7 @@
             </div>
             {% endif %}
 
-            <!-- Color Selection -->
+            
             {% if product.get_available_colors_list %}
             <div class="mb-6">
                 <label class="block text-white text-sm mb-3">COLOR</label>
@@ -129,7 +129,7 @@
             </div>
             {% endif %}
 
-            <!-- Quantity -->
+            
             <div class="mb-6">
                 <label class="block text-white text-sm mb-3">QUANTITY</label>
                 <div class="flex items-center w-32">
@@ -147,7 +147,7 @@
                 </div>
             </div>
 
-            <!-- Add to Cart button -->
+            
             {% if user.is_authenticated %}
             <form method="POST" action="{% url 'add_to_cart' product.id %}" class="mb-8" id="add-to-cart-form">
                 {% csrf_token %}
@@ -175,7 +175,7 @@
             </div>
             {% endif %}
 
-            <!-- Product Description -->
+            
             {% if product.description %}
             <div class="mt-8 pt-8 border-t border-[#333333]">
                 <h3 class="text-white text-sm font-bold mb-4 tracking-widest">DESCRIPTION</h3>
@@ -185,7 +185,7 @@
             </div>
             {% endif %}
 
-            <!-- Detailed Measurements for Cargo Jeans & Sweatpants -->
+            
             {% if product.has_detailed_measurements %}
             <div class="mt-8 pt-8 border-t border-[#333333]">
                 <h3 class="text-white text-sm font-bold mb-4 tracking-widest">SIZE & MEASUREMENTS</h3>
@@ -203,7 +203,7 @@
             </div>
             {% endif %}
 
-            <!-- Product Features -->
+            
             <div class="mt-8 pt-8 border-t border-[#333333]">
                 <div class="grid grid-cols-3 gap-8">
                     <div>
@@ -223,7 +223,7 @@
         </div>
     </div>
 
-    <!-- Reviews Section -->
+    
     <div class="mt-16 pt-16 border-t border-[#333333]">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-2xl font-bold text-white">REVIEWS</h2>
@@ -235,10 +235,10 @@
             {% endif %}
         </div>
         
-        <!-- Review Form (Hidden by default) -->
+        
         <div id="review-form-container" class="hidden mb-8">
             {%  if user.is_authenticated %}
-            <form method="POST" action="{% url 'add_review' product.id %}" class="space-y-4">
+            <form method="POST" action="{% url 'add_product_review' product.id %}" class="space-y-4">
                 {% csrf_token %}
                 <div>
                     <label class="block text-white text-sm mb-2">RATING</label>
@@ -281,7 +281,7 @@
         </div>
         
         {% if product.reviews.all %}
-        <!-- Show reviews -->
+        
         <div class="space-y-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-4">
@@ -323,11 +323,9 @@
         {% endif %}
         
         {% else %}
-        <!-- No reviews yet -->
+      
         <div class="text-center py-8">
-            <!-- <div class="w-16 h-16 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-[#666666]">rate_review</span>
-            </div> -->
+        
             <p class="text-[#cccccc] mb-4">NO REVIEWS YET. BE THE FIRST TO REVIEW THIS PRODUCT!</p>
         </div>
         {% endif %}
@@ -335,7 +333,7 @@
 </div>
 
 <style>
-    /* Hide number input spinners */
+    
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
@@ -346,7 +344,7 @@
         -moz-appearance: textfield;
     }
     
-    /* Image hover effect */
+    
     .image-container:hover .hover-image {
         opacity: 1;
     }
@@ -359,7 +357,7 @@
         transition: opacity 0.5s ease;
     }
     
-    /* Active thumbnail border */
+    
     .thumbnail-image.active {
         border-color: #dc2626 !important;
     }
@@ -367,18 +365,18 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Image hover functionality
+        
         const imageContainer = document.querySelector('.image-container');
         const mainImage = document.querySelector('.main-image');
         const hoverImage = document.querySelector('.hover-image');
         
         if (imageContainer && hoverImage) {
-            // Set initial state
+            
             mainImage.style.opacity = '1';
             hoverImage.style.opacity = '0';
         }
 
-        // Thumbnail image switching
+        
         document.querySelectorAll('.thumbnail-image').forEach(thumb => {
             thumb.addEventListener('click', function() {
                 const newImageSrc = this.dataset.fullImage;
@@ -392,7 +390,7 @@
                     hoverImg.src = newImageSrc;
                 }
                 
-                // Update active thumbnail
+                
                 document.querySelectorAll('.thumbnail-image').forEach(t => {
                     t.classList.remove('active');
                     t.classList.remove('border-[#dc2626]');
@@ -404,7 +402,7 @@
             });
         });
 
-        // Quantity controls
+
         const quantityInput = document.querySelector('.quantity-input');
         const hiddenQuantityInput = document.querySelector('#quantity-input-hidden');
         
@@ -424,7 +422,7 @@
             });
         }
 
-        // Update form hidden inputs when selection changes
+        
         document.querySelectorAll('input[name="size"]').forEach(input => {
             input.addEventListener('change', (e) => {
                 const sizeInput = document.querySelector('#size-input');
@@ -446,7 +444,7 @@
             });
         });
 
-        // Review form toggle
+        
         const reviewToggle = document.querySelector('#write-review-toggle');
         const reviewFormContainer = document.querySelector('#review-form-container');
         const cancelReviewBtn = document.querySelector('#cancel-review');
@@ -463,7 +461,7 @@
             }
         }
 
-        // Add to cart success animation
+        
         const addToCartForm = document.querySelector('#add-to-cart-form');
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
         
@@ -476,11 +474,11 @@
                 const originalText = addToCartBtn.textContent;
                 const originalBg = addToCartBtn.style.backgroundColor;
                 
-                // Show loading state
+                
                 addToCartBtn.textContent = 'ADDING...';
                 addToCartBtn.disabled = true;
                 
-                // Submit the form
+                
                 const formData = new FormData(this);
                 
                 fetch(this.action, {
@@ -499,30 +497,30 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Success animation
+                        
                         addToCartBtn.textContent = 'ADDED ✓';
                         addToCartBtn.style.backgroundColor = '#10B981';
                         addToCartBtn.style.borderColor = '#10B981';
                         
-                        // Update cart count in navbar
+                        
                         const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
                         if (cartBadge) {
                             cartBadge.textContent = data.cart_total_items || 1;
-                            // Animate cart badge
+                            
                             cartBadge.classList.add('animate-pulse');
                             setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
                         }
                         
-                        // Show success message
+                        
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
                         messageDiv.textContent = 'Added to cart!';
                         document.body.appendChild(messageDiv);
                         
-                        // Remove message after 2 seconds
+                        
                         setTimeout(() => messageDiv.remove(), 2000);
                         
-                        // Reset button after 1.5 seconds
+                    
                         setTimeout(() => {
                             addToCartBtn.textContent = originalText;
                             addToCartBtn.style.backgroundColor = '';
@@ -533,12 +531,12 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Show error
+                    
                     addToCartBtn.textContent = 'ADDING...';
                     addToCartBtn.style.backgroundColor = '#EF4444';
                     addToCartBtn.style.borderColor = '#EF4444';
                     
-                    // Reset button after 2 seconds
+                    
                     setTimeout(() => {
                         addToCartBtn.textContent = originalText;
                         addToCartBtn.style.backgroundColor = '';

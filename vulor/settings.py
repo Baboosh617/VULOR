@@ -11,17 +11,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 USE_TZ = True
 TIME_ZONE = 'UTC'
 
-# Initialize environment variables
+
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# This checks if we're running on Render (production) or locally
+
 ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
 
 DEBUG = not ON_RENDER
 
 if ON_RENDER:
-    # Production: Use PostgreSQL on Render
+    
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -29,7 +29,7 @@ if ON_RENDER:
             ssl_require=True,
 
             options={
-                'connect_timeout': 10,  # Fail fast if DB is slow
+                'connect_timeout': 10,  
                 'application_name': 'vulor-app',
             },
         )
@@ -37,7 +37,7 @@ if ON_RENDER:
     DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 else:
-    # Development: Use SQLite locally (no PostgreSQL needed)
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -48,7 +48,7 @@ else:
 
 
 
-# Debug settings and Allowed hosts
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 if DEBUG:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.humanize',
+    'django_celery_beat',
     
     # Third-party
     'allauth',
@@ -101,7 +102,7 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 60*60*2  # 2 HOURS
+SESSION_COOKIE_AGE = 60*60*2 
 
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -118,7 +119,7 @@ INSTALLED_APPS += ["channels"]
 
 ASGI_APPLICATION = "backend.asgi.application"
 
-# Optional: In-memory channel layer for development
+
 
 
 if DEBUG:
@@ -128,7 +129,7 @@ if DEBUG:
         },
     }
 else:
-    # Production: Use Redis channel layer
+    
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -376,3 +377,9 @@ else:
             'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379'),
         }
     }
+
+
+# Celery config
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"

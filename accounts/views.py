@@ -34,7 +34,7 @@ def register(request):
 @login_required
 def profile_view(request):
     # Get user's orders for the profile page
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]  # Last 5 orders
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]  
     
     context = {
         'orders': orders,

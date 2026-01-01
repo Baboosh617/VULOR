@@ -3,10 +3,10 @@
 {% load cache %}
 
 {% block content %}
-<!-- SECTION 1 — Hero -->
+<!-- SECTION Hero -->
 <section class="min-h-[90vh] lg:min-h-[90vh] bg-black flex items-center overflow-hidden">
     <div class="w-full">
-        <!-- Mobile: Carousel of latest products from each category -->
+        <!-- Mobile Carousel of latest products from each category -->
         <div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
             {% if hero_products %}
             <div id="mobileHeroCarousel" class="absolute inset-0">
@@ -16,19 +16,20 @@
                      style="background-image: url('{{ product.image.url }}');
                             background-size: cover;
                             background-position: center top;">
-            {% endcache %}
-                    <!-- Soft gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-black/90"></div>
+            
+                    
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-black/90"></div>
 
-                    <!-- Category Tag -->
+                    
                     <div class="absolute top-5 left-5 z-20 text-[10px] tracking-widest text-white bg-black/80 px-3 py-1 border border-[#333333]">
                         {{ product.get_category_display|upper }}
                     </div>
                 </div>
                 {% endfor %}
+            {% endcache %}
             </div>
 
-            <!-- CTA Overlay -->
+            
             <div class="absolute inset-0 z-30 flex flex-col items-center justify-end pb-10 space-y-4 text-center">
                 <a href="{% url 'product_list' %}"
                    class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-10 py-4 text-lg font-bold tracking-wide transition-colors border border-[#dc2626]">
@@ -36,7 +37,7 @@
                 </a>
             </div>
 
-            <!-- Indicators -->
+            
             <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
                 {% for product in hero_products %}
                 <span class="hero-dot w-2 h-2 rounded-full bg-[#333333]"></span>
@@ -50,25 +51,25 @@
             {% endif %}
         </div>
         
-        <!-- Desktop: Two Column Layout -->
+        <!-- Desktop Two Column -->
         <div class="hidden lg:grid lg:grid-cols-2 h-[90vh]">
-            <!-- Left: Text Content -->
+            
             <div class="flex items-center p-8 lg:p-12 bg-black">
                 <div class="max-w-lg space-y-6 lg:space-y-8">
-                    <!-- Headline -->
+            
                     <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white leading-none">
                         EVERYDAY STREET.<br><span class="text-[#dc2626]">ELEVATED.</span>
                     </h1>
                     
-                    <!-- Subtext -->
+                    
                     <p class="text-lg md:text-xl text-[#cccccc] leading-relaxed max-w-md">
                         Minimal fits for daily wear.
                     </p>
                     
-                    <!-- Red divider -->
+                    
                     <div class="w-20 h-1 bg-[#dc2626]"></div>
                     
-                    <!-- Button -->
+                    
                     <div class="pt-4">
                         <a href="{% url 'product_list' %}" 
                            class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-4 text-lg font-bold tracking-wider transition-colors border border-[#dc2626]">
@@ -78,27 +79,27 @@
                 </div>
             </div>
             
-            <!-- Right: Full-height Image Column -->
+            
             <div class="relative h-full overflow-hidden group bg-black">
                 {% if latest_product %}
                 {% cache 600 latest_product %}
                     <a href="{% url 'product_detail' latest_product.slug %}" class="block h-full w-full">
                         <div class="relative w-full h-full">
-                            <!-- Main Image Container -->
+            
                             <div class="absolute inset-0 overflow-hidden">
                                 <img src="{{ latest_product.image.url }}" 
                                      alt="{{ latest_product.name }}" 
                                      class="w-full h-full object-cover object-center min-w-full min-h-full group-hover:scale-105 transition-all duration-700">
-                                <!-- Red tint overlay on hover -->
+            
                                 <div class="absolute inset-0 bg-[#dc2626]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             </div>
-                            <!-- Red corner accent -->
+            
                             <div class="absolute top-0 right-0 w-32 h-32 border-t border-r border-[#dc2626]/20"></div>
                         </div>
                     </a>
                 {% endcache %}    
                 {% else %}
-                    <!-- Fallback placeholder -->
+            
                     <div class="w-full h-full bg-[#111111] flex items-center justify-center">
                         <span class="text-[#666666] text-lg">Latest Product Image</span>
                     </div>
@@ -108,7 +109,7 @@
     </div>
 </section>
 
-<!-- SECTION 2 — Featured Products -->
+<!-- Featured Products -->
 <section class="py-20 bg-black">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -136,7 +137,7 @@
                             </div>
                         {% endif %}
                         
-                        <!-- Hover Add to Cart -->
+    
                         <div class="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <form method="POST" action="{% url 'add_to_cart' product.id %}" 
                                   class="transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -184,7 +185,7 @@
     </div>
 </section>
 
-<!-- SECTION 3 — Brand Statement -->
+<!-- Brand Statement -->
 <section class="py-32 bg-black border-t border-[#333333]">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="mb-8">
@@ -203,7 +204,7 @@
     </div>
 </section>
 
-<!-- SECTION 4 — Reviews -->
+<!-- Reviews -->
 <section class="py-20 bg-black border-t border-[#333333] overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -211,56 +212,56 @@
             <p class="text-[#dc2626] text-sm tracking-widest uppercase font-bold">What our community says</p>
         </div>
 
-        <!-- Carousel Container -->
+    
         <div class="relative overflow-hidden">
             <div class="flex transition-transform duration-500 ease-in-out" id="reviewsCarousel">
             {% cache 300 store_reviews %}    
                 {% for review in store_reviews|slice:":10" %}
-                <div class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
-                    <div class="bg-[#1a1a1a] border border-[#333333] p-8 h-full hover:border-[#dc2626] transition-all duration-300 rounded-lg">
-                        <div class="flex items-center mb-6">
-                            <div class="w-12 h-12 bg-black border border-[#dc2626] rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                {{ review.user.username|first|upper }}
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="font-semibold text-sm text-white">
-                                    {% if review.user.first_name %}
-                                        {{ review.user.first_name }}
-                                    {% else %}
-                                        {{ review.user.username }}
-                                    {% endif %}
-                                </h4>
-                                <div class="flex items-center text-[#dc2626] mt-1">
-                                    {% for i in review.get_star_rating %}★{% endfor %}
-                                    {% for i in review.get_empty_stars %}☆{% endfor %}
+                    <div class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
+                        <div class="bg-[#1a1a1a] border border-[#333333] p-8 h-full hover:border-[#dc2626] transition-all duration-300 rounded-lg">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-black border border-[#dc2626] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    {{ review.user.username|first|upper }}
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-sm text-white">
+                                        {% if review.user.first_name %}
+                                            {{ review.user.first_name }}
+                                        {% else %}
+                                            {{ review.user.username }}
+                                        {% endif %}
+                                    </h4>
+                                    <div class="flex items-center text-[#dc2626] mt-1">
+                                        {% for i in review.get_star_rating %}★{% endfor %}
+                                        {% for i in review.get_empty_stars %}☆{% endfor %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <p class="text-[#cccccc] text-sm leading-relaxed mb-6 italic">"{{ review.comment|truncatechars:120 }}"</p>
-                        <div class="border-t border-[#333333] pt-4">
-                            <span class="text-xs text-[#666666]">{{ review.created_at|date:"M d, Y" }}</span>
+                            <p class="text-[#cccccc] text-sm leading-relaxed mb-6 italic">"{{ review.comment|truncatechars:120 }}"</p>
+                            <div class="border-t border-[#333333] pt-4">
+                                <span class="text-xs text-[#666666]">{{ review.created_at|date:"M d, Y" }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
                 {% empty %}
-            {% endcache %}    
                 <div class="w-full text-center py-12">
                     <p class="text-[#666666]">Be the first to review</p>
                 </div>
                 {% endfor %}
             </div>
+            {% endcache %}    
         </div>
 
-        <!-- Review Form -->
+    
         <div class="max-w-md mx-auto mt-20">
             <div class="bg-[#1a1a1a] border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 rounded-lg">
                 <h3 class="text-center text-lg font-bold mb-8 tracking-wide text-white">SHARE YOUR EXPERIENCE</h3>
                 
                 {% if user.is_authenticated %}
-                <form method="POST" action="{% url 'submit_review' %}" class="space-y-6">
+                <form method="POST" action="{% url 'add_store_review' %}" class="space-y-6">
                     {% csrf_token %}
                     
-                    <!-- Star Rating -->
+                    
                     <div class="text-center">
                         <div class="flex justify-center space-x-1 mb-4" id="star-rating">
                             {% for i in "54321" %}
@@ -271,7 +272,7 @@
                         </div>
                     </div>
 
-                    <!-- Comment -->
+                    
                     <div>
                         <textarea name="comment" required 
                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] rounded resize-none placeholder-[#666666]"
@@ -299,7 +300,7 @@
     </div>
 </section>
 
-<!-- FINAL CTA -->
+
 <section class="py-20 bg-black border-t border-[#333333]">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-6 text-white">ELEVATE YOUR STREETWEAR GAME</h2>
@@ -323,7 +324,7 @@
 </section>
 
 <style>
-    /* Carousel Styles */
+
     #reviewsCarousel {
         display: flex;
         width: 300%;
@@ -341,7 +342,7 @@
         }
     }
 
-    /* Star Rating Styles */
+    
     .star-input:checked + .star-label {
         color: #dc2626 !important;
     }
@@ -350,7 +351,7 @@
         color: #dc2626 !important;
     }
 
-    /* Active indicator styling */
+
     .hero-dot.bg-white {
         background-color: #dc2626 !important;
     }
@@ -381,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
 });
 
-// ========== Reviews Carousel ==========
+
 const reviewsCarousel = document.getElementById('reviewsCarousel');
 if (reviewsCarousel) {
     const carouselItems = reviewsCarousel.children;
@@ -417,21 +418,21 @@ if (reviewsCarousel) {
         updateReviewsCarousel();
     }
     
-    // Auto-advance carousel
+
     let reviewsInterval = setInterval(nextReviewsSlide, 4000);
     
-    // Pause on hover
+
     reviewsCarousel.addEventListener('mouseenter', () => clearInterval(reviewsInterval));
     reviewsCarousel.addEventListener('mouseleave', () => {
         reviewsInterval = setInterval(nextReviewsSlide, 4000);
     });
     
-    // Responsive updates
+
     window.addEventListener('resize', updateReviewsCarousel);
     updateReviewsCarousel();
 }
 
-// ========== Star Rating ==========
+
 const starInputs = document.querySelectorAll('.star-input');
 const starLabels = document.querySelectorAll('.star-label');
 
@@ -439,7 +440,7 @@ starInputs.forEach(input => {
     input.addEventListener('change', function() {
         const rating = this.value;
         
-        // Update star colors
+        
         starLabels.forEach(label => {
             const labelRating = label.getAttribute('data-rating');
             if (labelRating <= rating) {

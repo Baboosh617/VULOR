@@ -1,6 +1,7 @@
 from django.core.mail import EmailMultiAlternatives, send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from .tasks import send_html_email_task
 import logging
 import os
 
@@ -26,10 +27,10 @@ def send_html_email(subject, template, context, to_email):
         logger.error(f"Failed to send email: {subject}", exc_info=True)
 
 
-# ===================== USER EMAILS =====================
+
 
 def send_order_confirmation(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"Your VULOR Order #{order.id} is Confirmed",
         template="emails/order_confirmation.html",
         context={"user": user, "order": order},
@@ -38,7 +39,7 @@ def send_order_confirmation(user, order):
 
 
 def send_order_shipped(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"VULOR Order #{order.id} Shipped!",
         template="emails/shipping_update.html",
         context={"user": user, "order": order},
@@ -47,7 +48,7 @@ def send_order_shipped(user, order):
 
 
 def send_order_out_for_delivery(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"Order #{order.id} is Out for Delivery",
         template="emails/out_for_delivery.html",
         context={"user": user, "order": order},
@@ -56,7 +57,7 @@ def send_order_out_for_delivery(user, order):
 
 
 def send_order_delivered(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"Order #{order.id} Delivered Successfully",
         template="emails/order_delivered.html",
         context={"user": user, "order": order},
@@ -65,7 +66,7 @@ def send_order_delivered(user, order):
 
 
 def send_order_cancelled(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"VULOR Order #{order.id} Cancelled",
         template="emails/order_cancelled.html",
         context={"user": user, "order": order},
@@ -74,7 +75,7 @@ def send_order_cancelled(user, order):
 
 
 def send_payment_receipt(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"Payment Receipt – Order #{order.id}",
         template="emails/payment_receipt.html",
         context={"user": user, "order": order},
@@ -83,7 +84,7 @@ def send_payment_receipt(user, order):
 
 
 def send_review_request(user, order):
-    send_html_email(
+    send_html_email_task.delay(
         subject=f"Review Your Purchase – Order #{order.id}",
         template="emails/review_request.html",
         context={"user": user, "order": order},
@@ -100,10 +101,9 @@ def send_abandoned_cart_email(user, cart):
     )
 
 
-# ===================== ADMIN EMAILS =====================
 
 def send_low_stock_alert(product):
-    send_mail(
+    send_html_email_task.delay(
         subject=f"Low Stock Alert – {product.name}",
         message=f"{product.name} stock is low. Current stock: {product.inventory_count}",
         from_email=settings.DEFAULT_FROM_EMAIL,
@@ -113,8 +113,8 @@ def send_low_stock_alert(product):
 
 def send_admin_new_order(order):
     send_mail(
-        subject=f"New Order #{order.id} Placed",
-        message=f"Order #{order.id} by {order.user.username} totaling ₦{order.get_total_price()}",
+        subject=f"New Order #{order.id}",
+        message=f"Order #{order.id} totaling ₦{order.get_total_price}",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[ADMIN_EMAIL],
     )
@@ -123,7 +123,7 @@ def send_admin_new_order(order):
 def send_admin_high_value_order(order):
     send_mail(
         subject=f"High-Value Order Alert #{order.id}",
-        message=f"Order #{order.id} totaling ₦{order.get_total_price()} requires attention.",
+        message=f"Order #{order.id} totaling ₦{order.get_total_price} requires attention.",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[ADMIN_EMAIL],
     )

@@ -21,8 +21,8 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     reference = models.CharField(max_length=100, unique=True)
     status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-    channel = models.CharField(max_length=50, blank=True, null=True)  # payment method
-    gateway_response = models.TextField(blank=True, null=True)  # full response from Paystack
+    channel = models.CharField(max_length=50, blank=True, null=True) 
+    gateway_response = models.TextField(blank=True, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -38,7 +38,7 @@ class Payment(models.Model):
 class PaymentTransaction(models.Model):
     paystack_reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  # stored in Naira
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  
     status = models.CharField(max_length=20, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
     verified_at = models.DateTimeField(null=True, blank=True)
@@ -60,10 +60,10 @@ class PaymentTransaction(models.Model):
 
     @property
     def amount_in_kobo(self):
-        # ensure Decimal -> int (kobo)
+        
         return int( (Decimal(self.amount) * 100).quantize(0) )
 
     @staticmethod
     def generate_reference():
-        # simple unique reference generator
+        
         return f"{uuid.uuid4().hex[:12]}-{int(timezone.now().timestamp())}"

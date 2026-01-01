@@ -38,7 +38,7 @@ class Product(models.Model):
         ('42', '42'),
     ]
 
-    # New: Fit type for cargos
+
     FIT_CHOICES = [
         ('loose', 'Loose'),
         ('fit', 'Fit'),
@@ -57,7 +57,7 @@ class Product(models.Model):
 
     # image_alt = models.ImageField(upload_to='products/alt/', blank=True, null=True, verbose_name="Alternative Image")
 
-    # ✅ Low stock tracking
+
     low_stock_email_sent = models.BooleanField(default=False)
     
     available_sizes = models.CharField(max_length=100, default='S,M,L,XL')
@@ -69,7 +69,7 @@ class Product(models.Model):
     thigh_measurements = models.TextField(blank=True, help_text="Thigh measurements in inches (for cargo jeans)")
     rise_measurements = models.TextField(blank=True, help_text="Rise measurements in inches (for cargo jeans)")
 
-    # New field for cargo fit type
+  
     fit_type = models.CharField(max_length=10, choices=FIT_CHOICES, blank=True, null=True, help_text="Only for cargo jeans")
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -219,3 +219,9 @@ class ProductImage(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['product'], condition=models.Q(is_main=True), name='unique_main_image')
         ]
+
+class StoreReview(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

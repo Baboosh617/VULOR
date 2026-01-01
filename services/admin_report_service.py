@@ -15,11 +15,11 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 def send_weekly_sales_report():
     start_date = now() - timedelta(days=7)
 
-    # Weekly orders
+    
     order_items = OrderItem.objects.filter(order__created_at__gte=start_date)
 
 
-    # Revenue + total orders
+    
     total_revenue = (
     OrderItem.objects.filter(order__created_at__gte=start_date)
             .aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
@@ -28,10 +28,10 @@ def send_weekly_sales_report():
 )
     total_orders = (Order.objects.filter(created_at__gte=start_date).count())
 
-    # Low stock products
+    
     low_stock_products = Product.objects.filter(inventory_count__lte=5)
 
-    # Weekly product sales breakdown
+    
     product_sales = (
         OrderItem.objects.filter(order__created_at__gte=start_date)
         .values(

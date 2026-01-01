@@ -152,10 +152,11 @@
                     </a>
                 </div>
 
-                <!-- Login Button with pulse animation -->
+                <!-- Login Button -->
                 <div class="animate-float-in-delay-2">
                     <button type="submit" 
-                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] pulse-button transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden">
+                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 
+                            transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] pulse-button transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden">
                         LOGIN
                     </button>
                 </div>
@@ -177,32 +178,18 @@
             <div class="text-center animate-float-in-delay-2">
                 <p class="text-[#cccccc] text-sm tracking-wider">
                     DON'T HAVE AN ACCOUNT?
-                    <a href="{% url 'account_signup' %}" 
+                    <a href="{% url 'register' %}" 
                        class="text-[#dc2626] hover:text-white font-bold transition-all duration-300 transform hover:scale-105 inline-block ml-2 tracking-wider">
                         SIGN UP HERE
                     </a>
                 </p>
             </div>
-            
-            <!-- Community stats -->
-            <div class="mt-8 pt-6 border-t border-[#333333] animate-float-in-delay-2">
-                <div class="flex justify-center space-x-8">
-                    <div class="text-center">
-                        <div class="text-[#dc2626] text-xl font-bold tracking-wider">500+</div>
-                        <div class="text-[#666666] text-xs tracking-wider">STYLE ENTHUSIASTS</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-[#dc2626] text-xl font-bold tracking-wider">98%</div>
-                        <div class="text-[#666666] text-xs tracking-wider">SATISFACTION</div>
-                    </div>
-                </div>
-            </div>
+   
         </div>
     </div>
 </div>
 
 <script>
-// Add hover effect to form inputs
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"]');
     
@@ -220,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add ripple effect to login button
+    
     const loginButton = document.querySelector('button[type="submit"]');
     if (loginButton) {
         loginButton.addEventListener('click', function(e) {
@@ -260,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     }
     
-    // Add CSS for ripple animation if not already present
+    
     if (!document.querySelector('style[data-ripple]')) {
         const style = document.createElement('style');
         style.setAttribute('data-ripple', 'true');

@@ -17,7 +17,8 @@ class CustomUserCreationForm(UserCreationForm):
         validators=[RegexValidator(regex=r'^[\w.@+-]+$', message='Username may contain only letters, digits and @/./+/-/_ characters.')],
         max_length=150,
         widget=forms.TextInput(attrs={
-            'class': 'w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500',
+            'class': 'w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 '
+            'text-white focus:outline-none focus:border-purple-500',
             'placeholder': 'Choose a username'
         })
     )
@@ -33,7 +34,7 @@ class CustomUserCreationForm(UserCreationForm):
             user.save()
         return user
     
-    # ADD THIS METHOD - fixes the 'try_save' error
+    # fixes the 'try_save' error
     def try_save(self, request):
         """
         Required by django-allauth's SignupView in production

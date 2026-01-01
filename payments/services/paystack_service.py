@@ -1,10 +1,9 @@
-# payments/services/paystack_service.py
 import os
 import requests
 
 class PaystackService:
     BASE_URL = "https://api.paystack.co"
-    SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")  # ensure loaded by Django settings/env
+    SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY") 
 
     @property
     def headers(self):

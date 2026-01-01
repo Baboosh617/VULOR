@@ -5,20 +5,20 @@
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-black px-4">
     <div class="text-center max-w-md space-y-8">
-        <!-- VULOR Brand Mark -->
+        
         <div class="mb-8">
             <div class="w-20 h-20 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto">
                 <span class="text-[#dc2626] text-3xl font-bold">V</span>
             </div>
         </div>
         
-        <!-- Error Code -->
+        
         <div class="space-y-4">
             <div class="text-9xl font-bold text-white tracking-tighter">403</div>
             <div class="w-24 h-1 bg-gradient-to-r from-transparent via-[#dc2626] to-transparent mx-auto"></div>
         </div>
         
-        <!-- Message -->
+        
         <div class="space-y-4">
             <h1 class="text-2xl font-bold text-white tracking-wide">ACCESS DENIED</h1>
             <p class="text-[#cccccc] leading-relaxed tracking-wider">
@@ -26,24 +26,24 @@
             </p>
         </div>
         
-        <!-- Illustration -->
+        
         <div class="py-4">
             <div class="relative mx-auto w-32 h-32">
-                <!-- Lock illustration -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-24 h-24 border-2 border-[#333333] rounded-lg flex items-center justify-center">
                         <div class="w-16 h-16 border-2 border-[#dc2626] rounded-t-lg rounded-b-sm flex items-center justify-center relative">
-                            <!-- Lock body -->
+        
                             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
                                 <div class="w-8 h-6 bg-[#dc2626] rounded-t-full"></div>
                             </div>
-                            <!-- Keyhole -->
+        
                             <div class="w-2 h-4 bg-[#333333] rounded-full mt-2"></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Shield overlay -->
+        
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-32 h-32 border-2 border-[#dc2626]/30 rounded-full"></div>
                 </div>
@@ -51,7 +51,7 @@
             <p class="text-[#666666] text-sm mt-2 tracking-wider">THIS AREA IS RESTRICTED</p>
         </div>
         
-        <!-- CTA Buttons -->
+        
         <div class="space-y-4">
             <div>
                 <a href="{% url 'home' %}" 
@@ -79,7 +79,7 @@
             {% endif %}
         </div>
         
-        <!-- Security message -->
+        
         <div class="pt-8 border-t border-[#333333]">
             <p class="text-[#666666] text-xs tracking-wider">
                 <span class="text-[#dc2626] font-bold">SECURITY NOTICE:</span> 
@@ -112,7 +112,7 @@
         100% { transform: translateY(200%); }
     }
     
-    /* Animate the error number */
+    
     .text-9xl {
         position: relative;
         overflow: hidden;
@@ -129,12 +129,12 @@
         animation: scanLine 2s linear infinite;
     }
     
-    /* Animate the lock */
+    
     .w-24.h-24.rounded-lg {
         animation: lockShake 4s ease-in-out infinite, pulseGlow 2s ease-in-out infinite;
     }
     
-    /* Animate the shield */
+    
     .w-32.h-32.rounded-full {
         animation: pulseGlow 3s ease-in-out infinite;
     }
@@ -142,7 +142,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Add ripple effect to main button
+    
         const mainButton = document.querySelector('a[href*="home"]');
         if (mainButton) {
             mainButton.addEventListener('click', function(e) {
@@ -173,7 +173,7 @@
             });
         }
         
-        // Add CSS for ripple animation if not already present
+    
         if (!document.querySelector('style[data-ripple]')) {
             const style = document.createElement('style');
             style.setAttribute('data-ripple', 'true');
@@ -192,7 +192,7 @@
             document.head.appendChild(style);
         }
         
-        // Add hover effect to all buttons
+    
         const buttons = document.querySelectorAll('a, button');
         buttons.forEach(button => {
             button.addEventListener('mouseenter', function() {
@@ -205,7 +205,7 @@
             });
         });
         
-        // Add security alert effect
+    
         const securityNotice = document.querySelector('.text-\[\#666666\]\.text-xs');
         if (securityNotice) {
             let flashCount = 0;
@@ -228,11 +228,11 @@
                 }
             }
             
-            // Start flashing after 2 seconds
+    
             setTimeout(flashSecurityNotice, 2000);
         }
         
-        // Add keyhole click effect
+    
         const keyhole = document.querySelector('.w-2.h-4');
         if (keyhole) {
             keyhole.addEventListener('click', function() {
@@ -245,13 +245,13 @@
                     this.style.transform = '';
                 }, 1000);
                 
-                // Show access denied message
+    
                 const accessDenied = document.createElement('div');
                 accessDenied.className = 'mt-4 p-3 bg-[#111111] border border-[#dc2626]/30 text-[#dc2626] text-sm rounded tracking-wider';
                 accessDenied.textContent = 'ACCESS RESTRICTED - VALID CREDENTIALS REQUIRED';
                 accessDenied.style.animation = 'fadeIn 0.5s ease';
                 
-                // Remove previous message if exists
+    
                 const existingMessage = document.querySelector('.access-message');
                 if (existingMessage) {
                     existingMessage.remove();
@@ -260,7 +260,7 @@
                 accessDenied.classList.add('access-message');
                 document.querySelector('.space-y-4').appendChild(accessDenied);
                 
-                // Auto-remove after 5 seconds
+    
                 setTimeout(() => {
                     if (accessDenied.parentElement) {
                         accessDenied.style.opacity = '0';
@@ -274,11 +274,11 @@
                 }, 5000);
             });
             
-            // Add cursor pointer to keyhole
+      
             keyhole.style.cursor = 'pointer';
         }
         
-        // Add fadeIn animation if not present
+        
         if (!document.querySelector('style[data-fadein]')) {
             const style = document.createElement('style');
             style.setAttribute('data-fadein', 'true');

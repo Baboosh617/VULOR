@@ -31,7 +31,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     readonly_fields = ['created_at', 'updated_at']
 
-    # Main fieldset layout
+    
     base_fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'description')
@@ -45,7 +45,7 @@ class ProductAdmin(admin.ModelAdmin):
         ('Variants', {
             'fields': ('available_sizes', 'available_colors')
         }),
-        ('Fit Type (Cargo Jeans & Sweatpants)', {  # New section for fit type
+        ('Fit Type (Cargo Jeans & Sweatpants)', {  
             'fields': ('fit_type',),
             'classes': ('collapse',),
             'description': 'Choose Loose or Fit (only for Cargo Jeans & Sweatpants)',
@@ -71,7 +71,7 @@ class ProductAdmin(admin.ModelAdmin):
         Show fit_type + detailed measurements only for cargo jeans + sweatpants.
         """
         if obj is None:
-            # Creating a new product → show all fields so category can be selected
+           
             return self.base_fieldsets
 
         filtered = []
@@ -100,7 +100,7 @@ class ReviewAdmin(admin.ModelAdmin):
 # Inline admin for ProductImage
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    extra = 1  # Number of empty forms to display
+    extra = 1  
     fields = ['image', 'alt_text', 'is_main', 'image_preview']
     readonly_fields = ['image_preview']
     
@@ -110,7 +110,7 @@ class ProductImageInline(admin.TabularInline):
         return "No Image"
     image_preview.short_description = 'Preview'
 
-# Register the ProductImage model separately (optional)
+
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['product', 'image_preview', 'is_main', 'created_at']

@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Page Header -->
+    
     <div class="mb-12">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <!-- Left: Page Title -->
+            
             <h1 class="text-4xl md:text-5xl font-bold mb-6 lg:mb-0 text-white">
                 {% if current_category %}
                     {{ current_category|title }}
@@ -16,7 +16,7 @@
                 {% endif %}
             </h1>
             
-            <!-- Right: Sort Dropdown -->
+            
             <div class="w-full lg:w-auto">
                 <select title="filter" name="sort" onchange="window.location.href='?sort='+this.value" 
                         class="w-full lg:w-auto bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] transition-all duration-300 hover:border-[#dc2626]">
@@ -30,9 +30,9 @@
     </div>
 
     <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Filters Sidebar (Left side on desktop) -->
+        
         <div class="lg:w-64">
-            <!-- Mobile Filter Button -->
+        
             <div class="lg:hidden mb-6">
                 <button id="filter-toggle" 
                         class="w-full flex items-center justify-center space-x-2 border border-[#333333] text-white hover:border-[#dc2626] px-4 py-3 text-sm tracking-wide transition-all duration-300 bg-black">
@@ -43,9 +43,9 @@
                 </button>
             </div>
             
-            <!-- Filter Panel (Hidden on mobile, shown on desktop) -->
+        
             <div id="filter-panel" class="hidden lg:block bg-black border border-[#333333] p-6">
-                <!-- Category Filter -->
+        
                 <div class="mb-8">
                     <h3 class="text-sm font-bold text-[#dc2626] mb-4 tracking-widest">CATEGORY</h3>
                     <div class="space-y-3">
@@ -62,7 +62,7 @@
                     </div>
                 </div>
                 
-                <!-- Price Filter -->
+        
                 <div>
                     <h3 class="text-sm font-bold text-[#dc2626] mb-4 tracking-widest">PRICE</h3>
                     <div class="space-y-3">
@@ -79,14 +79,14 @@
             </div>
         </div>
 
-        <!-- Products Grid (Main Content) -->
+        
         <div class="flex-1">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                 {% for product in products %}
                 <div class="group relative">
-                    <!-- Product Card -->
+        
                     <a href="{% url 'product_detail' product.slug %}" class="block">
-                        <!-- Image Container with Hover Effects -->
+        
                         <div class="aspect-[0.9] overflow-hidden mb-4 bg-black border border-[#333333] group-hover:border-[#dc2626] transition-all duration-300">
                             {% if product.image %}
                                 <img src="{{ product.image.url }}" 
@@ -98,7 +98,7 @@
                                 </div>
                             {% endif %}
                             
-                            <!-- Hover Cart Button -->
+                            
                             <form method="POST" action="{% url 'add_to_cart' product.id %}" 
                                   class="absolute bottom-4 right-4 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                                 {% csrf_token %}
@@ -110,14 +110,14 @@
                             </form>
                         </div>
                         
-                        <!-- Product Info -->
+                        
                         <div class="space-y-2">
-                            <!-- Product Name -->
+                        
                             <h3 class="text-sm text-white font-normal tracking-tight">
                                 {{ product.name }}
                             </h3>
                             
-                            <!-- Price & Discount -->
+                        
                             <div class="flex items-center space-x-3">
                                 <span class="text-[#dc2626] font-bold text-lg">
                                     ₦{{ product.price }}
@@ -129,7 +129,7 @@
                                 {% endif %}
                             </div>
                             
-                            <!-- Category Tag -->
+                        
                             <div class="mt-2">
                                 <span class="text-xs text-[#666666] tracking-widest">
                                     {{ product.get_category_display|upper }}
@@ -139,7 +139,7 @@
                     </a>
                 </div>
                 {% empty %}
-                <!-- Empty State -->
+                
                 <div class="col-span-2 md:col-span-3 lg:col-span-4 text-center py-16">
                     <div class="w-16 h-16 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-6">
                         <span class="material-symbols-outlined text-[#666666]">search_off</span>
@@ -153,7 +153,7 @@
                 {% endfor %}
             </div>
 
-            <!-- Load More Button (If pagination exists) -->
+            
             {% if is_paginated and page_obj.has_next %}
             <div class="text-center mt-16">
                 <a href="?page={{ page_obj.next_page_number }}" 
@@ -167,7 +167,7 @@
 </div>
 
 <style>
-    /* Custom styles for filter toggle */
+    
     #filter-panel {
         transition: all 0.3s ease;
     }
@@ -182,7 +182,7 @@
         margin-top: 0.5rem;
     }
     
-    /* Custom scrollbar for dropdown */
+    
     select {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -192,7 +192,7 @@
         padding-right: 2.5rem;
     }
     
-    /* Product card hover effects */
+    
     .group:hover .product-name {
         color: #dc2626;
     }
@@ -200,7 +200,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Mobile filter toggle
+    
         const filterToggle = document.getElementById('filter-toggle');
         const filterPanel = document.getElementById('filter-panel');
         
@@ -209,7 +209,7 @@
                 filterPanel.classList.toggle('hidden');
                 filterPanel.classList.toggle('show');
                 
-                // Add/remove border for mobile
+                
                 if (filterPanel.classList.contains('show')) {
                     filterToggle.classList.add('border-[#dc2626]');
                 } else {
@@ -218,7 +218,7 @@
             });
         }
         
-        // Close filter panel when clicking outside on mobile
+        
         document.addEventListener('click', function(event) {
             if (window.innerWidth < 1024 && filterPanel) {
                 if (!filterPanel.classList.contains('hidden') &&
@@ -231,7 +231,7 @@
             }
         });
 
-        // Quick add to cart functionality
+        
         document.querySelectorAll('form[action*="add_to_cart"]').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -240,11 +240,11 @@
                 const originalHTML = button.innerHTML;
                 const originalBg = button.style.backgroundColor;
                 
-                // Show loading state
+        
                 button.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">autorenew</span>';
                 button.disabled = true;
                 
-                // Submit the form
+        
                 const formData = new FormData(this);
                 fetch(this.action, {
                     method: 'POST',
@@ -257,30 +257,30 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Success animation
+        
                         button.innerHTML = '<span class="material-symbols-outlined text-lg">check</span>';
                         button.style.backgroundColor = '#10B981';
                         button.style.borderColor = '#10B981';
                         
-                        // Update cart count in navbar
+        
                         const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
                         if (cartBadge) {
                             cartBadge.textContent = data.cart_total_items;
-                            // Animate cart badge
+        
                             cartBadge.classList.add('animate-pulse');
                             setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
                         }
                         
-                        // Show success message
+        
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
                         messageDiv.textContent = 'Added to cart!';
                         document.body.appendChild(messageDiv);
                         
-                        // Remove message after 2 seconds
+        
                         setTimeout(() => messageDiv.remove(), 2000);
                         
-                        // Reset button after 1.5 seconds
+        
                         setTimeout(() => {
                             button.innerHTML = originalHTML;
                             button.style.backgroundColor = '';
@@ -291,12 +291,12 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Show error
+        
                     button.innerHTML = '<span class="material-symbols-outlined text-lg">error</span>';
                     button.style.backgroundColor = '#EF4444';
                     button.style.borderColor = '#EF4444';
                     
-                    // Reset button after 2 seconds
+        
                     setTimeout(() => {
                         button.innerHTML = originalHTML;
                         button.style.backgroundColor = '';
@@ -307,7 +307,7 @@
             });
         });
 
-        // Add hover class to product names
+        
         const productNames = document.querySelectorAll('.group h3');
         productNames.forEach(name => {
             name.classList.add('product-name');

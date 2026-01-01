@@ -4,20 +4,20 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-12 bg-black">
-    <!-- Page Header -->
+    
     <div class="mb-12 border-b border-[#333333] pb-6">
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 tracking-wide">ORDER HISTORY</h1>
         <p class="text-[#dc2626] text-sm tracking-wider font-bold">TRACK AND REVIEW YOUR PAST ORDERS</p>
     </div>
 
     {% if orders %}
-    <!-- Orders List -->
+    
     <div class="space-y-4">
         {% for order in orders %}
-        <!-- Order Card - Simple horizontal row -->
+        
         <div class="border border-[#333333] bg-[#111111] py-6 px-6 hover:border-[#dc2626] transition-all duration-300 hover:bg-[#0a0a0a] group">
             <div class="flex flex-col md:flex-row md:items-center gap-6">
-                <!-- Left: Order ID and Date -->
+                
                 <div class="md:w-1/4">
                     <div class="text-white text-base font-bold mb-1 tracking-wider">
                         #{{ order.order_number|slice:":8" }}
@@ -27,7 +27,7 @@
                     </div>
                 </div>
 
-                <!-- Middle: Product Thumbnails -->
+                
                 <div class="md:w-2/4 flex items-center">
                     <div class="flex -space-x-2">
                         {% for item in order.items.all|slice:":3" %}
@@ -50,13 +50,13 @@
                     {% endif %}
                 </div>
 
-                <!-- Right: Total Price and Status Badge -->
+                
                 <div class="md:w-1/4">
                     <div class="text-[#dc2626] text-lg font-bold mb-2 tracking-wider">
                         ₦{{ order.total_amount }}
                     </div>
                     
-                    <!-- Status Badge -->
+                    
                     {% if order.status == 'delivered' %}
                     <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
                         DELIVERED
@@ -80,7 +80,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Far Right: View Order Button -->
+                
                 <div class="md:w-1/4 text-right">
                     <a href="{% url 'orders:order_detail' order.order_number %}" 
                        class="inline-flex items-center text-[#dc2626] hover:text-white transition-all duration-300 text-sm tracking-wider group">
@@ -90,13 +90,13 @@
                 </div>
             </div>
             
-            <!-- Red accent line on hover -->
+            
             <div class="h-0.5 bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-4"></div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <!-- Empty State -->
+    
     <div class="text-center py-20 border border-[#333333] bg-[#111111] rounded-lg">
         <div class="mb-6">
             <div class="w-20 h-20 border-2 border-[#333333] rounded-full flex items-center justify-center mx-auto">
@@ -116,7 +116,7 @@
 </div>
 
 <style>
-    /* Custom animations for order cards */
+    
     @keyframes slideIn {
         from {
             opacity: 0;
@@ -128,7 +128,7 @@
         }
     }
 
-    /* Stagger animation for order cards */
+    
     .order-card {
         animation: slideIn 0.5s ease-out forwards;
         opacity: 0;
@@ -143,14 +143,14 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Add staggered animation to order cards
+        
         const orderCards = document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]');
         orderCards.forEach((card, index) => {
             card.classList.add('order-card');
             card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
         });
 
-        // Add hover effect to view order links
+        
         document.querySelectorAll('a[href*="order_detail"]').forEach(link => {
             link.addEventListener('mouseenter', function() {
                 const arrow = this.querySelector('span');
@@ -167,7 +167,7 @@
             });
         });
 
-        // Add interactive effect to order cards
+        
         document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]').forEach(card => {
             card.addEventListener('mouseenter', function() {
                 this.style.transform = 'translateY(-2px)';
