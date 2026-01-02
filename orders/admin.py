@@ -11,7 +11,17 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ['order_number', 'user', 'total_amount', 'status', 'created_at']
     list_filter = ['status', 'created_at']
     search_fields = ['order_number', 'user__email', 'user__username']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = [   
+    'order_number',
+    'user',
+    'total_amount',
+    'payment_status',
+    'paystack_reference',
+    'paystack_access_code',
+    'created_at', 
+    'updated_at',
+    'status',
+    ]
     inlines = [OrderItemInline]
     
     fieldsets = (

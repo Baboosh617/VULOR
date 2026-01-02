@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Product, Review
+from .models import Product, Review, ProductImage
+from django.utils.html import format_html
+import logging
+
+logger = logging.getLogger(__name__)
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -27,7 +31,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     readonly_fields = ['created_at', 'updated_at']
 
-    # Main fieldset layout
+    
     base_fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'description')
@@ -41,10 +45,10 @@ class ProductAdmin(admin.ModelAdmin):
         ('Variants', {
             'fields': ('available_sizes', 'available_colors')
         }),
-        ('Fit Type (Cargo Jeans Only)', {  # New section for fit type
+        ('Fit Type (Cargo Jeans & Sweatpants)', {  
             'fields': ('fit_type',),
             'classes': ('collapse',),
-            'description': 'Choose Loose or Fit (only for Cargo Jeans)',
+            'description': 'Choose Loose or Fit (only for Cargo Jeans & Sweatpants)',
         }),
         ('Detailed Measurements (Cargo Jeans & Sweatpants)', {
             'fields': (
@@ -67,12 +71,12 @@ class ProductAdmin(admin.ModelAdmin):
         Show fit_type + detailed measurements only for cargo jeans + sweatpants.
         """
         if obj is None:
-            # Creating a new product → show all fields so category can be selected
+           
             return self.base_fieldsets
 
         filtered = []
         for title, data in self.base_fieldsets:
-            if title == 'Fit Type (Cargo Jeans Only)' and obj.category != 'cargo-jeans':
+            if title == 'Fit Type (Cargo Jeans & Sweatpants)' and obj.category not in ['cargo-jeans', 'sweatpants']:
                 continue
             if title == 'Detailed Measurements (Cargo Jeans & Sweatpants)' and obj.category not in ['cargo-jeans', 'sweatpants']:
                 continue
@@ -82,7 +86,40 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['user', 'rating', 'approved', 'created_at']
+    list_display = ['user', 'rating', 'approved', 'created_at', 'approved_by',]
     list_filter = ['approved', 'rating', 'created_at']
     search_fields = ['user__username', 'comment']
-    readonly_fields = ['created_at']
+    readonly_fields = ['created_at', 'approved_by']
+
+    def save_model(self, request, obj, form, change):
+        if obj.approved and not obj.approved_by:
+            obj.approved_by = request.user
+        super().save_model(request, obj, form, change)
+        logger.info(f"Review {obj.id} saved by {request.user.username}")
+
+# Inline admin for ProductImage
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1  
+    fields = ['image', 'alt_text', 'is_main', 'image_preview']
+    readonly_fields = ['image_preview']
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" height="100" style="object-fit: cover;" />', obj.image.url)
+        return "No Image"
+    image_preview.short_description = 'Preview'
+
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'image_preview', 'is_main', 'created_at']
+    list_filter = ['is_main', 'created_at']
+    list_editable = ['is_main']
+    search_fields = ['product__name', 'alt_text']
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" style="object-fit: cover;" />', obj.image.url)
+        return "No Image"
+    image_preview.short_description = 'Image'

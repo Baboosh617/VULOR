@@ -3,79 +3,347 @@
 {% block title %}Order {{ order.order_number }} - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-2">Order #{{ order.order_number }}</h1>
-    <p class="text-gray-400 mb-8">Placed on {{ order.created_at|date:"F j, Y" }}</p>
+<div class="max-w-4xl mx-auto px-4 py-12 bg-black">
     
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Order Items -->
-        <div class="bg-gray-800 rounded-2xl p-6">
-            <h2 class="text-2xl font-bold mb-6">Order Items</h2>
-            
-            <div class="space-y-4">
-                {% for item in order.items.all %}
-                <div class="flex items-center space-x-4">
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                         class="w-16 h-16 object-cover rounded">
-                    <div class="flex-1">
-                        <h3 class="font-semibold">{{ item.product.name }}</h3>
-                        <p class="text-gray-400 text-sm">
-                            {% if item.size %}Size: {{ item.size }}{% endif %}
-                            {% if item.color %} | Color: {{ item.color }}{% endif %}
-                        </p>
-                        <p class="text-sm">Quantity: {{ item.quantity }}</p>
-                    </div>
-                    <p class="font-semibold">₦{{ item.total_price }}</p>
-                </div>
-                {% endfor %}
-            </div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12 border-b border-[#333333] pb-6">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 tracking-wide">ORDER {{ order.order_number }}</h1>
+            <p class="text-[#dc2626] text-sm tracking-wider font-bold">PLACED ON {{ order.created_at|date:"F j, Y" }}</p>
         </div>
         
-        <!-- Order Summary -->
-        <div class="space-y-6">
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
-                
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>₦{{ order.total_amount }}</span>
-                    </div>
-                    <!-- <div class="flex justify-between">
-                        <span>Shipping</span>
-                        <span>$5.00</span>
-                    </div> -->
-                    <div class="flex justify-between text-lg font-bold border-t border-gray-700 pt-3">
-                        <span>Total</span>
-                        <span>₦{{ order.total_amount }}</span>
-                    </div>
+        
+        <div class="mt-4 sm:mt-0">
+            {% if order.status == 'delivered' %}
+            <span class="inline-block px-4 py-2 bg-[#dc2626]/10 text-[#dc2626] text-sm font-bold tracking-wider border border-[#dc2626]/30 rounded">
+                DELIVERED
+            </span>
+            {% elif order.status == 'shipped' %}
+            <span class="inline-block px-4 py-2 bg-[#dc2626]/10 text-[#dc2626] text-sm font-bold tracking-wider border border-[#dc2626]/30 rounded">
+                SHIPPED
+            </span>
+            {% elif order.status == 'processing' %}
+            <span class="inline-block px-4 py-2 bg-[#333333] text-[#666666] text-sm font-bold tracking-wider border border-[#333333] rounded">
+                PROCESSING
+            </span>
+            {% elif order.status == 'cancelled' %}
+            <span class="inline-block px-4 py-2 bg-[#dc2626]/10 text-[#dc2626] text-sm font-bold tracking-wider border border-[#dc2626]/30 rounded">
+                CANCELLED
+            </span>
+            {% else %}
+            <span class="inline-block px-4 py-2 bg-[#333333] text-[#666666] text-sm font-bold tracking-wider border border-[#333333] rounded">
+                {{ order.get_status_display|upper }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    
+    <div class="mb-12">
+        <h2 class="text-white text-sm font-bold tracking-wider mb-6">ORDER STATUS</h2>
+        
+        <div class="flex items-center justify-between relative">
+            
+            <div class="absolute top-4 left-0 w-full h-px bg-[#333333] -z-10"></div>
+            
+            
+            <div class="flex flex-col items-center group cursor-pointer">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status in 'processing,shipped,delivered' %}bg-[#dc2626] text-white{% else %}bg-[#111111] border-2 border-[#333333] group-hover:border-[#dc2626] transition-all duration-300{% endif %}">
+                    <span class="text-xs">●</span>
                 </div>
+                <span class="text-white text-xs text-center tracking-wider group-hover:text-[#dc2626] transition-colors duration-300">ORDER<br>CONFIRMED</span>
             </div>
             
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Shipping Information</h2>
-                
-                <div class="space-y-2">
-                    <p><strong>Address:</strong> {{ order.shipping_address }}</p>
-                    <p><strong>City:</strong> {{ order.shipping_city }}</p>
-                    <p><strong>State:</strong> {{ order.shipping_state }}</p>
-                    <p><strong>ZIP Code:</strong> {{ order.shipping_zipcode }}</p>
-                    <p><strong>Country:</strong> {{ order.shipping_country }}</p>
+            
+            <div class="flex flex-col items-center group cursor-pointer">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status in 'shipped,delivered' %}bg-[#dc2626] text-white{% elif order.status == 'processing' %}bg-[#111111] border-2 border-[#dc2626]{% else %}bg-[#111111] border-2 border-[#333333] group-hover:border-[#dc2626] transition-all duration-300{% endif %}">
+                    <span class="text-xs">●</span>
                 </div>
+                <span class="text-white text-xs text-center tracking-wider group-hover:text-[#dc2626] transition-colors duration-300">PROCESSING</span>
             </div>
             
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h2 class="text-2xl font-bold mb-4">Order Status</h2>
-                
-                <span class="px-3 py-1 rounded-full text-sm font-medium 
-                    {% if order.status == 'delivered' %}bg-green-500/20 text-green-500
-                    {% elif order.status == 'shipped' %}bg-blue-500/20 text-blue-500
-                    {% elif order.status == 'processing' %}bg-yellow-500/20 text-yellow-500
-                    {% else %}bg-gray-500/20 text-gray-500{% endif %}">
-                    {{ order.get_status_display }}
-                </span>
+            
+            <div class="flex flex-col items-center group cursor-pointer">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status == 'delivered' %}bg-[#dc2626] text-white{% elif order.status == 'shipped' %}bg-[#111111] border-2 border-[#dc2626]{% else %}bg-[#111111] border-2 border-[#333333] group-hover:border-[#dc2626] transition-all duration-300{% endif %}">
+                    <span class="text-xs">●</span>
+                </div>
+                <span class="text-white text-xs text-center tracking-wider group-hover:text-[#dc2626] transition-colors duration-300">SHIPPED</span>
+            </div>
+            
+            
+            <div class="flex flex-col items-center group cursor-pointer">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2
+                    {% if order.status == 'delivered' %}bg-[#111111] border-2 border-[#dc2626]{% else %}bg-[#111111] border-2 border-[#333333] group-hover:border-[#dc2626] transition-all duration-300{% endif %}">
+                    <span class="text-xs">●</span>
+                </div>
+                <span class="text-white text-xs text-center tracking-wider group-hover:text-[#dc2626] transition-colors duration-300">DELIVERED</span>
             </div>
         </div>
     </div>
+
+    
+    <div class="mb-12">
+        <h2 class="text-white text-sm font-bold tracking-wider mb-6">ITEMS IN THIS ORDER</h2>
+        
+        <div class="space-y-6">
+            {% for item in order.items.all %}
+            <div class="flex flex-col md:flex-row md:items-center gap-6 py-6 border-b border-[#333333] last:border-0 hover:bg-[#111111] transition-all duration-300 group p-4 rounded-lg">
+                
+                <div class="w-20 h-20 bg-black overflow-hidden flex-shrink-0 border border-[#333333] group-hover:border-[#dc2626] transition-all duration-300">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                </div>
+                
+                
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div>
+                            <h3 class="text-white text-base font-bold mb-1 tracking-wide">{{ item.product.name }}</h3>
+                            {% if item.size or item.color %}
+                            <div class="text-[#666666] text-sm tracking-wider">
+                                {% if item.size %}<span class="text-[#dc2626] font-bold">SIZE:</span> {{ item.size }}{% endif %}
+                                {% if item.size and item.color %} · {% endif %}
+                                {% if item.color %}<span class="text-[#dc2626] font-bold">COLOR:</span> {{ item.color }}{% endif %}
+                            </div>
+                            {% endif %}
+                            <div class="text-[#666666] text-sm mt-1 tracking-wider"><span class="text-[#dc2626] font-bold">QUANTITY:</span> {{ item.quantity }}</div>
+                            
+                            
+                            <a href="{% url 'product_detail' item.product.slug %}" 
+                               class="inline-block text-[#dc2626] hover:text-white text-sm tracking-wider font-bold transition-colors duration-300 mt-2 group/link">
+                                VIEW PRODUCT
+                                <span class="ml-1 transform group-hover/link:translate-x-1 transition-transform duration-300">→</span>
+                            </a>
+                        </div>
+                        
+                        
+                        <div class="text-[#dc2626] text-base font-bold tracking-wider">
+                            ₦{{ item.get_total_price }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        
+        <div class="border border-[#333333] p-6 bg-[#111111] rounded-lg hover:border-[#dc2626] transition-all duration-300">
+            <h2 class="text-white text-sm font-bold tracking-wider mb-6">SHIPPING INFORMATION</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div>
+                    <h3 class="text-white text-sm font-bold tracking-wider mb-4">SHIPPING ADDRESS</h3>
+                    <div class="text-[#cccccc] text-sm leading-relaxed tracking-wider">
+                        {{ order.shipping_full_name|default:user.get_full_name|default:user.username|upper }}<br>
+                        {{ order.shipping_address|default:"" }}<br>
+                        {% if order.shipping_city %}{{ order.shipping_city|upper }}, {% endif %}{{ order.shipping_state|default:""|upper }}<br>
+                        NIGERIA<br>
+                        {{ order.customer_phone|default:"" }}
+                    </div>
+                </div>
+                
+                <!-- Shipping Method -->
+                <div>
+                    <h3 class="text-white text-sm font-bold tracking-wider mb-4">SHIPPING METHOD</h3>
+                    <div class="text-[#cccccc] text-sm leading-relaxed tracking-wider">
+                        <div class="text-[#dc2626] font-bold mb-1 tracking-wider">STANDARD DELIVERY</div>
+                        {% if order.shipping_state %}
+                        KADUNA → {{ order.shipping_state|upper }}<br>
+                        {% endif %}
+                        {% if order.shipping_fee %}
+                        ₦{{ order.shipping_fee }}<br>
+                        {% endif %}
+                        ESTIMATED: 3-5 BUSINESS DAYS
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="border border-[#333333] p-6 bg-[#111111] rounded-lg hover:border-[#dc2626] transition-all duration-300">
+            <h2 class="text-white text-sm font-bold tracking-wider mb-6">PAYMENT SUMMARY</h2>
+            
+            <div class="space-y-4">
+                
+                <div class="flex justify-between text-white text-sm tracking-wider">
+                    <span>SUBTOTAL</span>
+                    <span>₦{{ order.subtotal|default:order.total_amount }}</span>
+                </div>
+                
+                
+                <div class="flex justify-between text-white text-sm tracking-wider">
+                    <span>SHIPPING</span>
+                    <span>₦{{ order.shipping_fee|default:"0" }}</span>
+                </div>
+                
+                
+                <div class="border-t border-[#333333] pt-4"></div>
+                
+                
+                <div class="flex justify-between text-[#dc2626] text-lg font-bold tracking-wider">
+                    <span>TOTAL</span>
+                    <span>₦{{ order.total_amount }}</span>
+                </div>
+                
+                
+                <div class="pt-4 border-t border-[#333333]">
+                    {% if order.payment_status == 'paid' %}
+                    <div class="flex items-center text-[#dc2626] text-sm tracking-wider font-bold">
+                        <div class="w-6 h-6 border-2 border-[#dc2626] rounded-full flex items-center justify-center mr-2">
+                            <span class="text-xs">✓</span>
+                        </div>
+                        PAID VIA {{ order.payment_method|default:"PAYSTACK"|upper }}
+                    </div>
+                    {% elif order.payment_status == 'pending' %}
+                    <div class="flex items-center text-[#666666] text-sm tracking-wider font-bold">
+                        <div class="w-6 h-6 border-2 border-[#666666] rounded-full flex items-center justify-center mr-2">
+                            <span class="text-xs">⏳</span>
+                        </div>
+                        PAYMENT PENDING
+                    </div>
+                    {% else %}
+                    <div class="flex items-center text-[#666666] text-sm tracking-wider font-bold">
+                        <div class="w-6 h-6 border-2 border-[#666666] rounded-full flex items-center justify-center mr-2">
+                            <span class="text-xs">!</span>
+                        </div>
+                        {{ order.get_payment_status_display|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="pt-8 border-t border-[#333333]">
+        <h2 class="text-white text-sm font-bold tracking-wider mb-6">ACTIONS</h2>
+        
+        <div class="flex flex-wrap gap-4">
+            {% if order.status == 'shipped' and order.tracking_number %}
+            <a href="#" 
+               class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-6 py-2 transition-all duration-300 text-sm tracking-wider font-bold">
+                TRACK PACKAGE
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'contact' %}" 
+               class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-6 py-2 transition-all duration-300 text-sm tracking-wider font-bold">
+                CONTACT SUPPORT
+            </a>
+            
+            <button onclick="window.print()" 
+                    class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-6 py-2 transition-all duration-300 text-sm tracking-wider font-bold">
+                DOWNLOAD RECEIPT
+            </button>
+        </div>
+    </div>
 </div>
+
+<style>
+    
+    @media print {
+        body * {
+            visibility: hidden;
+            background: white !important;
+            color: black !important;
+        }
+        .max-w-4xl, .max-w-4xl * {
+            visibility: visible;
+        }
+        .max-w-4xl {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: 100%;
+            background: white !important;
+        }
+        .bg-black, .bg-\[\#111111\], .bg-\[\#0a0a0a\] {
+            background: white !important;
+        }
+        .text-white, .text-\[\#cccccc\], .text-\[\#666666\] {
+            color: black !important;
+        }
+        .text-\[\#dc2626\] {
+            color: darkred !important;
+        }
+        .border-\[\#333333\], .border-\[\#dc2626\] {
+            border-color: black !important;
+        }
+        button, a {
+            display: none !important;
+        }
+        
+        
+        .bg-\[\#dc2626\] {
+            background: darkred !important;
+            color: white !important;
+        }
+        .border-\[\#dc2626\] {
+            border-color: darkred !important;
+        }
+    }
+
+    
+    @keyframes pulseDot {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .group:hover .w-8 {
+        animation: pulseDot 0.5s ease-in-out;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const timelineSteps = document.querySelectorAll('.group.cursor-pointer');
+    
+    timelineSteps.forEach(step => {
+        step.addEventListener('mouseenter', function() {
+            const dot = this.querySelector('.w-8');
+            if (dot && !dot.classList.contains('bg-[#dc2626]')) {
+                dot.style.borderColor = '#dc2626';
+            }
+        });
+        
+        step.addEventListener('mouseleave', function() {
+            const dot = this.querySelector('.w-8');
+            if (dot && !dot.classList.contains('bg-[#dc2626]') && !dot.classList.contains('border-[#dc2626]')) {
+                dot.style.borderColor = '#333333';
+            }
+        });
+    });
+
+    
+    const orderItems = document.querySelectorAll('.hover\\:bg-\\[\\#111111\\]');
+    
+    orderItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 10px 25px rgba(220, 38, 38, 0.1)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+
+    
+    const trackButton = document.querySelector('a[href="#"]');
+    if (trackButton && trackButton.textContent.includes('TRACK PACKAGE')) {
+        trackButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Tracking information would appear here. In a real application, this would link to a tracking service.');
+        });
+    }
+});
+</script>
 {% endblock %}

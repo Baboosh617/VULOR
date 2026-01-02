@@ -191,13 +191,13 @@
 
     <!-- SECTION 6: Fit Type (Conditional) -->
     <section id="fit-type-section" style="display: none;" class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Fit Type (Cargo Jeans Only)</h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Fit Type (Cargo Jeans & Sweatpants)</h2>
       <div class="max-w-md">
         <label class="block text-sm font-medium text-gray-700 mb-2">
           Fit Type <span class="text-red-500">*</span>
         </label>
         {{ form.fit_type }}
-        <p class="mt-2 text-sm text-gray-600">Choose between "Loose" (relaxed fit) or "Fit" (slimmer fit) for cargo jeans.</p>
+        <p class="mt-2 text-sm text-gray-600">Choose between "Loose" (relaxed fit) or "Fit" (slimmer fit) for cargo jeans & sweatpants.</p>
       </div>
     </section>
 
@@ -240,33 +240,122 @@
     </section>
 
     <!-- SECTION 8: Media -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Media</h2>
-      <div class="flex flex-col md:flex-row gap-8 items-start">
+<section class="border-b pb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Media</h2>
+
+    <div class="flex flex-col md:flex-row gap-8 items-start">
+        <!-- Main product image -->
         <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Product Image <span class="text-red-500">*</span>
-          </label>
-          {{ form.image }}
-          <p class="mt-2 text-sm text-gray-500">Upload a high-quality image of the product.</p>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Main Product Image <span class="text-red-500">*</span>
+            </label>
+            {{ form.image }}
+            <p class="mt-2 text-sm text-gray-500">
+                This is the primary image used across the store.
+            </p>
         </div>
+
+        <!-- Preview -->
         <div class="w-48 h-48 bg-gray-100 rounded-xl overflow-hidden shadow-md">
-          {% if product and product.image %}
-            <img id="image-preview" src="{{ product.image.url }}" class="object-cover w-full h-full" />
-          {% else %}
-            <img id="image-preview" src="" style="display: none;" class="object-cover w-full h-full" />
-            <div id="no-image" class="w-full h-full flex items-center justify-center">
-              <div class="text-center">
-                <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <p class="mt-2 text-sm text-gray-500">No image</p>
-              </div>
-            </div>
-          {% endif %}
+            {% if product and product.image %}
+                <img id="image-preview" src="{{ product.image.url }}" class="object-cover w-full h-full" />
+            {% else %}
+                <img id="image-preview" src="" style="display:none;" class="object-cover w-full h-full" />
+                <div id="no-image" class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                    No image
+                </div>
+            {% endif %}
         </div>
-      </div>
-    </section>
+    </div>
+
+    <!-- Existing Alternate Images -->
+    <div class="mt-10">
+        <h3 class="font-semibold mb-4">Alternate Product Images</h3>
+        
+        {% if alternate_images %}
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {% for img in alternate_images %}
+                    <div class="border rounded-lg p-2 text-center group relative">
+                        <img src="{{ img.image.url }}" 
+                             alt="{{ img.alt_text|default:product.name }}" 
+                             class="h-24 w-full object-cover rounded mb-2">
+                        
+                        <div class="text-xs">
+                            <p class="text-gray-600 truncate">{{ img.alt_text|default:"No description" }}</p>
+                            {% if img.is_main %}
+                                <span class="text-green-600 font-medium">✓ Main</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Hover Actions -->
+                        <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center space-x-2">
+                            {% if not img.is_main %}
+                                <a href="{% url 'dashboard:set_main_alternate_image' product.id img.id %}" 
+                                   class="text-white bg-blue-600 hover:bg-blue-700 p-2 rounded-full"
+                                   title="Set as Main">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'dashboard:delete_alternate_image' product.id img.id %}" 
+                               class="text-white bg-red-600 hover:bg-red-700 p-2 rounded-full"
+                               onclick="return confirm('Delete this image?')"
+                               title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-sm text-gray-500">No alternate images yet. Add some below.</p>
+        {% endif %}
+    </div>
+
+    <!-- Add Alternate Images -->
+    <div class="mt-10 border-t pt-6">
+        <h3 class="font-semibold mb-4">Add Alternate Images</h3>
+        <p class="text-sm text-gray-600 mb-4">Upload different angles or views of the product to show customers.</p>
+
+        <div class="space-y-6">
+            <!-- File Upload -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Images
+                </label>
+                <input type="file" 
+                       name="alternate_images" 
+                       accept="image/*"
+                       multiple
+                       class="block w-full text-sm border rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <p class="mt-1 text-xs text-gray-500">You can select multiple images (JPG, PNG, WebP).</p>
+            </div>
+
+            <!-- Dynamic Alt Text Fields -->
+            <div id="altTextContainer">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Image Descriptions (Optional)
+                </label>
+                <p class="text-xs text-gray-500 mb-3">Add descriptions for each image in the same order as uploaded.</p>
+                
+                <!-- Placeholder for dynamic fields -->
+                <div id="dynamicAltFields"></div>
+            </div>
+
+            <!-- Set Main Image -->
+            <div id="mainImageContainer" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Set Main Alternate Image
+                </label>
+                <p class="text-xs text-gray-500 mb-3">Which alternate image should be marked as the main view?</p>
+                <div id="mainImageOptions" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+</section>
 
     <!-- SECTION 9: Timestamps (Read-only for edit) -->
     {% if product %}
@@ -312,6 +401,70 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const alternateImagesInput = document.querySelector('input[name="alternate_images"]');
+    const dynamicAltFields = document.getElementById('dynamicAltFields');
+    const mainImageContainer = document.getElementById('mainImageContainer');
+    const mainImageOptions = document.getElementById('mainImageOptions');
+    
+    if (alternateImagesInput) {
+        alternateImagesInput.addEventListener('change', function(e) {
+            const files = e.target.files;
+            dynamicAltFields.innerHTML = '';
+            mainImageOptions.innerHTML = '';
+            
+            if (files.length > 0) {
+                mainImageContainer.classList.remove('hidden');
+                
+                // Create fields for each file
+                Array.from(files).forEach((file, index) => {
+                    // Create alt text input
+                    const altDiv = document.createElement('div');
+                    altDiv.className = 'mb-3';
+                    altDiv.innerHTML = `
+                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            Image ${index + 1}: ${file.name}
+                        </label>
+                        <input type="text" 
+                               name="alternate_alt_text" 
+                               placeholder="Describe this view (e.g., Back detail, Side angle)"
+                               class="w-full border rounded p-2 text-sm"
+                               value="${file.name.split('.')[0].replace(/[_-]/g, ' ')}">
+                    `;
+                    dynamicAltFields.appendChild(altDiv);
+                    
+                    // Create main image radio option
+                    const radioDiv = document.createElement('div');
+                    radioDiv.className = 'flex items-center';
+                    radioDiv.innerHTML = `
+                        <input type="radio" 
+                               id="main_${index}" 
+                               name="alternate_is_main" 
+                               value="${index}"
+                               class="h-4 w-4 text-blue-600">
+                        <label for="main_${index}" class="ml-2 text-sm text-gray-700">
+                            Image ${index + 1}${index === 0 ? ' (First image)' : ''}
+                        </label>
+                    `;
+                    mainImageOptions.appendChild(radioDiv);
+                    
+                    // Auto-select first image as main
+                    if (index === 0) {
+                        radioDiv.querySelector('input').checked = true;
+                    }
+                });
+            } else {
+                mainImageContainer.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Keep your existing JavaScript functions...
+    // ... rest of your existing JavaScript code ...
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
   // Category change handler
   const categorySelect = document.getElementById('id_category');
   const fitTypeSection = document.getElementById('fit-type-section');
@@ -322,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const category = categorySelect.value;
     
     // Show/hide fit type section
-    if (category === 'cargo-jeans') {
+    if (category === 'cargo-jeans' || category === 'sweatpants') {
       fitTypeSection.style.display = 'block';
       document.getElementById('id_fit_type').required = true;
     } else {

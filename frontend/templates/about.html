@@ -4,129 +4,154 @@
 {% block title %}About - VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <!-- Header -->
-    <div class="text-center mb-16">
-        <h1 class="text-4xl font-bold text-white mb-6">About VULOR</h1>
-        <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto"></div>
+<div class="max-w-6xl mx-auto px-4 py-16 bg-black">
+    
+    <div class="text-center mb-20">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">BUILT FOR EVERYDAY CONFIDENCE.</h1>
+        <p class="text-[#dc2626] text-lg max-w-2xl mx-auto leading-relaxed tracking-wider">
+            VULOR creates minimal streetwear designed to feel good, look sharp, and last.
+        </p>
     </div>
 
-    <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-        <!-- Text Content -->
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
+        
         <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-white">Our Story</h2>
-            <p class="text-gray-300 leading-relaxed">
-                Welcome to VULOR
-
-Where confidence meets comfort.
-
-Vulor is more than a clothing brand — it’s a movement built on ambition, self-expression, and authenticity. Every piece we create is designed to make you stand out effortlessly — from bold cargos 
-and statement tees to limited-edition hoodies that speak your style.
-
-
-            </p>
-
-            <h2 class="text-2xl font-bold text-white mt-8">Our Mission</h2>
-            <p class="text-gray-300 leading-relaxed">
-                Born from the streets and driven by purpose, Vulor represents the grind, the vision, and the courage to build something from the ground up. We keep our designs original, our prices fair, and our mission simple — to bring quality streetwear that anyone can own, wear, and be proud of.
-
-Join the movement.
-Own your style.
-Own Vulor.
-
-            </p>
+            <h2 class="text-2xl font-bold text-white tracking-wide">WHY VULOR EXISTS</h2>
+            <div class="space-y-4 text-[#cccccc] leading-relaxed border-l-2 border-[#dc2626] pl-6 py-2">
+                <p class="leading-relaxed">
+                    Welcome to VULOR - where confidence meets comfort.
+                </p>
+                <p class="leading-relaxed">
+                    We believe good clothing doesn't need to shout. VULOR is about clean design, quality materials, and pieces you can wear anywhere — every day.
+                </p>
+                <p class="leading-relaxed">
+                    No trends chasing. No overdesign. Just solid fits that work.
+                </p>
+                <p class="leading-relaxed">
+                    Born from the streets and driven by purpose, Vulor represents the grind, the vision, and the courage to build something from the ground up. We keep our designs original, our prices fair, and our mission simple — to bring quality streetwear that anyone can own, wear, and be proud of.
+                </p>
+            </div>
         </div>
 
-        <!-- Image Slideshow -->
-        <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-            <div class="slideshow-container relative overflow-hidden rounded-lg">
-                <!-- Slides -->
+
+        <div class="bg-transparent">
+            <div class="slideshow-container relative overflow-hidden border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
+
                 <div class="slide fade">
                     <img src="{% static 'images/logo-1.jpg' %}" 
-                         alt="VULOR Studio" class="w-full h-80 object-cover rounded-lg">
+                         alt="VULOR Studio" class="w-full h-96 object-cover">
                 </div>
                 
                 <div class="slide fade">
                     <img src="{% static 'images/logo-2.jpg' %}" 
-                         alt="VULOR Design Process" class="w-full h-80 object-cover rounded-lg">
+                         alt="VULOR Design Process" class="w-full h-96 object-cover">
                 </div>
                 
                 <div class="slide fade">
                     <img src="{% static 'images/logo-3.jpg' %}" 
-                         alt="VULOR Collection" class="w-full h-80 object-cover rounded-lg">
+                         alt="VULOR Collection" class="w-full h-96 object-cover">
                 </div>
 
                 <div class="slide fade">
                     <img src="{% static 'images/logo-4.jpg' %}" 
-                         alt="VULOR Quality" class="w-full h-80 object-cover rounded-lg">
+                         alt="VULOR Quality" class="w-full h-96 object-cover">
                 </div>
 
                 <div class="slide fade">
                     <img src="{% static 'images/logo-5.jpg' %}" 
-                         alt="VULOR Community" class="w-full h-80 object-cover rounded-lg">
+                         alt="VULOR Community" class="w-full h-96 object-cover">
                 </div>
 
-                <!-- Navigation arrows -->
-                <button class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-900 bg-opacity-30 text-white p-1 rounded-full hover:bg-opacity-50 transition-all backdrop-blur-sm">
+
+                <button class="slideshow-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
-                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-900 bg-opacity-30 text-white p-1 rounded-full hover:bg-opacity-50 transition-all backdrop-blur-sm">
+                <button class="slideshow-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
 
-                <!-- Dots indicator - 5 dots -->
-                <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
-                    <span class="dot w-2 h-2 bg-white rounded-full cursor-pointer opacity-50"></span>
+
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
+                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Values Section -->
-    <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
-        <h2 class="text-2xl font-bold text-white text-center mb-8">Our Values</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Value 1 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl"></span>
-                </div>
-                <h3 class="text-lg font-semibold text-white mb-2">Quality First</h3>
-                <p class="text-gray-300 text-sm">
+
+    <div class="mb-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MINIMAL BY DESIGN</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
+                    Clean silhouettes. Thoughtful details. Nothing extra.
+                </p>
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Premium materials and meticulous craftsmanship in every piece we create.
                 </p>
             </div>
 
-            <!-- Value 2 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl"></span>
-                </div>
-                <h3 class="text-lg font-semibold text-white mb-2">Limited Editions</h3>
-                <p class="text-gray-300 text-sm">
+
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MADE TO LAST</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
+                    Quality fabrics and construction you can trust.
+                </p>
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Exclusive designs with limited runs to ensure uniqueness and collectibility.
                 </p>
             </div>
 
-            <!-- Value 3 -->
-            <div class="text-center">
-                <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-2xl"></span>
-                </div>
-                <h3 class="text-lg font-semibold text-white mb-2">Community Driven</h3>
-                <p class="text-gray-300 text-sm">
+
+            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
+                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
+                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">EVERYDAY WEAR</h3>
+                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
+                    Pieces that fit real life, not just photos.
+                </p>
+                <p class="text-[#666666] text-sm leading-relaxed">
                     Building a global community of streetwear enthusiasts who share our passion.
                 </p>
             </div>
+        </div>
+    </div>
+
+
+    <div class="text-center mb-20 max-w-2xl mx-auto border-t border-[#333333] pt-12">
+        <h2 class="text-2xl font-bold text-white mb-6 tracking-wider">DESIGNED WITH REAL LIFE IN MIND</h2>
+        <p class="text-[#cccccc] leading-relaxed">
+            From daily movement to long days out, our pieces are made to handle everyday wear — wherever you are.
+        </p>
+    </div>
+
+
+    <div class="text-center border-t border-[#333333] pt-12">
+        <h2 class="text-2xl font-bold text-white mb-8 tracking-wider">WEAR IT YOUR WAY.</h2>
+        <a href="{% url 'product_list' %}" 
+           class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider py-3 px-8 transition-all duration-300 border border-[#dc2626]">
+            SHOP VULOR
+        </a>
+    </div>
+
+
+    <div class="mt-24 pt-12 border-t border-[#333333]">
+        <div class="text-center max-w-3xl mx-auto">
+            <h2 class="text-white text-lg font-bold mb-6 tracking-wider">OUR MISSION</h2>
+            <p class="text-[#dc2626] text-xl leading-relaxed tracking-wider font-bold">
+                JOIN THE MOVEMENT. OWN YOUR STYLE. OWN VULOR.
+            </p>
         </div>
     </div>
 </div>
@@ -151,6 +176,12 @@ Own Vulor.
     animation-name: fade;
     animation-duration: 1.5s;
 }
+
+
+.dot.active {
+    opacity: 1 !important;
+    background-color: #dc2626 !important;
+}
 </style>
 
 <script>
@@ -158,25 +189,27 @@ document.addEventListener('DOMContentLoaded', function() {
     let slideIndex = 0;
     const slides = document.getElementsByClassName("slide");
     const dots = document.getElementsByClassName("dot");
-    const prevButton = document.querySelector('.slideshow-container button:first-of-type');
-    const nextButton = document.querySelector('.slideshow-container button:last-of-type');
+    const prevButton = document.querySelector('.slideshow-prev');
+    const nextButton = document.querySelector('.slideshow-next');
 
     function showSlides(n) {
         // Wrap around if at end
         if (n >= slides.length) { slideIndex = 0; }
         if (n < 0) { slideIndex = slides.length - 1; }
         
-        // Hide all slides
+
         for (let i = 0; i < slides.length; i++) {
             slides[i].style.display = "none";
-            dots[i].classList.remove('opacity-100');
-            dots[i].classList.add('opacity-50');
+            dots[i].classList.remove('active');
+            dots[i].classList.remove('bg-[#dc2626]');
+            dots[i].classList.add('bg-[#333333]');
         }
         
-        // Show current slide and update dot
+
         slides[slideIndex].style.display = "block";
-        dots[slideIndex].classList.remove('opacity-50');
-        dots[slideIndex].classList.add('opacity-100');
+        dots[slideIndex].classList.add('active');
+        dots[slideIndex].classList.remove('bg-[#333333]');
+        dots[slideIndex].classList.add('bg-[#dc2626]');
     }
 
     function nextSlide() {
@@ -189,21 +222,38 @@ document.addEventListener('DOMContentLoaded', function() {
         showSlides(slideIndex);
     }
 
-    // Initialize
+
     showSlides(slideIndex);
 
-    // Auto-advance every 4 seconds (changed from 5)
-    setInterval(nextSlide, 4000);
+    
+    let slideshowInterval = setInterval(nextSlide, 5000);
 
-    // Event listeners for buttons
-    nextButton.addEventListener('click', nextSlide);
-    prevButton.addEventListener('click', prevSlide);
+    
+    const slideshowContainer = document.querySelector('.slideshow-container');
+    slideshowContainer.addEventListener('mouseenter', () => clearInterval(slideshowInterval));
+    slideshowContainer.addEventListener('mouseleave', () => {
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
 
-    // Event listeners for dots
+    
+    if (nextButton) nextButton.addEventListener('click', () => {
+        nextSlide();
+        clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
+    if (prevButton) prevButton.addEventListener('click', () => {
+        prevSlide();
+        clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(nextSlide, 5000);
+    });
+
+    
     for (let i = 0; i < dots.length; i++) {
         dots[i].addEventListener('click', function() {
             slideIndex = i;
             showSlides(slideIndex);
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(nextSlide, 5000);
         });
     }
 });

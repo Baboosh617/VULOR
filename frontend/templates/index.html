@@ -1,486 +1,455 @@
 {% extends "base.html" %}
+{% load static %}
+{% load cache %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="min-h-screen flex items-center justify-center" style="background: linear-gradient(to right, #1C2A3A, #2E4057);">
-    <div class="text-center">
-        <h1 class="text-6xl md:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
-            VULOR
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-300 mb-12">
-            Guided by vision, driven by style.
-        </p>
-        <a href="{% url 'product_list' %}" 
-           class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded text-lg font-semibold transition-colors inline-block">
-            Shop Now
-        </a>
-    </div>
-</div>
-
-<!-- New Arrivals Section -->
-<section class="py-20 bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-white mb-4">New Arrivals</h2>
-            <p class="text-gray-400">Fresh drops added weekly</p>
-        </div>
-
-        {% if new_arrivals %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for product in new_arrivals|slice:":6" %}
-            <a href="{% url 'product_detail' product.slug %}" class="group">
-                <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-purple-500 transition-colors duration-300">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" 
-                             class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
-                        
-                        <div class="absolute top-3 right-3">
-                            <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
-                                NEW
-                            </span>
-                        </div>
-                    </div>
+<!-- SECTION Hero -->
+<section class="min-h-[90vh] lg:min-h-[90vh] bg-black flex items-center overflow-hidden">
+    <div class="w-full">
+        <!-- Mobile Carousel of latest products from each category -->
+        <div class="lg:hidden relative h-[75vh] overflow-hidden bg-black">
+            {% if hero_products %}
+            <div id="mobileHeroCarousel" class="absolute inset-0">
+            {% cache 600 hero_products %}
+                {% for product in hero_products %}
+                <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-[1800ms] ease-in-out"
+                     style="background-image: url('{{ product.image.url }}');
+                            background-size: cover;
+                            background-position: center top;">
+            
                     
-                    <div class="p-4">
-                        <h3 class="text-lg font-medium text-white mb-2">{{ product.name }}</h3>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xl font-bold text-purple-500">₦{{ product.price }}</span>
-                            <span class="text-sm text-gray-400">{{ product.get_category_display }}</span>
-                        </div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-black/90"></div>
+
+                    
+                    <div class="absolute top-5 left-5 z-20 text-[10px] tracking-widest text-white bg-black/80 px-3 py-1 border border-[#333333]">
+                        {{ product.get_category_display|upper }}
                     </div>
                 </div>
-            </a>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-12">
-            <p class="text-gray-400 text-lg mb-4">No new arrivals available at the moment.</p>
-            <a href="{% url 'product_list' %}" 
-               class="inline-block border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white px-6 py-2 rounded transition-colors">
-                Browse All Products
-            </a>
-        </div>
-        {% endif %}
+                {% endfor %}
+            {% endcache %}
+            </div>
 
-        <div class="text-center mt-8">
-            <a href="{% url 'product_list' %}?sort=newest" 
-               class="inline-block border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white px-6 py-2 rounded transition-colors">
-                View All Products
-            </a>
+            
+            <div class="absolute inset-0 z-30 flex flex-col items-center justify-end pb-10 space-y-4 text-center">
+                <a href="{% url 'product_list' %}"
+                   class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-10 py-4 text-lg font-bold tracking-wide transition-colors border border-[#dc2626]">
+                    SHOP NEW ARRIVALS
+                </a>
+            </div>
+
+            
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+                {% for product in hero_products %}
+                <span class="hero-dot w-2 h-2 rounded-full bg-[#333333]"></span>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="w-full h-full bg-[#111111] flex items-center justify-center">
+                <span class="text-[#666666] text-lg">Hero Image</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Desktop Two Column -->
+        <div class="hidden lg:grid lg:grid-cols-2 h-[90vh]">
+            
+            <div class="flex items-center p-8 lg:p-12 bg-black">
+                <div class="max-w-lg space-y-6 lg:space-y-8">
+            
+                    <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white leading-none">
+                        EVERYDAY STREET.<br><span class="text-[#dc2626]">ELEVATED.</span>
+                    </h1>
+                    
+                    
+                    <p class="text-lg md:text-xl text-[#cccccc] leading-relaxed max-w-md">
+                        Minimal fits for daily wear.
+                    </p>
+                    
+                    
+                    <div class="w-20 h-1 bg-[#dc2626]"></div>
+                    
+                    
+                    <div class="pt-4">
+                        <a href="{% url 'product_list' %}" 
+                           class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-4 text-lg font-bold tracking-wider transition-colors border border-[#dc2626]">
+                            SHOP NEW ARRIVALS
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="relative h-full overflow-hidden group bg-black">
+                {% if latest_product %}
+                {% cache 600 latest_product %}
+                    <a href="{% url 'product_detail' latest_product.slug %}" class="block h-full w-full">
+                        <div class="relative w-full h-full">
+            
+                            <div class="absolute inset-0 overflow-hidden">
+                                <img src="{{ latest_product.image.url }}" 
+                                     alt="{{ latest_product.name }}" 
+                                     class="w-full h-full object-cover object-center min-w-full min-h-full group-hover:scale-105 transition-all duration-700">
+            
+                                <div class="absolute inset-0 bg-[#dc2626]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            </div>
+            
+                            <div class="absolute top-0 right-0 w-32 h-32 border-t border-r border-[#dc2626]/20"></div>
+                        </div>
+                    </a>
+                {% endcache %}    
+                {% else %}
+            
+                    <div class="w-full h-full bg-[#111111] flex items-center justify-center">
+                        <span class="text-[#666666] text-lg">Latest Product Image</span>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Final CTA -->
-<section class="py-16 bg-gray-800">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-        <h2 class="text-2xl font-bold text-white mb-4">
-            {% if user.is_authenticated %}
-            Welcome to VULOR
-            {% else %}
-            Ready to Elevate Your Style?
-            {% endif %}
-        </h2>
+<!-- Featured Products -->
+<section class="py-20 bg-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center mb-4">
+                <div class="w-8 h-0.5 bg-[#dc2626] mr-3"></div>
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">NEW ARRIVALS</h2>
+                <div class="w-8 h-0.5 bg-[#dc2626] ml-3"></div>
+            </div>
+            <p class="text-[#dc2626] text-sm tracking-widest uppercase font-bold">Fresh additions to the collection</p>
+        </div>
+
+        {% if new_arrivals %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% cache 900 new_arrivals %}
+            {% for product in new_arrivals|slice:":6" %}
+            <div class="group relative bg-[#111111] border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
+                <a href="{% url 'product_detail' product.slug %}" class="block">
+                    <div class="aspect-square overflow-hidden bg-black">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-[#111111]">
+                                <span class="text-[#666666] text-sm">IMAGE COMING SOON</span>
+                            </div>
+                        {% endif %}
+                        
+    
+                        <div class="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <form method="POST" action="{% url 'add_to_cart' product.id %}" 
+                                  class="transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-3 text-sm tracking-widest font-bold transition-all duration-300 border border-[#dc2626]">
+                                    ADD TO CART
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold tracking-wide text-white mb-2">{{ product.name }}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#dc2626] font-bold text-xl">₦{{ product.price }}</span>
+                            {% if product.compare_price %}
+                            <span class="text-[#666666] line-through text-sm">₦{{ product.compare_price }}</span>
+                            {% endif %}
+                            <span class="text-xs text-[#dc2626] tracking-wide bg-black px-2 py-1 border border-[#333333]">{{ product.get_category_display|upper }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% endcache %}
+        </div>
         
-        <p class="text-gray-400 mb-6">
-            {% if user.is_authenticated %}
-            Continue your streetwear journey with our latest collection
-            {% else %}
-            Join the VULOR community today
-            {% endif %}
+        <div class="text-center mt-16">
+            <a href="{% url 'product_list' %}?sort=newest" 
+               class="inline-block border-2 border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-10 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
+                VIEW ALL PRODUCTS
+            </a>
+        </div>
+        
+        {% else %}
+        <div class="text-center py-12">
+            <p class="text-[#666666] mb-6">No new arrivals available</p>
+            <a href="{% url 'product_list' %}" 
+               class="inline-block border border-[#333333] text-[#666666] hover:border-[#dc2626] hover:text-[#dc2626] px-6 py-2 transition-colors duration-300 text-sm tracking-widest">
+                BROWSE COLLECTION
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Brand Statement -->
+<section class="py-32 bg-black border-t border-[#333333]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="mb-8">
+            <div class="w-16 h-16 border-2 border-[#dc2626] rounded-50 flex items-center justify-center mx-auto mb-6">
+                <span class="text-[#dc2626] text-2xl font-bold">V</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl text-white leading-tight font-bold">
+                <span class="text-[#dc2626]">GUIDED</span> BY VISION.<br>
+                <span class="text-[#dc2626]">DRIVEN</span> BY STYLE.
+            </h2>
+        </div>
+        <p class="text-[#cccccc] text-lg mt-6 max-w-xl mx-auto">
+            Where premium craftsmanship meets urban innovation. 
+            Each piece is designed for those who demand excellence in every detail.
         </p>
-        
+    </div>
+</section>
+
+<!-- Reviews -->
+<section class="py-20 bg-black border-t border-[#333333] overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-white">CLIENT TESTIMONIALS</h2>
+            <p class="text-[#dc2626] text-sm tracking-widest uppercase font-bold">What our community says</p>
+        </div>
+
+    
+        <div class="relative overflow-hidden">
+            <div class="flex transition-transform duration-500 ease-in-out" id="reviewsCarousel">
+            {% cache 300 store_reviews %}    
+                {% for review in store_reviews|slice:":10" %}
+                    <div class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
+                        <div class="bg-[#1a1a1a] border border-[#333333] p-8 h-full hover:border-[#dc2626] transition-all duration-300 rounded-lg">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-black border border-[#dc2626] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    {{ review.user.username|first|upper }}
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-sm text-white">
+                                        {% if review.user.first_name %}
+                                            {{ review.user.first_name }}
+                                        {% else %}
+                                            {{ review.user.username }}
+                                        {% endif %}
+                                    </h4>
+                                    <div class="flex items-center text-[#dc2626] mt-1">
+                                        {% for i in review.get_star_rating %}★{% endfor %}
+                                        {% for i in review.get_empty_stars %}☆{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[#cccccc] text-sm leading-relaxed mb-6 italic">"{{ review.comment|truncatechars:120 }}"</p>
+                            <div class="border-t border-[#333333] pt-4">
+                                <span class="text-xs text-[#666666]">{{ review.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                <div class="w-full text-center py-12">
+                    <p class="text-[#666666]">Be the first to review</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endcache %}    
+        </div>
+
+    
+        <div class="max-w-md mx-auto mt-20">
+            <div class="bg-[#1a1a1a] border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 rounded-lg">
+                <h3 class="text-center text-lg font-bold mb-8 tracking-wide text-white">SHARE YOUR EXPERIENCE</h3>
+                
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'add_store_review' %}" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    
+                    <div class="text-center">
+                        <div class="flex justify-center space-x-1 mb-4" id="star-rating">
+                            {% for i in "54321" %}
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
+                                   {% if forloop.first %}checked{% endif %}>
+                            <label for="star{{ i }}" class="text-2xl cursor-pointer text-[#333333] hover:text-[#dc2626] transition-colors star-label" data-rating="{{ i }}">★</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <textarea name="comment" required 
+                                  class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] rounded resize-none placeholder-[#666666]"
+                                  rows="4"
+                                  placeholder="Your review..."></textarea>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white py-3 text-sm tracking-widest font-bold transition-all duration-300 border border-[#dc2626]">
+                        SUBMIT REVIEW
+                    </button>
+                </form>
+                
+                {% else %}
+                <div class="text-center py-6">
+                    <p class="text-[#666666] mb-6 text-sm">Sign in to share your review</p>
+                    <a href="{% url 'login' %}" 
+                       class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-2 transition-all duration-300 text-sm tracking-widest font-bold">
+                        SIGN IN
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-20 bg-black border-t border-[#333333]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-6 text-white">ELEVATE YOUR STREETWEAR GAME</h2>
+        <p class="text-[#dc2626] mb-10 text-sm tracking-widest uppercase font-bold max-w-md mx-auto">
+            Premium quality meets distinctive style
+        </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{% url 'product_list' %}" 
-               class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded font-semibold transition-colors text-center">
-                {% if user.is_authenticated %}
-                Continue Shopping
-                {% else %}
-                Start Shopping
-                {% endif %}
+               class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold border border-[#dc2626]">
+                SHOP COLLECTION
             </a>
             
             {% if not user.is_authenticated %}
             <a href="{% url 'register' %}" 
-               class="border border-gray-600 text-gray-300 hover:bg-gray-700 px-6 py-3 rounded font-semibold transition-colors text-center">
-                Create Account
+               class="border-2 border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
+                CREATE ACCOUNT
             </a>
             {% endif %}
         </div>
     </div>
 </section>
 
-<!-- Customer Reviews Section -->
-<section class="py-20 bg-gray-800">
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-white mb-4">Customer Reviews</h2>
-            <p class="text-gray-400">What our customers are saying</p>
-            <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-4"></div>
-        </div>
-
-        <!-- Display Reviews -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            {% for review in reviews %}
-            <div class="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {{ review.user.username|first|upper }}
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="font-semibold text-white">{{ review.user.username }}</h4>
-                        <div class="flex items-center">
-                            <!-- Star Rating -->
-                            <div class="flex text-yellow-400 mr-2">
-                                {% for star in review.get_star_rating %}
-                                <span>★</span>
-                                {% endfor %}
-                                {% for star in review.get_empty_stars %}
-                                <span class="text-gray-500">★</span>
-                                {% endfor %}
-                            </div>
-                            <span class="text-gray-400 text-sm">{{ review.created_at|timesince }} ago</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-gray-300 text-sm leading-relaxed">"{{ review.comment }}"</p>
-            </div>
-            {% empty %}
-            <div class="col-span-2 text-center py-8">
-                <p class="text-gray-400">No reviews yet. Be the first to review!</p>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Review Form -->
-       <div class="bg-gray-800 rounded-3xl p-6 md:p-8 my-8">
-    <h2 class="text-3xl font-bold text-white mb-8 text-center">Customer Reviews</h2>
-    
-    <!-- Reviews Stats (Optional) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="bg-gray-700 p-6 rounded-2xl text-center">
-            <div class="text-4xl font-bold text-yellow-400 mb-2">
-                {{ avg_rating|default:"5.0" }}/5
-            </div>
-            <div class="text-gray-300">
-                <div class="flex justify-center mb-1">
-                    {% for i in "12345" %}
-                        <span class="text-yellow-400">★</span>
-                    {% endfor %}
-                </div>
-                Average Rating
-            </div>
-        </div>
-        
-        <div class="bg-gray-700 p-6 rounded-2xl text-center">
-            <div class="text-4xl font-bold text-white mb-2">{{ total_reviews }}</div>
-            <div class="text-gray-300">Total Reviews</div>
-        </div>
-        
-        <div class="bg-gray-700 p-6 rounded-2xl text-center">
-            <div class="text-4xl font-bold text-white mb-2">{{ store_reviews.count }}</div>
-            <div class="text-gray-300">Store Reviews</div>
-        </div>
-    </div>
-    
-    <!-- Reviews Display Section -->
-    <div class="mb-12">
-        <h3 class="text-2xl font-bold text-white mb-6">What Our Customers Say</h3>
-        
-        {% if store_reviews %}
-            <!-- Store Reviews -->
-            <div class="space-y-6">
-                {% for review in store_reviews %}
-                    <div class="bg-gray-700 rounded-xl p-6 border border-gray-600 hover:border-purple-500 transition-all duration-300">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <div class="flex items-center mb-2">
-                                    <div class="flex text-yellow-400 mr-3">
-                                        {% for i in review.get_star_rating %}
-                                            <span class="text-xl">★</span>
-                                        {% endfor %}
-                                        {% for i in review.get_empty_stars %}
-                                            <span class="text-xl text-gray-500">☆</span>
-                                        {% endfor %}
-                                    </div>
-                                    <span class="text-gray-300">{{ review.rating }}.0</span>
-                                </div>
-                                <h4 class="text-white font-semibold">
-                                    {% if review.user.first_name and review.user.last_name %}
-                                        {{ review.user.first_name }} {{ review.user.last_name }}
-                                    {% else %}
-                                        {{ review.user.username }}
-                                    {% endif %}
-                                </h4>
-                            </div>
-                            <span class="text-gray-400 text-sm">
-                                {{ review.created_at|timesince }} ago
-                            </span>
-                        </div>
-                        
-                        <p class="text-gray-300 mb-4">{{ review.comment }}</p>
-                        
-                        {% if not review.product %}
-                            <span class="inline-block bg-purple-900 text-purple-200 text-xs px-3 py-1 rounded-full">
-                                Store Review
-                            </span>
-                        {% else %}
-                            <span class="inline-block bg-blue-900 text-blue-200 text-xs px-3 py-1 rounded-full">
-                                Product: {{ review.product.name }}
-                            </span>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-            
-            <!-- View All Reviews Link (if you have a dedicated reviews page) -->
-            {% if store_reviews.count > 3 %}
-                <div class="text-center mt-8">
-                    <a href="{% url 'review_list' %}" 
-                       class="inline-block text-purple-400 hover:text-purple-300 transition-colors">
-                        View All Reviews →
-                    </a>
-                </div>
-            {% endif %}
-            
-        {% else %}
-            <!-- No Reviews Yet -->
-            <div class="text-center py-12 bg-gray-700 rounded-2xl">
-                <div class="text-6xl mb-4">📝</div>
-                <h4 class="text-xl font-semibold text-white mb-2">No Reviews Yet</h4>
-                <p class="text-gray-400 mb-6">Be the first to share your experience!</p>
-            </div>
-        {% endif %}
-    </div>
-    
-    <!-- Review Form -->
-    <div class="bg-gray-700 rounded-2xl p-8 border border-gray-600">
-        <h3 class="text-2xl font-bold text-white mb-6 text-center">Write a Review</h3>
-        
-        {% if user.is_authenticated %}
-            <form method="POST" action="{% url 'submit_review' %}" class="space-y-6" id="reviewForm">
-                {% csrf_token %}
-                
-                <!-- Review Type Selection (Optional) -->
-                <div class="flex space-x-4 mb-4">
-                    <button type="button" 
-                            id="storeReviewBtn" 
-                            class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-medium transition-colors">
-                        ✨ Store Review
-                    </button>
-                    <button type="button" 
-                            id="productReviewBtn" 
-                            class="flex-1 bg-gray-600 text-gray-300 py-2 rounded-lg font-medium transition-colors">
-                        📦 Product Review
-                    </button>
-                </div>
-                
-                <!-- Product Selection (Hidden by default) -->
-                <div id="productSelection" class="hidden">
-                    <label class="block text-white text-sm font-medium mb-2">Select Product</label>
-                    <select name="product_id" class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
-                        <option value="">-- Select a Product (Optional) --</option>
-                        {% for product in recent_products %}
-                            <option value="{{ product.id }}">{{ product.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <p class="text-gray-400 text-sm mt-1">
-                        Leave empty for general store review
-                    </p>
-                </div>
-                
-                <!-- Star Rating -->
-                <div class="text-center">
-                    <label class="block text-white text-lg font-semibold mb-4">How would you rate us?</label>
-                    <div class="flex justify-center space-x-2 mb-2" id="star-rating">
-                        {% for i in "54321" %}
-                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden star-input" 
-                                   {% if forloop.first %}checked{% endif %}>
-                            <label for="star{{ i }}" class="text-3xl cursor-pointer text-gray-500 hover:text-yellow-400 transition-colors star-label" data-rating="{{ i }}">★</label>
-                        {% endfor %}
-                    </div>
-                    <div id="rating-text" class="text-gray-400 text-sm">Excellent</div>
-                </div>
-
-                <!-- Comment -->
-                <div>
-                    <label class="block text-white text-sm font-medium mb-2">Your Review</label>
-                    <textarea name="comment" required 
-                              class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 resize-none"
-                              rows="4"
-                              placeholder="Share your experience with our products and service..."
-                              minlength="10"
-                              maxlength="500"></textarea>
-                    <div class="text-right text-gray-400 text-sm mt-1">
-                        <span id="charCount">0</span>/500 characters
-                    </div>
-                </div>
-
-                <button type="submit" 
-                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors duration-300 transform hover:scale-[1.02]">
-                    Submit Review
-                </button>
-            </form>
-            
-        {% else %}
-            <!-- Not Logged In -->
-            <div class="text-center py-8">
-                <p class="text-gray-400 mb-4">Please log in to write a review</p>
-                <a href="{% url 'login' %}" 
-                   class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded transition-colors">
-                    Login to Review
-                </a>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-    </div>
-</section>
-
-<!-- <style>
-.star-label:hover,
-.star-label:hover ~ .star-label {
-    color: #fbbf24 !important; 
-}
-
-.star-input:checked ~ .star-label,
-.star-input:checked + .star-label {
-    color: #fbbf24 !important; 
-}
-
-.star-input:checked ~ .star-label {
-    color: #fbbf24 !important;
-}
-</style> -->
 <style>
-/* Additional CSS for star rating */
-.star-label {
-    transition: all 0.2s ease;
-}
-.star-label:hover ~ .star-label,
-.star-input:checked ~ .star-label {
-    color: #fbbf24; /* yellow-400 */
-}
-</style>
-<!-- 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const starInputs = document.querySelectorAll('.star-input');
-    const starLabels = document.querySelectorAll('.star-label');
-    const ratingText = document.getElementById('rating-text');
-    
-    const ratingTexts = {
-        '5': 'Excellent',
-        '4': 'Very Good', 
-        '3': 'Good',
-        '2': 'Fair',
-        '1': 'Poor'
-    };
-    
-    starInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const rating = this.value;
-            ratingText.textContent = ratingTexts[rating];
-            
-            // Update star colors
-            starLabels.forEach(label => {
-                const labelRating = label.getAttribute('data-rating');
-                if (labelRating <= rating) {
-                    label.style.color = '#fbbf24'; 
-                } else {
-                    label.style.color = '#6b7280'; 
-                }
-            });
-        });
-    });
-    
-    // Initialize on page load
-    const checkedInput = document.querySelector('.star-input:checked');
-    if (checkedInput) {
-        checkedInput.dispatchEvent(new Event('change'));
+
+    #reviewsCarousel {
+        display: flex;
+        width: 300%;
     }
-});
-</script> -->
-<!-- JavaScript for Enhanced Review Form -->
+    
+    @media (min-width: 768px) {
+        #reviewsCarousel {
+            width: 200%;
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        #reviewsCarousel {
+            width: 150%;
+        }
+    }
+
+    
+    .star-input:checked + .star-label {
+        color: #dc2626 !important;
+    }
+
+    .star-label:hover {
+        color: #dc2626 !important;
+    }
+
+
+    .hero-dot.bg-white {
+        background-color: #dc2626 !important;
+    }
+</style>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Star Rating Logic
-    const starInputs = document.querySelectorAll('.star-input');
-    const starLabels = document.querySelectorAll('.star-label');
-    const ratingText = document.getElementById('rating-text');
+document.addEventListener('DOMContentLoaded', () => {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+
+    if (!slides.length) return;
+
+    let index = 0;
+
+    function showSlide(i) {
+        slides.forEach(slide => slide.classList.remove('opacity-100'));
+        dots.forEach(dot => dot.classList.remove('bg-white'));
+
+        slides[i].classList.add('opacity-100');
+        dots[i].classList.add('bg-white');
+    }
+
+    showSlide(index);
+
+    setInterval(() => {
+        index = (index + 1) % slides.length;
+        showSlide(index);
+    }, 5000);
+});
+
+
+const reviewsCarousel = document.getElementById('reviewsCarousel');
+if (reviewsCarousel) {
+    const carouselItems = reviewsCarousel.children;
+    let currentIndex = 0;
     
-    const ratingTexts = {
-        '5': 'Excellent',
-        '4': 'Good',
-        '3': 'Average',
-        '2': 'Fair',
-        '1': 'Poor'
-    };
+    function updateReviewsCarousel() {
+        let itemsPerView;
+        if (window.innerWidth >= 1024) {
+            itemsPerView = 3;
+        } else if (window.innerWidth >= 768) {
+            itemsPerView = 2;
+        } else {
+            itemsPerView = 1;
+        }
+        
+        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+        const translateX = -currentIndex * (100 / itemsPerView);
+        reviewsCarousel.style.transform = `translateX(${translateX}%)`;
+    }
     
-    starLabels.forEach(label => {
-        label.addEventListener('click', function() {
-            const rating = this.getAttribute('data-rating');
-            ratingText.textContent = ratingTexts[rating];
-            
-            // Update star colors
-            starLabels.forEach(l => {
-                if (l.getAttribute('data-rating') <= rating) {
-                    l.classList.remove('text-gray-500');
-                    l.classList.add('text-yellow-400');
-                } else {
-                    l.classList.remove('text-yellow-400');
-                    l.classList.add('text-gray-500');
-                }
-            });
-        });
+    function nextReviewsSlide() {
+        let itemsPerView;
+        if (window.innerWidth >= 1024) {
+            itemsPerView = 3;
+        } else if (window.innerWidth >= 768) {
+            itemsPerView = 2;
+        } else {
+            itemsPerView = 1;
+        }
+        
+        const totalItems = Math.ceil(carouselItems.length / itemsPerView);
+        currentIndex = (currentIndex + 1) % totalItems;
+        updateReviewsCarousel();
+    }
+    
+
+    let reviewsInterval = setInterval(nextReviewsSlide, 4000);
+    
+
+    reviewsCarousel.addEventListener('mouseenter', () => clearInterval(reviewsInterval));
+    reviewsCarousel.addEventListener('mouseleave', () => {
+        reviewsInterval = setInterval(nextReviewsSlide, 4000);
     });
     
-    // Character Counter
-    const textarea = document.querySelector('textarea[name="comment"]');
-    const charCount = document.getElementById('charCount');
-    
-    textarea.addEventListener('input', function() {
-        charCount.textContent = this.value.length;
-    });
-    
-    // Review Type Toggle
-    const storeReviewBtn = document.getElementById('storeReviewBtn');
-    const productReviewBtn = document.getElementById('productReviewBtn');
-    const productSelection = document.getElementById('productSelection');
-    
-    storeReviewBtn.addEventListener('click', function() {
-        storeReviewBtn.classList.add('bg-purple-600', 'text-white');
-        storeReviewBtn.classList.remove('bg-gray-600', 'text-gray-300');
+
+    window.addEventListener('resize', updateReviewsCarousel);
+    updateReviewsCarousel();
+}
+
+
+const starInputs = document.querySelectorAll('.star-input');
+const starLabels = document.querySelectorAll('.star-label');
+
+starInputs.forEach(input => {
+    input.addEventListener('change', function() {
+        const rating = this.value;
         
-        productReviewBtn.classList.remove('bg-purple-600', 'text-white');
-        productReviewBtn.classList.add('bg-gray-600', 'text-gray-300');
         
-        productSelection.classList.add('hidden');
-    });
-    
-    productReviewBtn.addEventListener('click', function() {
-        productReviewBtn.classList.add('bg-purple-600', 'text-white');
-        productReviewBtn.classList.remove('bg-gray-600', 'text-gray-300');
-        
-        storeReviewBtn.classList.remove('bg-purple-600', 'text-white');
-        storeReviewBtn.classList.add('bg-gray-600', 'text-gray-300');
-        
-        productSelection.classList.remove('hidden');
-    });
-    
-    // Form Submission Alert
-    const reviewForm = document.getElementById('reviewForm');
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', function(e) {
-            const comment = textarea.value.trim();
-            if (comment.length < 10) {
-                e.preventDefault();
-                alert('Please write at least 10 characters for your review.');
-                textarea.focus();
+        starLabels.forEach(label => {
+            const labelRating = label.getAttribute('data-rating');
+            if (labelRating <= rating) {
+                label.style.color = '#dc2626';
+            } else {
+                label.style.color = '#333333';
             }
         });
-    }
+    });
 });
 </script>
 {% endblock %}

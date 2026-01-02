@@ -4,20 +4,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from products import views as product_views
-from accounts.views import register  # ADD THIS IMPORT
+from accounts.views import register  
 from services.admin_report_service import send_weekly_sales_report
 from django.http import HttpResponse
-from healthcheck import views as healthcheck_views
+
+import os
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    
-    # Authentication URLs - FIXED
+    path(os.getenv('ADMIN_URL', 'admin/'), admin.site.urls),
+   
     path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
-    path('register/', register, name='register'),  # ADDED THIS LINE
+    path('captcha/', include('captcha.urls')),
     
-    # App URLs
+    
+    
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('', product_views.home, name='home'),
@@ -26,9 +27,8 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('payments/', include('payments.urls', namespace='payments')),
     path('error-pages/', include('error_pages.urls')),
-    path('services/', include('services.urls')),  # ADDED THIS LINE
-    path('dashboard/', include('dashboard.urls', namespace='dashboard')),  # ADDED THIS LINE
-    path('health-check/', healthcheck_views.health_check, name='health_check'),  # ADDED THIS LINE
+    path('services/', include('services.urls')),  
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),  
 ]
 
 if settings.DEBUG:

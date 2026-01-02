@@ -5,16 +5,40 @@ from services.email_service import (
     send_order_confirmation,
     send_admin_new_order,
     send_admin_high_value_order,
-    send_admin_order_cancellation
+    send_admin_order_cancellation,
+    send_payment_receipt
 )
-from products.inventory_service import restock_order_items
+from services.inventory_service import reduce_inventory, restock_order_items
 
-HIGH_VALUE_THRESHOLD = 1000.00  # example threshold
+HIGH_VALUE_THRESHOLD = 100000  # example threshold
 
 @receiver(post_save, sender=Order)
 def order_created(sender, instance, created, **kwargs):
     if created:
         send_order_confirmation(instance.user, instance)
+        send_admin_new_order(instance)
+
+@receiver(post_save, sender=Order)
+def payment_success(sender, instance, **kwargs):
+    if instance.payment_status == "success" and not instance.inventory_adjusted:
+        reduce_inventory(instance)
+        send_payment_receipt(instance.user, instance)
+        instance.inventory_adjusted = True
+        instance.save(update_fields=["inventory_adjusted"])
+
+@receiver(post_save, sender=Order)
+def high_value_order(sender, instance, **kwargs):
+    if instance.get_total_price >= HIGH_VALUE_THRESHOLD and not instance.admin_notified_high_value:
+        send_admin_high_value_order(instance)
+        instance.admin_notified_high_value = True
+        instance.save(update_fields=["admin_notified_high_value"])
+
+@receiver(post_save, sender=Order)
+def cancellation(sender, instance, **kwargs):
+    if instance.status == "cancelled":
+        restock_order_items(instance)
+
+
 
 @receiver(post_save, sender=Order)
 def send_payment_receipt_signal(sender, instance, **kwargs):

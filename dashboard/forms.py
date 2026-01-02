@@ -1,9 +1,12 @@
-# dashboard/forms.py
 from django import forms
 from products.models import Product
+from products.models import ProductImage
+from django.core.exceptions import ValidationError
+from django.utils.text import slugify
+from django.core.files.uploadedfile import UploadedFile
 
 class ProductForm(forms.ModelForm):
-    # Custom field for slug
+    
     slug = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
@@ -69,7 +72,8 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Black,White,Navy'
             }),
             'image': forms.FileInput(attrs={
-                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded '
+                'file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
             }),
             'inventory_count': forms.NumberInput(attrs={
                 'class': 'border rounded p-2 w-full',
@@ -130,9 +134,9 @@ class ProductForm(forms.ModelForm):
         category = cleaned.get('category')
         
         # Fit type validation
-        if category == 'cargo-jeans' and not cleaned.get('fit_type'):
-            self.add_error('fit_type', 'Fit type is required for cargo jeans.')
-        elif category != 'cargo-jeans':
+        if category in ['cargo-jeans', 'sweatpants'] and not cleaned.get('fit_type'):
+            self.add_error('fit_type', 'Fit type is required for cargo jeans & sweatpants.')
+        elif category not in ['cargo-jeans', 'sweatpants']:
             cleaned['fit_type'] = None
         
         # Clear measurements if not cargo-jeans or sweatpants
@@ -146,6 +150,13 @@ class ProductForm(forms.ModelForm):
             ]
             for field in measurement_fields:
                 cleaned[field] = ''
+
+        image = self.cleaned_data.get('image')
+        if image and isinstance(image, UploadedFile):
+            if not image.content_type.startswith('image/'):
+                raise ValidationError('Uploaded file is not a valid image.')
+            if image.size > 10485760: #10 MB
+                raise ValidationError('Image size should not exceed 10 MB.')    
         
         # Size validation
         sizes = cleaned.get('available_sizes', '')
@@ -173,8 +184,10 @@ class ProductForm(forms.ModelForm):
     
     def save(self, commit=True):
         instance = super().save(commit=False)
+
+        instance.slug = slugify(instance.name)
         
-        # Handle sizes and colors formatting
+        
         if self.cleaned_data.get('available_sizes'):
             sizes = self.cleaned_data['available_sizes']
             sizes = [s.strip().upper() for s in sizes.split(',') if s.strip()]
@@ -189,3 +202,25 @@ class ProductForm(forms.ModelForm):
             instance.save()
         
         return instance
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'alt_text', 'is_main']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'border rounded p-2 w-full file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+            }),
+            'alt_text': forms.TextInput(attrs={
+                'class': 'border rounded p-2 w-full',
+                'placeholder': 'e.g., Side view, Back detail, Worn look'
+            }),
+            'is_main': forms.CheckboxInput(attrs={
+                'class': 'h-5 w-5 text-blue-600 rounded'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['alt_text'].required = False
+        self.fields['is_main'].required = False

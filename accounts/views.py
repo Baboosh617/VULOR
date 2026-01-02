@@ -4,16 +4,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 from orders.models import Order
+from django_ratelimit.decorators import ratelimit
 
 UserCreationForm = CustomUserCreationForm
 
+@ratelimit(key='ip', rate='5/m', block=True)
 def register(request):
     """Custom registration view that works with allauth"""
+    print("REGISTER VIEW HIT", request.method)
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Registration successful!")
             return redirect('home')
         else:
@@ -31,7 +34,7 @@ def register(request):
 @login_required
 def profile_view(request):
     # Get user's orders for the profile page
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]  # Last 5 orders
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]  
     
     context = {
         'orders': orders,
@@ -59,7 +62,7 @@ def size_guide(request):
     return render(request, 'size_guide.html', context)
 
 
-@login_required
+@ratelimit(key='ip', rate='5/m', block=True)
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
