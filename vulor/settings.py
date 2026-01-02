@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.humanize',
-    'django_celery_beat',
+    #'django_celery_beat',
     
     # Third-party
     'allauth',
