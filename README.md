@@ -6,9 +6,13 @@ It supports product listings, shopping cart, orders, payments, user accounts, an
 TECH STACK
 
 Backend: Django 6, Django Allauth, Paystack API
+
 Frontend: Tailwind CSS, JavaScript
+
 Database: SQLite & PostgreSQL
+
 Auth: Email + Google OAuth
+
 Payments: Paystack
 
 
