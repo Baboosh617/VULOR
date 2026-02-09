@@ -387,5 +387,5 @@ CELERY_TASK_SERIALIZER = "json"
 
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
-RECAPTCHA_PUBLIC_KEY = '...'
-SECRET_KEY = 'django-insecure-change-this-to-any-random-string'
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
