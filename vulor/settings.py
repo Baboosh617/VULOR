@@ -75,7 +75,6 @@ INSTALLED_APPS = [
 
     
     # Local apps
-    'captcha',
     'products',
     'accounts',
     'cart',
@@ -83,6 +82,7 @@ INSTALLED_APPS = [
     'error_pages',
     'payments',
     'dashboard',
+    'django_recaptcha',
 ]
 
 MIDDLEWARE = [
@@ -383,3 +383,9 @@ else:
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
+
+
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
+
+RECAPTCHA_PUBLIC_KEY = '...'
+SECRET_KEY = 'django-insecure-change-this-to-any-random-string'
