@@ -17,8 +17,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     # path('django_recaptcha/', include('django_recaptcha.urls')),
     
-    
-    
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
     path('', product_views.home, name='home'),
