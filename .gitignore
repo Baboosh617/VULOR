@@ -47,3 +47,7 @@ htmlcov/
 *.docker-file.dockerfile
 
 *.nginx.conf
+
+#Cache
+.cache/
+django_cache/
