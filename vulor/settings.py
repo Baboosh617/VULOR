@@ -51,7 +51,7 @@ else:
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vulor.onrender.com']
 else:
     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
