@@ -28,14 +28,57 @@
         {% endblock %}
     </div>
 </div>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-const ws = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
 
-ws.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    alert(data.text);  // simple example, can replace with nicer UI badge
-}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+    // ── WebSocket for real-time notifications ──────────────────────────────
+    // Only connect if Django Channels is available (checks for ws:// support)
+    (function () {
+        const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${wsScheme}://${window.location.host}/ws/notifications/`;
+
+        function connectWebSocket() {
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = function () {
+                console.log('[WS] Admin notification socket connected.');
+            };
+
+            ws.onmessage = function (e) {
+                try {
+                    const data = JSON.parse(e.data);
+                    showAdminNotification(data.text || 'New notification');
+                } catch (err) {
+                    console.warn('[WS] Could not parse message:', e.data);
+                }
+            };
+
+            ws.onclose = function () {
+                // Retry after 5 seconds — avoids spamming the console on dev
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onerror = function (err) {
+                // Silently ignore in development — Channels may not be running
+                console.warn('[WS] WebSocket error (is Redis/Channels running?):', err.type);
+            };
+        }
+
+        function showAdminNotification(message) {
+            const container = document.getElementById('admin-notifications') || document.body;
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 z-50 bg-blue-600 text-white px-6 py-3 rounded shadow-lg';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Only attempt connection if the browser supports WebSocket
+        if ('WebSocket' in window) {
+            connectWebSocket();
+        }
+    })();
 </script>
 
 </body>
