@@ -1,3 +1,4 @@
+from inspect import signature
 import json
 import hmac
 import hashlib
@@ -246,11 +247,9 @@ def paystack_webhook(request):
     payload = request.body
     signature = request.headers.get("x-paystack-signature")
 
-    expected_signature = hmac.new(
-        settings.PAYSTACK_SECRET_KEY.encode(),
-        payload,
-        hashlib.sha512
-    ).hexdigest()
+    expected_signature = hmac.new(settings.PAYSTACK_SECRET_KEY.encode(), payload, hashlib.sha512).hexdigest()
+    if not hmac.compare_digest(signature or "", expected_signature):
+        return HttpResponse(status=400)
 
     if signature != expected_signature:
         return HttpResponse(status=400)

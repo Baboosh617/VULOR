@@ -10,7 +10,10 @@ from django.db import transaction
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
 import logging
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,9 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
+
+from products.cache_utils import bump_products_cache_version
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -182,6 +185,7 @@ def add_product(request):
         if form.is_valid():
             product = form.save()
             _handle_alternate_images(request, product)
+            bump_products_cache_version()
             messages.success(request, f'Product "{product.name}" added successfully.')
             logger.info(f'Product "{product.name}" added by {request.user.username}.')
             return redirect('dashboard:product_list')
@@ -205,6 +209,7 @@ def edit_product(request, product_id):
         if form.is_valid():
             product = form.save()
             _handle_alternate_images(request, product)
+            bump_products_cache_version()
             messages.success(request, f'Product "{product.name}" updated successfully.')
             logger.info(f'Product "{product.name}" edited by {request.user.username}.')
             return redirect('dashboard:product_list')
@@ -272,6 +277,7 @@ def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product_name = product.name
     product.delete()
+    bump_products_cache_version()
     logger.info(f'Product "{product_name}" deleted by {request.user.username}.')
     messages.success(request, f'Product "{product_name}" deleted.')
     return redirect("dashboard:product_list")
@@ -328,3 +334,12 @@ def toggle_user_active(request, user_id):
     logger.info(f"User {user.username} {status} by {request.user.username}.")
     messages.success(request, f"User {user.username} has been {status}.")
     return redirect("dashboard:customer_list")
+
+@staff_member_required
+def approve_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    review.approved = True
+    review.approved_by = request.user
+    review.save(update_fields=['approved', 'approved_by'])
+    logger.info(f"Review {review.id} approved by {request.user.username}")
+    return redirect("dashboard:review_list")

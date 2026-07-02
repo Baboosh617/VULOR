@@ -18,6 +18,8 @@ from django_ratelimit.decorators import ratelimit
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 
+from .cache_utils import get_products_cache_version
+
 logger = logging.getLogger(__name__)
 
 from django.shortcuts import render
@@ -28,8 +30,8 @@ from .forms import ReviewForm
 
 def home(request):
     
-    cache_key = 'home_page_data'
-    context = cache.get(cache_key)
+    version = get_products_cache_version()
+    cache_key = f'home_page_data_v{version}'
 
     if not context:
         
@@ -78,6 +80,9 @@ def product_list(request):
     sort = request.GET.get('sort', 'newest')
     page_number = request.GET.get('page', 1)
 
+    version = get_products_cache_version()
+    cache_key = f'product_list_v{version}_{category}_{search}_{sort}_page_{page_number}'
+
 
     cache_key = f'product_list_{category}_{search}_{sort}_page_{page_number}'
     context = cache.get(cache_key)
@@ -121,6 +126,10 @@ def product_list(request):
 def product_detail(request, slug):
     cache_key = f'product_detail_{slug}'
     context = cache.get(cache_key)
+
+    version = get_products_cache_version()
+    cache_key = f'product_detail_v{version}_{slug}'
+   
 
     if not context:
         product = get_object_or_404(Product, slug=slug, is_active=True)
@@ -188,9 +197,23 @@ def add_product_review(request, product_id):
 @login_required
 def add_store_review(request):
     if request.method == "POST":
-        StoreReview.objects.create(
-            user=request.user,
-            rating=request.POST.get("rating"),
-            comment=request.POST.get("comment"),
-        )
-        return redirect("products:home")
+        rating = request.POST.get("rating")
+        comment = request.POST.get("comment", "").strip()
+
+        if not rating or not comment:
+            messages.error(request, "Please provide both a rating and a comment.")
+            return redirect("home")
+
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid rating.")
+            return redirect("home")
+
+        if rating not in (1, 2, 3, 4, 5):
+            messages.error(request, "Rating must be between 1 and 5.")
+            return redirect("home")
+
+        StoreReview.objects.create(user=request.user, rating=rating, comment=comment)
+        messages.success(request, "Thanks for your feedback!")
+    return redirect("home")
