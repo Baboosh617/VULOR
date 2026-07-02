@@ -189,55 +189,89 @@
       </div>
     </section>
 
-    <!-- SECTION 6: Fit Type (Conditional) -->
-    <section id="fit-type-section" style="display: none;" class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Fit Type (Cargo Jeans & Sweatpants)</h2>
-      <div class="max-w-md">
+    <!-- SECTION 6: Fit Type — replace existing fit-type-section -->
+<section id="fit-type-section" style="display: none;" class="border-b pb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
+        Fit Type <span class="text-sm font-normal text-gray-500">(Cargo Jeans & Sweatpants only)</span>
+    </h2>
+    <div class="max-w-sm">
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          Fit Type <span class="text-red-500">*</span>
+            Fit Type <span class="text-red-500">*</span>
         </label>
         {{ form.fit_type }}
-        <p class="mt-2 text-sm text-gray-600">Choose between "Loose" (relaxed fit) or "Fit" (slimmer fit) for cargo jeans & sweatpants.</p>
-      </div>
-    </section>
+        <p class="mt-2 text-sm text-gray-500">
+            <strong>Loose</strong> — relaxed, roomy cut. 
+            <strong>Fit</strong> — slim, tapered cut.
+        </p>
+    </div>
+</section>
 
-    <!-- SECTION 7: Measurements (Conditional) -->
-    <section id="measurements-section" style="display: none;" class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Detailed Measurements (Inches)</h2>
-      <p class="text-sm text-gray-600 mb-6">Enter measurements for each available size. Format: <code class="bg-gray-100 px-1 rounded">SIZE: MEASUREMENT</code> (one per line)</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- SECTION 7: Measurements — replace existing measurements-section -->
+<section id="measurements-section" style="display: none;" class="border-b pb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b">
+        Detailed Measurements
+        <span class="text-sm font-normal text-gray-500">(Cargo Jeans & Sweatpants only)</span>
+    </h2>
+
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+        <strong>How to enter measurements:</strong> One size per line in the format
+        <code class="bg-blue-100 px-1 rounded">SIZE: VALUE</code><br>
+        Example for waist: <code class="bg-blue-100 px-1 rounded">28: 28"</code> then new line
+        <code class="bg-blue-100 px-1 rounded">30: 30"</code> etc.<br>
+        These will display to customers as a size chart when they select their size.
+    </div>
+
+    <!-- Live preview table -->
+    <div id="measurement-preview" class="mb-6 hidden">
+        <h3 class="font-medium text-gray-900 mb-3">Preview — customers will see this:</h3>
+        <div class="overflow-x-auto">
+            <table id="measurement-table" class="min-w-full border border-gray-200 rounded-lg text-sm">
+                <thead class="bg-gray-50">
+                    <tr id="measurement-header"></tr>
+                </thead>
+                <tbody id="measurement-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Waist Measurements
-          </label>
-          {{ form.waist_measurements }}
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Waist Measurements
+            </label>
+            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 28"</code></p>
+            {{ form.waist_measurements }}
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Hip Measurements
-          </label>
-          {{ form.hip_measurements }}
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Hip Measurements
+            </label>
+            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 34"</code></p>
+            {{ form.hip_measurements }}
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Length Measurements
-          </label>
-          {{ form.length_measurements }}
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Length Measurements
+            </label>
+            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 40"</code></p>
+            {{ form.length_measurements }}
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Thigh Measurements
-          </label>
-          {{ form.thigh_measurements }}
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Thigh Measurements
+            </label>
+            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 22"</code></p>
+            {{ form.thigh_measurements }}
         </div>
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Rise Measurements
-          </label>
-          {{ form.rise_measurements }}
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Rise Measurements
+            </label>
+            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 10"</code></p>
+            {{ form.rise_measurements }}
         </div>
-      </div>
-    </section>
+    </div>
+</section>
 
     <!-- SECTION 8: Media -->
 <section class="border-b pb-8">
@@ -464,166 +498,274 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Category change handler
-  const categorySelect = document.getElementById('id_category');
-  const fitTypeSection = document.getElementById('fit-type-section');
-  const measurementsSection = document.getElementById('measurements-section');
-  const sizeHelpText = document.getElementById('size-help-text');
-  
-  function updateCategoryUI() {
-    const category = categorySelect.value;
-    
-    // Show/hide fit type section
-    if (category === 'cargo-jeans' || category === 'sweatpants') {
-      fitTypeSection.style.display = 'block';
-      document.getElementById('id_fit_type').required = true;
-    } else {
-      fitTypeSection.style.display = 'none';
-      document.getElementById('id_fit_type').required = false;
-    }
-    
-    // Show/hide measurements section
-    if (category === 'cargo-jeans' || category === 'sweatpants') {
-      measurementsSection.style.display = 'block';
-      if (sizeHelpText) {
-        sizeHelpText.textContent = 'Comma-separated numeric waist sizes (e.g., 28,30,32,34)';
-      }
-    } else {
-      measurementsSection.style.display = 'none';
-      if (sizeHelpText) {
-        sizeHelpText.textContent = 'Comma-separated letter sizes (e.g., S,M,L,XL)';
-      }
-    }
-  }
-  
-  // Initial update
-  updateCategoryUI();
-  
-  // Listen for changes
-  categorySelect.addEventListener('change', updateCategoryUI);
-  
-  // Image preview
-  const imageInput = document.querySelector('input[type="file"][name="image"]');
-  const imagePreview = document.getElementById('image-preview');
-  const noImage = document.getElementById('no-image');
-  
-  if (imageInput) {
-    imageInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          imagePreview.src = e.target.result;
-          imagePreview.style.display = 'block';
-          if (noImage) noImage.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Category toggle ──────────────────────────────────────────────────────
+    const categorySelect    = document.getElementById('id_category');
+    const fitTypeSection    = document.getElementById('fit-type-section');
+    const measureSection    = document.getElementById('measurements-section');
+    const sizeHelpText      = document.getElementById('size-help-text');
+    const fitTypeInput      = document.getElementById('id_fit_type');
+
+    function updateCategoryUI() {
+        const cat      = categorySelect ? categorySelect.value : '';
+        const needsMeasure = (cat === 'cargo-jeans' || cat === 'sweatpants');
+
+        // Show/hide fit type
+        if (fitTypeSection) {
+            fitTypeSection.style.display = needsMeasure ? 'block' : 'none';
+            if (fitTypeInput) fitTypeInput.required = needsMeasure;
         }
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-  
-  // Price comparison calculator
-  const priceInput = document.getElementById('id_price');
-  const comparePriceInput = document.getElementById('id_compare_price');
-  const discountBadge = document.getElementById('discount-badge');
-  
-  function calculateDiscount() {
-    const price = parseFloat(priceInput?.value || 0);
-    const comparePrice = parseFloat(comparePriceInput?.value || 0);
-    
-    if (comparePrice && comparePrice > price) {
-      const diff = (comparePrice - price).toFixed(2);
-      const pct = Math.round(((comparePrice - price) / comparePrice) * 100);
-      discountBadge.innerHTML = `
-        <span class="mr-1">🎉</span>
-        <span>${pct}% off (Save ₦${diff})</span>
-      `;
-      discountBadge.classList.remove('bg-gray-100', 'text-gray-800');
-      discountBadge.classList.add('bg-green-100', 'text-green-800');
-    } else {
-      discountBadge.innerHTML = '<span>No discount</span>';
-      discountBadge.classList.remove('bg-green-100', 'text-green-800');
-      discountBadge.classList.add('bg-gray-100', 'text-gray-800');
+
+        // Show/hide measurements
+        if (measureSection) {
+            measureSection.style.display = needsMeasure ? 'block' : 'none';
+        }
+
+        // Update size help text
+        if (sizeHelpText) {
+            sizeHelpText.textContent = needsMeasure
+                ? 'Comma-separated waist sizes (e.g. 28,30,32,34)'
+                : 'Comma-separated sizes (e.g. S,M,L,XL)';
+        }
+
+        if (needsMeasure) buildMeasurementPreview();
     }
-  }
-  
-  if (priceInput && comparePriceInput) {
-    priceInput.addEventListener('input', calculateDiscount);
-    comparePriceInput.addEventListener('input', calculateDiscount);
-    calculateDiscount(); // Initial calculation
-  }
-  
-    
-    // Keep your existing category, image, price JS if you need it
-    // But remove any complex slug logic
+
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateCategoryUI);
+        updateCategoryUI(); // run once on load
+    }
+
+    // ── Measurement preview table ────────────────────────────────────────────
+    const measureFields = {
+        'Waist':  document.getElementById('id_waist_measurements'),
+        'Hip':    document.getElementById('id_hip_measurements'),
+        'Length': document.getElementById('id_length_measurements'),
+        'Thigh':  document.getElementById('id_thigh_measurements'),
+        'Rise':   document.getElementById('id_rise_measurements'),
+    };
+
+    Object.values(measureFields).forEach(el => {
+        if (el) el.addEventListener('input', buildMeasurementPreview);
+    });
+
+    function parseMeasurements(text) {
+        // Parses "28: 28\", 30: 30\"" or multiline "28: 28\"\n30: 30\""
+        const result = {};
+        if (!text) return result;
+        const lines = text.replace(/,\s*/g, '\n').split('\n');
+        lines.forEach(line => {
+            const [size, val] = line.split(':').map(s => s.trim());
+            if (size && val) result[size] = val;
+        });
+        return result;
+    }
+
+    function buildMeasurementPreview() {
+        const preview = document.getElementById('measurement-preview');
+        const header  = document.getElementById('measurement-header');
+        const body    = document.getElementById('measurement-body');
+        if (!preview || !header || !body) return;
+
+        // Collect all sizes from waist (primary)
+        const waistEl   = measureFields['Waist'];
+        const waistData = parseMeasurements(waistEl ? waistEl.value : '');
+        const sizes     = Object.keys(waistData);
+
+        if (sizes.length === 0) {
+            preview.classList.add('hidden');
+            return;
+        }
+
+        // Build header row
+        header.innerHTML = `<th class="px-4 py-2 border border-gray-200 bg-gray-50 text-left font-semibold">Size</th>` +
+            Object.keys(measureFields)
+                .filter(name => {
+                    const el = measureFields[name];
+                    return el && el.value.trim();
+                })
+                .map(name => `<th class="px-4 py-2 border border-gray-200 bg-gray-50 text-left font-semibold">${name}</th>`)
+                .join('');
+
+        // Build data rows
+        body.innerHTML = sizes.map(size => {
+            const cells = Object.entries(measureFields)
+                .filter(([, el]) => el && el.value.trim())
+                .map(([name, el]) => {
+                    const data = parseMeasurements(el.value);
+                    return `<td class="px-4 py-2 border border-gray-200">${data[size] || '—'}</td>`;
+                })
+                .join('');
+            return `<tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 border border-gray-200 font-semibold">${size}</td>
+                        ${cells}
+                    </tr>`;
+        }).join('');
+
+        preview.classList.remove('hidden');
+    }
+
+    // ── Image preview ────────────────────────────────────────────────────────
+    const imageInput   = document.querySelector('input[type="file"][name="image"]');
+    const imagePreview = document.getElementById('image-preview');
+    const noImage      = document.getElementById('no-image');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                if (noImage) noImage.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ── Price discount calculator ────────────────────────────────────────────
+    const priceInput        = document.getElementById('id_price');
+    const comparePriceInput = document.getElementById('id_compare_price');
+    const discountBadge     = document.getElementById('discount-badge');
+
+    function calcDiscount() {
+        if (!priceInput || !comparePriceInput || !discountBadge) return;
+        const price   = parseFloat(priceInput.value) || 0;
+        const compare = parseFloat(comparePriceInput.value) || 0;
+
+        if (compare > price && price > 0) {
+            const diff = (compare - price).toFixed(2);
+            const pct  = Math.round(((compare - price) / compare) * 100);
+            discountBadge.innerHTML = `<span class="mr-1">🎉</span><span>${pct}% off (Save ₦${diff})</span>`;
+            discountBadge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-800';
+        } else {
+            discountBadge.innerHTML = '<span>No discount set</span>';
+            discountBadge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800';
+        }
+    }
+
+    if (priceInput)        priceInput.addEventListener('input', calcDiscount);
+    if (comparePriceInput) comparePriceInput.addEventListener('input', calcDiscount);
+    calcDiscount();
+
+    // ── Alternate images ─────────────────────────────────────────────────────
+    const alternateInput   = document.querySelector('input[name="alternate_images"]');
+    const dynamicAltFields = document.getElementById('dynamicAltFields');
+    const mainImgContainer = document.getElementById('mainImageContainer');
+    const mainImgOptions   = document.getElementById('mainImageOptions');
+
+    if (alternateInput) {
+        alternateInput.addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (!dynamicAltFields || !mainImgOptions) return;
+            dynamicAltFields.innerHTML = '';
+            mainImgOptions.innerHTML  = '';
+
+            if (files.length > 0 && mainImgContainer) {
+                mainImgContainer.classList.remove('hidden');
+            } else if (mainImgContainer) {
+                mainImgContainer.classList.add('hidden');
+            }
+
+            Array.from(files).forEach((file, index) => {
+                const altDiv = document.createElement('div');
+                altDiv.className = 'mb-3';
+                altDiv.innerHTML = `
+                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                        Image ${index + 1}: ${file.name}
+                    </label>
+                    <input type="text"
+                           name="alternate_alt_text"
+                           placeholder="Describe this view (e.g. Side detail, Back view)"
+                           class="w-full border rounded p-2 text-sm"
+                           value="${file.name.split('.')[0].replace(/[_-]/g, ' ')}">
+                `;
+                dynamicAltFields.appendChild(altDiv);
+
+                const radioDiv = document.createElement('div');
+                radioDiv.className = 'flex items-center mb-1';
+                radioDiv.innerHTML = `
+                    <input type="radio" id="main_${index}" name="alternate_is_main" value="${index}"
+                           class="h-4 w-4 text-blue-600" ${index === 0 ? 'checked' : ''}>
+                    <label for="main_${index}" class="ml-2 text-sm text-gray-700">
+                        Image ${index + 1}${index === 0 ? ' (default)' : ''}
+                    </label>
+                `;
+                mainImgOptions.appendChild(radioDiv);
+            });
+        });
+    }
+
+    // ── Helper functions (used by onclick in HTML) ───────────────────────────
+    window.setSizeExample = function (example) {
+        const el = document.getElementById('id_available_sizes');
+        if (el) { el.value = example; }
+    };
+
+    window.addColor = function (color) {
+        const el = document.getElementById('id_available_colors');
+        if (!el) return;
+        const current = el.value.split(',').map(c => c.trim()).filter(Boolean);
+        if (!current.includes(color)) {
+            current.push(color);
+            el.value = current.join(', ');
+        }
+    };
 });
-
-// Helper functions
-function setSizeExample(example) {
-  document.getElementById('id_available_sizes').value = example;
-}
-
-function addColor(color) {
-  const colorsInput = document.getElementById('id_available_colors');
-  let currentColors = colorsInput.value.split(',').map(c => c.trim()).filter(c => c);
-  
-  if (!currentColors.includes(color)) {
-    currentColors.push(color);
-    colorsInput.value = currentColors.join(', ');
-  }
-}
-
-function slugify(text) {
-  return text.toString().toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
-}
 </script>
+
+<!-- Replace the last <script> block in product_form.html -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.getElementById('id_name');
     const slugInput = document.getElementById('id_slug');
+
+    if (!nameInput || !slugInput) return;
+
+    // Is this a new product (no existing slug) or an edit?
+    const isNewProduct = slugInput.value.trim() === '';
+
+    // Create preview element
     const slugPreview = document.createElement('div');
-    
-    if (nameInput && slugInput) {
-        // Add preview element
-        slugPreview.className = 'mt-1 text-xs text-blue-500';
-        slugPreview.id = 'slug-preview';
-        slugInput.parentNode.appendChild(slugPreview);
-        
-        // Function to update slug preview
-        function updateSlugPreview() {
-            const name = nameInput.value;
-            if (name) {
-                const baseSlug = name
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^\w-]+/g, '')
-                    .replace(/--+/g, '-')
-                    .trim();
-                
-                // Show preview of what the slug will be
-                slugPreview.textContent = `Will generate: ${baseSlug} (or ${baseSlug}-1, ${baseSlug}-2 if needed)`;
-                
-                // Only auto-fill slug if it's empty (for new products)
-                if (!slugInput.value) {
-                    slugInput.value = baseSlug;
-                }
-            } else {
-                slugPreview.textContent = '';
-            }
-        }
-        
-        // Update preview when typing
-        nameInput.addEventListener('input', updateSlugPreview);
-        
-        // Initial preview
-        updateSlugPreview();
+    slugPreview.className = 'mt-1 text-xs text-blue-500';
+    slugInput.parentNode.appendChild(slugPreview);
+
+    function slugify(text) {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')       // spaces to hyphens
+            .replace(/[^\w-]+/g, '')    // remove non-word chars
+            .replace(/--+/g, '-')       // collapse double hyphens
+            .replace(/^-+|-+$/g, '');   // trim leading/trailing hyphens
     }
+
+    function updateSlug() {
+        const name     = nameInput.value;
+        const baseSlug = slugify(name);
+
+        if (!name) {
+            slugPreview.textContent = '';
+            if (isNewProduct) slugInput.value = '';
+            return;
+        }
+
+        slugPreview.textContent = `URL slug: ${baseSlug}`;
+
+        // ── FIXED: always update for new products, never for edits ──
+        if (isNewProduct) {
+            slugInput.value = baseSlug;
+        }
+    }
+
+    // Fire on every keystroke — not just when field is empty
+    nameInput.addEventListener('input', updateSlug);
+
+    // Run once on load in case name is pre-filled (edit page)
+    updateSlug();
 });
 </script>
 {% endblock %}

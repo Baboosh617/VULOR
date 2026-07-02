@@ -227,14 +227,14 @@
     </nav>
 
     
+    
     {% if messages %}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-            {% for message in messages %}
-                <div class="bg-[#dc2626] text-white p-4 mb-4 text-sm tracking-wide font-bold border border-[#dc2626]">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
+        {% for message in messages %}
+            <div data-django-message="{{ message }}"
+                 data-django-tags="{{ message.tags }}"
+                 style="display:none;">
+            </div>
+        {% endfor %}
     {% endif %}
 
     
@@ -490,5 +490,8 @@
             });
         });
     </script>
+    
+    <script src="{% static 'js/toast.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
 </body>
 </html>

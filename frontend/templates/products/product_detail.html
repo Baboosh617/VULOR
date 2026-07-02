@@ -70,22 +70,130 @@
             {% endif %}
 
             
-            {% if product.category == 'cargo-jeans' or product.category == 'sweatpants' %}
-            <div class="mb-6">
-                <label class="block text-white text-sm mb-3">FIT</label>
-                <div class="flex flex-wrap gap-2">
-                    {% for fit_value, fit_label in FIT_CHOICES %}
-                    <label class="flex items-center">
-                        <input type="radio" name="fit_type" value="{{ fit_value }}"
-                               class="hidden peer" {% if product.fit_type == fit_value %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
-                            {{ fit_label }}
-                        </span>
-                    </label>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
+            <!-- Replace the size selection section in product_detail.html -->
+
+{% if product.category == 'cargo-jeans' or product.category == 'sweatpants' %}
+
+<!-- Fit Type -->
+<div class="border-t border-[#333333] pt-6 mb-6">
+    <h3 class="text-white text-sm font-bold mb-4 tracking-widest">FIT TYPE</h3>
+    <div class="flex gap-3">
+        {% for fit_value, fit_label in FIT_CHOICES %}
+        <label class="cursor-pointer">
+            <input type="radio" name="fit_type" value="{{ fit_value }}"
+                   id="fit_{{ fit_value }}"
+                   class="hidden peer"
+                   {% if product.fit_type == fit_value %}checked{% endif %}>
+            <span class="block px-6 py-3 border-2 border-[#333333] text-[#cccccc] text-sm
+                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
+                         hover:border-[#666666] transition-all duration-200 rounded">
+                {{ fit_label }}
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Waist Size Selection -->
+{% if product.get_available_sizes_list %}
+<div class="border-t border-[#333333] pt-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-white text-sm font-bold tracking-widest">WAIST SIZE</h3>
+        <button type="button" onclick="toggleMeasurementsTable()"
+                class="text-[#dc2626] text-xs hover:text-white transition-colors">
+            View Size Chart ↓
+        </button>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-4">
+        {% for size in product.get_available_sizes_list %}
+        <label class="cursor-pointer">
+            <input type="radio" name="size" value="{{ size }}"
+                   id="size_{{ size }}"
+                   class="hidden peer"
+                   onchange="onSizeSelected('{{ size }}')"
+                   {% if forloop.first %}checked{% endif %}>
+            <span class="block px-5 py-3 border-2 border-[#333333] text-[#cccccc] text-sm font-mono
+                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
+                         hover:border-[#666666] transition-all duration-200 rounded">
+                {{ size }}"
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+
+    <!-- Selected size measurements panel -->
+    <div id="size-measurements-panel"
+         class="hidden bg-[#111111] border border-[#333333] rounded-lg p-4 text-sm">
+        <p class="text-[#dc2626] font-bold mb-3 tracking-widest text-xs" id="selected-size-label">
+            SIZE — MEASUREMENTS
+        </p>
+        <div class="grid grid-cols-2 gap-3" id="selected-size-data"></div>
+    </div>
+
+    <!-- Full size chart (hidden by default) -->
+    {% if product.has_detailed_measurements %}
+    <div id="full-size-chart" class="hidden mt-4">
+        <div class="overflow-x-auto rounded-lg border border-[#333333]">
+            <table class="w-full text-sm">
+                <thead class="bg-[#111111]">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-[#dc2626] font-bold tracking-widest">SIZE</th>
+                        {% if product.waist_measurements %}
+                        <th class="px-4 py-3 text-left text-white font-semibold">Waist</th>
+                        {% endif %}
+                        {% if product.hip_measurements %}
+                        <th class="px-4 py-3 text-left text-white font-semibold">Hip</th>
+                        {% endif %}
+                        {% if product.length_measurements %}
+                        <th class="px-4 py-3 text-left text-white font-semibold">Length</th>
+                        {% endif %}
+                        {% if product.thigh_measurements %}
+                        <th class="px-4 py-3 text-left text-white font-semibold">Thigh</th>
+                        {% endif %}
+                        {% if product.rise_measurements %}
+                        <th class="px-4 py-3 text-left text-white font-semibold">Rise</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody id="size-chart-body" class="divide-y divide-[#333333]">
+                    <!-- filled by JS -->
+                </tbody>
+            </table>
+        </div>
+        <p class="text-xs text-[#666666] mt-2">All measurements in inches.</p>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- Regular size selection for non-pants categories -->
+{% if product.get_available_sizes_list %}
+<div class="border-t border-[#333333] pt-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-white text-sm font-bold tracking-widest">SIZE</h3>
+        <a href="{% url 'size_guide' %}" class="text-[#dc2626] text-xs hover:text-white transition-colors">
+            Size Guide →
+        </a>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        {% for size in product.get_available_sizes_list %}
+        <label class="cursor-pointer">
+            <input type="radio" name="size" value="{{ size }}"
+                   class="hidden peer"
+                   {% if forloop.first %}checked{% endif %}>
+            <span class="block px-5 py-3 border-2 border-[#333333] text-[#cccccc] text-sm
+                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
+                         hover:border-[#666666] transition-all duration-200 rounded">
+                {{ size }}
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endif %}
 
             
             {% if product.get_available_sizes_list %}
@@ -547,5 +655,112 @@
             });
         }
     });
+</script>
+
+<script>
+// ── Measurement data from Django (JSON) ───────────────────────────────────────
+const MEASUREMENTS = {
+    waist:  parseMeasurementText("{{ product.waist_measurements|escapejs }}"),
+    hip:    parseMeasurementText("{{ product.hip_measurements|escapejs }}"),
+    length: parseMeasurementText("{{ product.length_measurements|escapejs }}"),
+    thigh:  parseMeasurementText("{{ product.thigh_measurements|escapejs }}"),
+    rise:   parseMeasurementText("{{ product.rise_measurements|escapejs }}"),
+};
+
+const MEASURE_LABELS = {
+    waist: 'Waist', hip: 'Hip', length: 'Length', thigh: 'Thigh', rise: 'Rise'
+};
+
+function parseMeasurementText(text) {
+    const result = {};
+    if (!text) return result;
+    text.replace(/,\s*/g, '\n').split('\n').forEach(line => {
+        const parts = line.split(':');
+        if (parts.length >= 2) {
+            const size = parts[0].trim();
+            const val  = parts.slice(1).join(':').trim();
+            if (size && val) result[size] = val;
+        }
+    });
+    return result;
+}
+
+function onSizeSelected(size) {
+    const panel     = document.getElementById('size-measurements-panel');
+    const label     = document.getElementById('selected-size-label');
+    const dataEl    = document.getElementById('selected-size-data');
+    const chartBody = document.getElementById('size-chart-body');
+
+    if (!panel || !dataEl) return;
+
+    // Check if there are any measurements at all
+    const hasMeasurements = Object.values(MEASUREMENTS).some(m => Object.keys(m).length > 0);
+    if (!hasMeasurements) return;
+
+    // Update the panel
+    label.textContent = `SIZE ${size}" — MEASUREMENTS`;
+
+    const cells = Object.entries(MEASUREMENTS)
+        .filter(([, data]) => data[size])
+        .map(([key, data]) => `
+            <div class="flex flex-col">
+                <span class="text-[#666666] text-xs uppercase tracking-widest mb-1">
+                    ${MEASURE_LABELS[key]}
+                </span>
+                <span class="text-white font-semibold">${data[size]}</span>
+            </div>
+        `).join('');
+
+    if (cells) {
+        dataEl.innerHTML = cells;
+        panel.classList.remove('hidden');
+    }
+
+    // Highlight the selected row in the full chart
+    if (chartBody) {
+        chartBody.querySelectorAll('tr').forEach(row => {
+            const sizeCell = row.querySelector('td:first-child');
+            if (sizeCell) {
+                const isSelected = sizeCell.textContent.trim() === `${size}"`;
+                row.classList.toggle('bg-[#dc2626]/10', isSelected);
+                row.classList.toggle('border-l-2', isSelected);
+                row.classList.toggle('border-[#dc2626]', isSelected);
+            }
+        });
+    }
+}
+
+function toggleMeasurementsTable() {
+    const chart = document.getElementById('full-size-chart');
+    if (!chart) return;
+    chart.classList.toggle('hidden');
+
+    // Build chart body if empty
+    const body = document.getElementById('size-chart-body');
+    if (body && body.children.length === 0) buildSizeChartTable(body);
+}
+
+function buildSizeChartTable(body) {
+    const sizes = Object.keys(MEASUREMENTS.waist);
+    if (sizes.length === 0) return;
+
+    body.innerHTML = sizes.map(size => {
+        const cells = Object.entries(MEASUREMENTS)
+            .filter(([, data]) => Object.keys(data).length > 0)
+            .map(([, data]) => `<td class="px-4 py-3 text-[#cccccc]">${data[size] || '—'}</td>`)
+            .join('');
+
+        return `<tr class="hover:bg-[#111111] transition-colors">
+                    <td class="px-4 py-3 font-bold text-white">${size}"</td>
+                    ${cells}
+                </tr>`;
+    }).join('');
+}
+
+// Run once for initially selected size
+document.addEventListener('DOMContentLoaded', () => {
+    const checked = document.querySelector('input[name="size"]:checked');
+    if (checked) onSizeSelected(checked.value);
+});
 </script>
 {% endblock %}
