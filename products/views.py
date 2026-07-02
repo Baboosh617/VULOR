@@ -33,8 +33,9 @@ def home(request):
     version = get_products_cache_version()
     cache_key = f'home_page_data_v{version}'
 
+    context = cache.get(cache_key)
+
     if not context:
-        
         hero_products = []
         for category, _ in Product.CATEGORY_CHOICES:
             product = (
