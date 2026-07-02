@@ -10,6 +10,8 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
+from django.utils.dateparse import parse_datetime
+from django.http import JsonResponse
 
 from products.cache_utils import bump_products_cache_version
 
@@ -21,6 +23,9 @@ User = get_user_model()
 
 @staff_member_required  # ← FIXED: was unprotected
 def dashboard_home(request):
+    if 'dashboard_last_seen' not in request.session:
+        request.session['dashboard_last_seen'] = now().isoformat()
+    
     total_orders = Order.objects.count()
     pending_orders = Order.objects.filter(status="pending").count()
     completed_orders = Order.objects.filter(status="completed").count()
@@ -75,6 +80,17 @@ def dashboard_home(request):
 
     return render(request, "dashboard/home.html", context)
 
+@staff_member_required
+def new_orders_check(request):
+    last_seen_raw = request.session.get('dashboard_last_seen')
+    last_seen = parse_datetime(last_seen_raw) if last_seen_raw else None
+    new_count = Order.objects.filter(created_at__gt=last_seen).count() if last_seen else 0
+    return JsonResponse({'new_orders': new_count})
+
+@staff_member_required
+def new_orders_ack(request):
+    request.session['dashboard_last_seen'] = now().isoformat()
+    return JsonResponse({'status': 'ok'})
 
 @staff_member_required
 def review_list(request):

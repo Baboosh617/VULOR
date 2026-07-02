@@ -29,25 +29,21 @@ def checkout(request):
             messages.error(request, "Your cart is empty.")
             return redirect("view_cart")
 
-        full_name     = request.POST.get("full_name", "").strip()
-        phone_number  = request.POST.get("phone_number", "").strip()
-        email         = request.POST.get("email", "").strip()
-        address_line  = request.POST.get("address_line", "").strip()
-        state         = request.POST.get("state", "").strip()
-        city          = request.POST.get("city", "").strip()
+        full_name = request.POST.get("full_name", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+        email = request.POST.get("email", "").strip()
+        address_line = request.POST.get("address_line", "").strip()
+        state = request.POST.get("state", "").strip()
+        city = request.POST.get("city", "").strip()
         shipping_zone = request.POST.get("shipping_zone", "").strip()
 
         required_fields = {
-            'full_name': full_name,
-            'phone_number': phone_number,
-            'email': email,
-            'address_line': address_line,
-            'state': state,
-            'city': city,
+            'full_name': full_name, 'phone_number': phone_number, 'email': email,
+            'address_line': address_line, 'state': state, 'city': city,
         }
-        missing = [f.replace('_', ' ').title() for f, v in required_fields.items() if not v]
-        if missing:
-            messages.error(request, f"Please fill in: {', '.join(missing)}")
+        missing_fields = [f.replace('_', ' ').title() for f, v in required_fields.items() if not v]
+        if missing_fields:
+            messages.error(request, f"Please fill in: {', '.join(missing_fields)}")
             return render(request, "orders/checkout.html", {"cart": cart})
 
         try:
@@ -62,28 +58,28 @@ def checkout(request):
 
         try:
             from decimal import Decimal
-            shipping_fee = Decimal("5000.00") if state.lower() == "lagos" else Decimal("3000.00")
+            shipping_fee_decimal = Decimal("5000.00") if state.lower() == "lagos" else Decimal("3000.00")
 
+            # fast-fail before touching the lock — optimization only, not the
+            # authoritative check (see inside the atomic block below)
             if Order.objects.filter(user=request.user, payment_status='pending').exists():
                 messages.error(request, "You already have a pending order.")
                 return redirect('view_cart')
 
-            calculated_total = cart.total_price + shipping_fee
+            calculated_total = cart.total_price + shipping_fee_decimal
             if calculated_total <= 0:
-                messages.error(request, "Order total is invalid.")
+                messages.error(request, "Order total is less than or equal to zero.")
                 return redirect('view_cart')
 
+            # ---- THIS replaces the old dead `Order.objects.select_for_update().filter(...)` ----
             with transaction.atomic():
-                # ── FIXED: actually use the locked queryset ──────────
-                existing_pending = (
-                    Order.objects
-                    .select_for_update()
-                    .filter(user=request.user, payment_status='pending')
-                )
-                if existing_pending.exists():
+                User.objects.select_for_update().get(pk=request.user.pk)
+
+                # authoritative recheck — the row lock above serializes concurrent
+                # requests from the same user, so this check is now race-safe
+                if Order.objects.filter(user=request.user, payment_status='pending').exists():
                     messages.error(request, "You already have a pending order.")
                     return redirect('view_cart')
-                # ─────────────────────────────────────────────────────
 
                 order = Order.objects.create(
                     user=request.user,
@@ -94,29 +90,24 @@ def checkout(request):
                     shipping_state=state,
                     shipping_zipcode="",
                     shipping_country="Nigeria",
-                    shipping_fee=shipping_fee,
+                    shipping_fee=shipping_fee_decimal,
                     shipping_zone=shipping_zone,
                     customer_email=email,
                     customer_phone=phone_number,
                 )
-
                 for cart_item in cart.items.all():
                     OrderItem.objects.create(
-                        order=order,
-                        product=cart_item.product,
-                        quantity=cart_item.quantity,
-                        price=cart_item.product.price,
-                        size=cart_item.size,
-                        color=cart_item.color,
+                        order=order, product=cart_item.product, quantity=cart_item.quantity,
+                        price=cart_item.product.price, size=cart_item.size, color=cart_item.color,
                     )
+                logger.info(f"Order {order.id} created by {request.user.email}")
+                cart.items.all().delete()
 
-            logger.info(f"Order {order.id} created by {request.user.email}")
-            cart.items.all().delete()
             return redirect('payments:initiate_payment', order_id=order.id)
 
         except Exception as e:
-            logger.error(f"Error creating order for {request.user.email}: {e}", exc_info=True)
-            messages.error(request, "Something went wrong. Please try again.")
+            logger.error(f"Error creating order for user {request.user.email}: {str(e)}", exc_info=True)
+            messages.error(request, "Something went wrong while creating your order. Please try again.")
             return render(request, "orders/checkout.html", {"cart": cart})
 
     except Cart.DoesNotExist:

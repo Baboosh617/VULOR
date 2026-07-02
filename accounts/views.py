@@ -5,31 +5,27 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm
 from orders.models import Order
 from django_ratelimit.decorators import ratelimit
+from allauth.account.utils import complete_signup, setup_user_email
+from allauth.account import app_settings as allauth_settings
 
 UserCreationForm = CustomUserCreationForm
 
 @ratelimit(key='ip', rate='5/m', block=True)
 def register(request):
-    """Custom registration view that works with allauth"""
-    print("REGISTER VIEW HIT", request.method)
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, "Registration successful!")
-            return redirect('home')
+            setup_user_email(request, user, [])  # registers user.email as the primary EmailAddress
+            return complete_signup(
+                request, user, allauth_settings.EMAIL_VERIFICATION, reverse('home')
+            )
         else:
             messages.error(request, "Please correct the errors below.")
     else:
         form = UserCreationForm()
-    
-    # Pass additional context for template
-    context = {
-        'form': form,
-        'title': 'Sign Up',
-    }
-    return render(request, 'account/register.html', context)
+
+    return render(request, 'account/register.html', {'form': form, 'title': 'Sign Up'})
 
 @login_required
 def profile_view(request):

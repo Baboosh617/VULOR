@@ -19,4 +19,6 @@ urlpatterns = [
     path("customers/<int:user_id>/edit/", views.edit_customer, name="edit_customer"),
     path('product/<int:product_id>/image/delete/<int:image_id>/', views.delete_alternate_image, name='delete_alternate_image'),
     path('product/<int:product_id>/image/set-main/<int:image_id>/', views.set_main_alternate_image, name='set_main_alternate_image'),
+    path("notifications/check/", views.new_orders_check, name="new_orders_check"),
+    path("notifications/ack/", views.new_orders_ack, name="new_orders_ack"),
 ]

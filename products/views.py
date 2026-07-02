@@ -75,53 +75,31 @@ def home(request):
 
 
 def product_list(request):
-    category = request.GET.get('category')
-    search = request.GET.get('search')
-    sort = request.GET.get('sort', 'newest')
-    page_number = request.GET.get('page', 1)
+    products = Product.objects.all().order_by("-created_at")
+    query = request.GET.get("q")
+    if query:
+        products = products.filter(name__icontains=query)
+    category_filter = request.GET.get("category")
+    if category_filter in dict(Product.CATEGORY_CHOICES).keys():
+        products = products.filter(category=category_filter)
+    active_filter = request.GET.get("active")
+    if active_filter == "true":
+        products = products.filter(is_active=True)
+    elif active_filter == "false":
+        products = products.filter(is_active=False)
 
-    version = get_products_cache_version()
-    cache_key = f'product_list_v{version}_{category}_{search}_{sort}_page_{page_number}'
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+    paged_products = paginator.get_page(page_number)
 
-
-    cache_key = f'product_list_{category}_{search}_{sort}_page_{page_number}'
-    context = cache.get(cache_key)
-
-    if not context:
-        products = Product.objects.filter(is_active=True)
-        valid_categories = dict(Product.CATEGORY_CHOICES).keys()
-
-        if category in valid_categories:
-            products = products.filter(category=category)
-
-        if search:
-            products = products.filter(Q(name__icontains=search) | Q(description__icontains=search))
-
-
-        if sort == 'price_low':
-            products = products.order_by('price')
-        elif sort == 'price_high':
-            products = products.order_by('-price')
-        elif sort == 'name':
-            products = products.order_by('name')
-        else: 
-            products = products.order_by('-created_at')
-
-        paginator = Paginator(products, 10)
-        paged_products = paginator.get_page(page_number)
-
-        context = {
-            'products': paged_products,
-            'categories': Product.CATEGORY_CHOICES,
-            'current_category': category,
-            'search_query': search,
-            'sort_method': sort,
-        }
-
-        
-        cache.set(cache_key, context, 60 * 10)
-
-    return render(request, 'products/product_list.html', context)
+    context = {
+        "products": paged_products,
+        "query": query,
+        "category_filter": category_filter,
+        "active_filter": active_filter,
+        "category_choices": Product.CATEGORY_CHOICES,
+    }
+    return render(request, "dashboard/products.html", context)
 
 def product_detail(request, slug):
     cache_key = f'product_detail_{slug}'
