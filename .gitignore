@@ -38,6 +38,8 @@ Thumbs.db
 *.tmp
 *.cache
 
+# Django cache
+django_cache/
 
 # Coverage reports
 htmlcov/
