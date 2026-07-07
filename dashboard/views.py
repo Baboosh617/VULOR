@@ -102,16 +102,6 @@ def review_list(request):
 
 
 @staff_member_required
-def approve_review(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
-    review.approved = True
-    review.save()
-    logger.info(f"Review {review.id} approved by {request.user.username}")
-    messages.success(request, f"Review from {review.user.username} has been approved.")
-    return redirect("dashboard:review_list")
-
-
-@staff_member_required
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     review.delete()

@@ -5,8 +5,6 @@ from django.utils import timezone
 
 import uuid
 
-from decimal import Decimal
-
 class Payment(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -60,8 +58,7 @@ class PaymentTransaction(models.Model):
 
     @property
     def amount_in_kobo(self):
-        
-        return int( (Decimal(self.amount) * 100).quantize(0) )
+        return int(self.amount * 100)
 
     @staticmethod
     def generate_reference():

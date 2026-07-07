@@ -28,10 +28,8 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100)])
 
-    SIZE_CHOICES = [('S','Small'),('M','Medium'),('L','Large')]
-    COLOR_CHOICES = [('red','Red'),('blue','Blue'),('green','Green')]
-    size = models.CharField(max_length=10, choices=SIZE_CHOICES, blank=True)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    size = models.CharField(max_length=10, blank=True)
+    color = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

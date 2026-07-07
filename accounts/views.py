@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse
 from .forms import CustomUserCreationForm
 from orders.models import Order
 from django_ratelimit.decorators import ratelimit

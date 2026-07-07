@@ -9,7 +9,7 @@
       <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Order Details:</h2>
       <ul>
         {% for item in order.items.all %}
-          <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.total_price }}</li>
+          <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.get_total_price }}</li>
         {% endfor %}
       </ul>
 

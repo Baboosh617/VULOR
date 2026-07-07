@@ -1,0 +1,485 @@
+diff --git a/accounts/views.py b/accounts/views.py
+index aa3217d..2d7a36a 100644
+--- a/accounts/views.py
++++ b/accounts/views.py
+@@ -1,7 +1,7 @@
+ from django.shortcuts import render, redirect
+-from django.contrib.auth import login
+ from django.contrib.auth.decorators import login_required
+ from django.contrib import messages
++from django.urls import reverse
+ from .forms import CustomUserCreationForm
+ from orders.models import Order
+ from django_ratelimit.decorators import ratelimit
+diff --git a/cart/migrations/0005_alter_cartitem_color_alter_cartitem_size.py b/cart/migrations/0005_alter_cartitem_color_alter_cartitem_size.py
+new file mode 100644
+index 0000000..8d78e5d
+--- /dev/null
++++ b/cart/migrations/0005_alter_cartitem_color_alter_cartitem_size.py
+@@ -0,0 +1,21 @@
++from django.db import migrations, models
++
++
++class Migration(migrations.Migration):
++
++    dependencies = [
++        ('cart', '0004_alter_cartitem_color_alter_cartitem_quantity_and_more'),
++    ]
++
++    operations = [
++        migrations.AlterField(
++            model_name='cartitem',
++            name='color',
++            field=models.CharField(blank=True, max_length=50),
++        ),
++        migrations.AlterField(
++            model_name='cartitem',
++            name='size',
++            field=models.CharField(blank=True, max_length=10),
++        ),
++    ]
+diff --git a/cart/models.py b/cart/models.py
+index c559b6b..547ed1c 100644
+--- a/cart/models.py
++++ b/cart/models.py
+@@ -28,10 +28,8 @@ class CartItem(models.Model):
+     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100)])
+ 
+-    SIZE_CHOICES = [('S','Small'),('M','Medium'),('L','Large')]
+-    COLOR_CHOICES = [('red','Red'),('blue','Blue'),('green','Green')]
+-    size = models.CharField(max_length=10, choices=SIZE_CHOICES, blank=True)
+-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
++    size = models.CharField(max_length=10, blank=True)
++    color = models.CharField(max_length=50, blank=True)
+ 
+     def __str__(self):
+         return f"{self.quantity} x {self.product.name}"
+diff --git a/dashboard/views.py b/dashboard/views.py
+index 8671ba1..bcd1753 100644
+--- a/dashboard/views.py
++++ b/dashboard/views.py
+@@ -101,16 +101,6 @@ def review_list(request):
+     return render(request, "dashboard/reviews.html", {"reviews": reviews})
+ 
+ 
+-@staff_member_required
+-def approve_review(request, review_id):
+-    review = get_object_or_404(Review, id=review_id)
+-    review.approved = True
+-    review.save()
+-    logger.info(f"Review {review.id} approved by {request.user.username}")
+-    messages.success(request, f"Review from {review.user.username} has been approved.")
+-    return redirect("dashboard:review_list")
+-
+-
+ @staff_member_required
+ def delete_review(request, review_id):
+     review = get_object_or_404(Review, id=review_id)
+diff --git a/frontend/templates/emails/low_stock_alert.html b/frontend/templates/emails/low_stock_alert.html
+index 03b6f48..70293fb 100644
+--- a/frontend/templates/emails/low_stock_alert.html
++++ b/frontend/templates/emails/low_stock_alert.html
+@@ -3,7 +3,7 @@
+     <div style="max-width:600px; margin:auto; background-color:#fff; padding:20px; border-radius:8px;">
+       <h1 style="font-size:24px; font-weight:bold; color:#111827;">Low Stock Alert</h1>
+       <p style="font-size:16px; color:#374151;">The product <strong>{{ product.name }}</strong> is running low on stock.</p>
+-      <p>Current stock: {{ product.stock }}</p>
++      <p>Current stock: {{ product.inventory_count }}</p>
+       <p>Please restock soon to avoid running out.</p>
+       <a href="http://localhost:8000/admin/products/{{ product.id }}/change/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#dc2626; color:#fff; text-decoration:none; border-radius:5px;">Update Stock</a>
+     </div>
+diff --git a/frontend/templates/emails/order_confirmation.html b/frontend/templates/emails/order_confirmation.html
+index 1cc8aab..cbb6915 100644
+--- a/frontend/templates/emails/order_confirmation.html
++++ b/frontend/templates/emails/order_confirmation.html
+@@ -9,7 +9,7 @@
+       <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Order Details:</h2>
+       <ul>
+         {% for item in order.items.all %}
+-          <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.total_price }}</li>
++          <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.get_total_price }}</li>
+         {% endfor %}
+       </ul>
+ 
+diff --git a/frontend/templates/emails/weekly_sales_report.html b/frontend/templates/emails/weekly_sales_report.html
+index d2028d3..81347f2 100644
+--- a/frontend/templates/emails/weekly_sales_report.html
++++ b/frontend/templates/emails/weekly_sales_report.html
+@@ -29,7 +29,7 @@
+         {% if low_stock_products %}
+             <ul>
+             {% for product in low_stock_products %}
+-                <li>{{ product.name }} — Qty: {{ product.quantity }}</li>
++                <li>{{ product.name }} — Qty: {{ product.inventory_count }}</li>
+             {% endfor %}
+             </ul>
+         {% else %}
+diff --git a/payments/models.py b/payments/models.py
+index 0827703..8ac9be2 100644
+--- a/payments/models.py
++++ b/payments/models.py
+@@ -5,8 +5,6 @@ from django.utils import timezone
+ 
+ import uuid
+ 
+-from decimal import Decimal
+-
+ class Payment(models.Model):
+     PAYMENT_STATUS_CHOICES = [
+         ('pending', 'Pending'),
+@@ -60,8 +58,7 @@ class PaymentTransaction(models.Model):
+ 
+     @property
+     def amount_in_kobo(self):
+-        
+-        return int( (Decimal(self.amount) * 100).quantize(0) )
++        return int(self.amount * 100)
+ 
+     @staticmethod
+     def generate_reference():
+diff --git a/payments/views.py b/payments/views.py
+index ed30d89..65bcb74 100644
+--- a/payments/views.py
++++ b/payments/views.py
+@@ -251,8 +251,6 @@ def paystack_webhook(request):
+     if not hmac.compare_digest(signature or "", expected_signature):
+         return HttpResponse(status=400)
+ 
+-    if signature != expected_signature:
+-        return HttpResponse(status=400)
+     try:
+         event = json.loads(payload)
+     except ValueError:
+diff --git a/products/urls.py b/products/urls.py
+index ea0cdad..724e5c5 100644
+--- a/products/urls.py
++++ b/products/urls.py
+@@ -2,9 +2,8 @@ from django.urls import path
+ from . import views
+ 
+ urlpatterns = [
+-    path('', views.home, name='home'),
+-    path('products/', views.product_list, name='product_list'),
+-    path('product/<slug:slug>/', views.product_detail, name='product_detail'),  # fixed: added /
++    path('', views.product_list, name='product_list'),
++    path('<slug:slug>/', views.product_detail, name='product_detail'),
+     path('review/add/<int:product_id>/', views.add_product_review, name='add_product_review'),
+     path('review/add/store/', views.add_store_review, name='add_store_review'),
+ ]
+\ No newline at end of file
+diff --git a/products/views.py b/products/views.py
+index 3006572..e6f3426 100644
+--- a/products/views.py
++++ b/products/views.py
+@@ -76,31 +76,48 @@ def home(request):
+ 
+ 
+ def product_list(request):
+-    products = Product.objects.all().order_by("-created_at")
+-    query = request.GET.get("q")
+-    if query:
+-        products = products.filter(name__icontains=query)
+-    category_filter = request.GET.get("category")
+-    if category_filter in dict(Product.CATEGORY_CHOICES).keys():
+-        products = products.filter(category=category_filter)
+-    active_filter = request.GET.get("active")
+-    if active_filter == "true":
+-        products = products.filter(is_active=True)
+-    elif active_filter == "false":
+-        products = products.filter(is_active=False)
+-
+-    paginator = Paginator(products, 10)
+-    page_number = request.GET.get('page')
+-    paged_products = paginator.get_page(page_number)
+-
+-    context = {
+-        "products": paged_products,
+-        "query": query,
+-        "category_filter": category_filter,
+-        "active_filter": active_filter,
+-        "category_choices": Product.CATEGORY_CHOICES,
+-    }
+-    return render(request, "dashboard/products.html", context)
++    category = request.GET.get('category')
++    search = request.GET.get('search')
++    sort = request.GET.get('sort', 'newest')
++    page_number = request.GET.get('page', 1)
++
++    version = get_products_cache_version()
++    cache_key = f'product_list_v{version}_{category}_{search}_{sort}_page_{page_number}'
++    context = cache.get(cache_key)
++
++    if not context:
++        products = Product.objects.filter(is_active=True)
++        valid_categories = dict(Product.CATEGORY_CHOICES).keys()
++
++        if category in valid_categories:
++            products = products.filter(category=category)
++
++        if search:
++            products = products.filter(Q(name__icontains=search) | Q(description__icontains=search))
++
++        if sort == 'price_low':
++            products = products.order_by('price')
++        elif sort == 'price_high':
++            products = products.order_by('-price')
++        elif sort == 'name':
++            products = products.order_by('name')
++        else:
++            products = products.order_by('-created_at')
++
++        paginator = Paginator(products, 10)
++        paged_products = paginator.get_page(page_number)
++
++        context = {
++            'products': paged_products,
++            'categories': Product.CATEGORY_CHOICES,
++            'current_category': category,
++            'search_query': search,
++            'sort_method': sort,
++        }
++
++        cache.set(cache_key, context, 60 * 10)
++
++    return render(request, 'products/product_list.html', context)
+ 
+ def product_detail(request, slug):
+     cache_key = f'product_detail_{slug}'
+diff --git a/requirements.txt b/requirements.txt
+index 73e90f9..0156fa6 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -1,44 +1,35 @@
+-asgiref==3.10.0
+-certifi==2024.2.2
+-cffi==2.0.0
+-charset-normalizer==3.4.4
+-colorama==0.4.6
+-crispy-tailwind==0.5.0
+-cryptography==46.0.3
+-defusedxml==0.7.1
+-dj-database-url==2.1.0
+-Django==5.0.4
+-django-allauth==0.61.0
+-django-crispy-forms==2.0
+-django-environ==0.10.0
+-django-formtools==2.5.1
+-django-otp==1.5.0
+-django-phonenumber-field==7.2.0
+-django-tailwind==4.4.2
+-django-two-factor-auth==1.16.0
+-gunicorn==21.2.0
+-idna==3.11
+-oauthlib==3.3.1
+-packaging==25.0
+-pillow==12.0.0
+-psycopg2-binary==2.9.11
+-pycparser==2.23
+-PyJWT==2.10.1
+-pypng==0.20220715.0
+-pytailwindcss==0.3.0
+-python-dotenv==1.2.1
+-python3-openid==3.2.0
+-qrcode==7.4.2
+-requests==2.32.5
+-requests-oauthlib==2.0.0
+-sqlparse==0.5.3
+-typing_extensions==4.15.0
+-tzdata==2025.2
+-urllib3==2.5.0
+-whitenoise==6.6.0
+-celery==5.6.2
+-redis==5.0.0
+-django-celery-beat==2.6.0
+-django-recaptcha==4.0.0
+-django-ratelimit==4.1.0
+-phonenumbers==8.13.0
++asgiref==3.10.0
++certifi==2024.2.2
++cffi==2.0.0
++charset-normalizer==3.4.4
++colorama==0.4.6
++cryptography==46.0.3
++defusedxml==0.7.1
++dj-database-url==2.1.0
++Django==5.0.4
++django-allauth==0.61.0
++django-environ==0.10.0
++django-tailwind==4.4.2
++gunicorn==21.2.0
++idna==3.11
++oauthlib==3.3.1
++packaging==25.0
++pillow==12.0.0
++psycopg2-binary==2.9.11
++pycparser==2.23
++PyJWT==2.10.1
++pytailwindcss==0.3.0
++python-dotenv==1.2.1
++python3-openid==3.2.0
++requests==2.32.5
++requests-oauthlib==2.0.0
++sqlparse==0.5.3
++typing_extensions==4.15.0
++tzdata==2025.2
++urllib3==2.5.0
++whitenoise==6.6.0
++celery==5.6.2
++redis==5.0.0
++django-celery-beat==2.6.0
++django-recaptcha==4.0.0
++django-ratelimit==4.1.0
+diff --git a/services/admin_report_service.py b/services/admin_report_service.py
+index 49a545d..f4c3eba 100644
+--- a/services/admin_report_service.py
++++ b/services/admin_report_service.py
+@@ -1,12 +1,12 @@
+ from django.core.mail import EmailMultiAlternatives
+ from django.template.loader import render_to_string
++from django.utils.html import strip_tags
+ from django.conf import settings
+ from django.db.models import Sum, F
+ from django.utils.timezone import now, timedelta
+ from orders.models import Order, OrderItem
+ from products.models import Product
+ from django.http import HttpResponse
+-from orders.models import Order
+ from django.db.models import DecimalField, ExpressionWrapper
+ import os 
+ 
+@@ -17,16 +17,14 @@ def send_weekly_sales_report():
+ 
+     
+     order_items = OrderItem.objects.filter(order__created_at__gte=start_date)
++    orders = Order.objects.filter(created_at__gte=start_date)
+ 
+-
+-    
+     total_revenue = (
+-    OrderItem.objects.filter(order__created_at__gte=start_date)
+-            .aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
++        order_items.aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
+         )
+     )["total"] or 0
+ )
+-    total_orders = (Order.objects.filter(created_at__gte=start_date).count())
++    total_orders = orders.count()
+ 
+     
+     low_stock_products = Product.objects.filter(inventory_count__lte=5)
+@@ -47,14 +45,15 @@ def send_weekly_sales_report():
+ 
+     context = {
+         "order_items": order_items,
++        "orders": orders,
+         "total_revenue": total_revenue,
+         "total_orders": total_orders,
+         "low_stock_products": low_stock_products,
+         "product_sales": product_sales,
+     }
+ 
+-    html_body = render_to_string("admin/emails/weekly_sales_report.html", context)
+-    text_body = render_to_string("admin/emails/weekly_sales_report_plain.txt", context)
++    html_body = render_to_string("emails/weekly_sales_report.html", context)
++    text_body = strip_tags(html_body)
+ 
+     msg = EmailMultiAlternatives(
+         subject="VULOR — Weekly Sales Report",
+diff --git a/services/tasks.py b/services/tasks.py
+index 0008083..4e6c524 100644
+--- a/services/tasks.py
++++ b/services/tasks.py
+@@ -1,6 +1,7 @@
+ from celery import shared_task
+ from django.core.mail import EmailMultiAlternatives
+ from django.template.loader import render_to_string
++from django.utils.html import strip_tags
+ from django.conf import settings
+ from django.utils.timezone import now, timedelta
+ from django.db.models import Sum, F, DecimalField, ExpressionWrapper
+@@ -31,6 +32,7 @@ def send_weekly_sales_report_task(self):
+     start_date = now() - timedelta(days=7)
+ 
+     order_items = OrderItem.objects.filter(order__created_at__gte=start_date)
++    orders = Order.objects.filter(created_at__gte=start_date)
+ 
+     total_revenue = (
+         order_items.aggregate(
+@@ -43,7 +45,7 @@ def send_weekly_sales_report_task(self):
+         )["total"] or 0
+     )
+ 
+-    total_orders = Order.objects.filter(created_at__gte=start_date).count()
++    total_orders = orders.count()
+     low_stock_products = Product.objects.filter(inventory_count__lte=5)
+ 
+     product_sales = (
+@@ -63,14 +65,15 @@ def send_weekly_sales_report_task(self):
+ 
+     context = {
+         "order_items": order_items,
++        "orders": orders,
+         "total_revenue": total_revenue,
+         "total_orders": total_orders,
+         "low_stock_products": low_stock_products,
+         "product_sales": product_sales,
+     }
+ 
+-    html_body = render_to_string("admin/emails/weekly_sales_report.html", context)
+-    text_body = render_to_string("admin/emails/weekly_sales_report_plain.txt", context)
++    html_body = render_to_string("emails/weekly_sales_report.html", context)
++    text_body = strip_tags(html_body)
+ 
+     msg = EmailMultiAlternatives(
+         subject="VULOR — Weekly Sales Report",
+diff --git a/vulor/settings.py b/vulor/settings.py
+index 41496e9..7931a99 100644
+--- a/vulor/settings.py
++++ b/vulor/settings.py
+@@ -114,31 +114,6 @@ X_FRAME_OPTIONS = 'DENY'
+ SECURE_CONTENT_TYPE_NOSNIFF =True
+ 
+ 
+-# Channels config
+-
+-ASGI_APPLICATION = "backend.asgi.application"
+-
+-
+-
+-
+-if DEBUG:
+-    CHANNEL_LAYERS = {
+-        "default": {
+-            "BACKEND": "channels.layers.InMemoryChannelLayer",
+-        },
+-    }
+-else:
+-    
+-    CHANNEL_LAYERS = {
+-        "default": {
+-            "BACKEND": "channels_redis.core.RedisChannelLayer",
+-            "CONFIG": {
+-                "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379")],
+-            },
+-        },
+-    }
+-
+-
+ ROOT_URLCONF = 'vulor.urls'
+ 
+ TEMPLATES = [
+diff --git a/vulor/urls.py b/vulor/urls.py
+index 0dfa997..4a24a80 100644
+--- a/vulor/urls.py
++++ b/vulor/urls.py
+@@ -12,8 +12,7 @@ import os
+ 
+ urlpatterns = [
+     path(os.getenv('ADMIN_URL', 'admin/'), admin.site.urls),
+-    path('home/', product_views.home, name='home'),
+-   
++
+     path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
+     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+     # path('django_recaptcha/', include('django_recaptcha.urls')),

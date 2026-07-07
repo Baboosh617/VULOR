@@ -3,19 +3,13 @@ certifi==2024.2.2
 cffi==2.0.0
 charset-normalizer==3.4.4
 colorama==0.4.6
-crispy-tailwind==0.5.0
 cryptography==46.0.3
 defusedxml==0.7.1
 dj-database-url==2.1.0
 Django==5.0.4
 django-allauth==0.61.0
-django-crispy-forms==2.0
 django-environ==0.10.0
-django-formtools==2.5.1
-django-otp==1.5.0
-django-phonenumber-field==7.2.0
 django-tailwind==4.4.2
-django-two-factor-auth==1.16.0
 gunicorn==21.2.0
 idna==3.11
 oauthlib==3.3.1
@@ -24,11 +18,9 @@ pillow==12.0.0
 psycopg2-binary==2.9.11
 pycparser==2.23
 PyJWT==2.10.1
-pypng==0.20220715.0
 pytailwindcss==0.3.0
 python-dotenv==1.2.1
 python3-openid==3.2.0
-qrcode==7.4.2
 requests==2.32.5
 requests-oauthlib==2.0.0
 sqlparse==0.5.3
@@ -41,4 +33,3 @@ redis==5.0.0
 django-celery-beat==2.6.0
 django-recaptcha==4.0.0
 django-ratelimit==4.1.0
-phonenumbers==8.13.0

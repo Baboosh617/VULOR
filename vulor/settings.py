@@ -114,31 +114,6 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF =True
 
 
-# Channels config
-
-ASGI_APPLICATION = "backend.asgi.application"
-
-
-
-
-if DEBUG:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        },
-    }
-else:
-    
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379")],
-            },
-        },
-    }
-
-
 ROOT_URLCONF = 'vulor.urls'
 
 TEMPLATES = [

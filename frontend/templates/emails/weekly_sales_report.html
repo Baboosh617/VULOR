@@ -29,7 +29,7 @@
         {% if low_stock_products %}
             <ul>
             {% for product in low_stock_products %}
-                <li>{{ product.name }} — Qty: {{ product.quantity }}</li>
+                <li>{{ product.name }} — Qty: {{ product.inventory_count }}</li>
             {% endfor %}
             </ul>
         {% else %}

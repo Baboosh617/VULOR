@@ -251,8 +251,6 @@ def paystack_webhook(request):
     if not hmac.compare_digest(signature or "", expected_signature):
         return HttpResponse(status=400)
 
-    if signature != expected_signature:
-        return HttpResponse(status=400)
     try:
         event = json.loads(payload)
     except ValueError:

@@ -1,12 +1,12 @@
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.conf import settings
 from django.db.models import Sum, F
 from django.utils.timezone import now, timedelta
 from orders.models import Order, OrderItem
 from products.models import Product
 from django.http import HttpResponse
-from orders.models import Order
 from django.db.models import DecimalField, ExpressionWrapper
 import os 
 
@@ -17,16 +17,14 @@ def send_weekly_sales_report():
 
     
     order_items = OrderItem.objects.filter(order__created_at__gte=start_date)
+    orders = Order.objects.filter(created_at__gte=start_date)
 
-
-    
     total_revenue = (
-    OrderItem.objects.filter(order__created_at__gte=start_date)
-            .aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
+        order_items.aggregate(total=Sum(ExpressionWrapper(F("quantity") * F("price"), output_field=DecimalField())
         )
     )["total"] or 0
 )
-    total_orders = (Order.objects.filter(created_at__gte=start_date).count())
+    total_orders = orders.count()
 
     
     low_stock_products = Product.objects.filter(inventory_count__lte=5)
@@ -47,14 +45,15 @@ def send_weekly_sales_report():
 
     context = {
         "order_items": order_items,
+        "orders": orders,
         "total_revenue": total_revenue,
         "total_orders": total_orders,
         "low_stock_products": low_stock_products,
         "product_sales": product_sales,
     }
 
-    html_body = render_to_string("admin/emails/weekly_sales_report.html", context)
-    text_body = render_to_string("admin/emails/weekly_sales_report_plain.txt", context)
+    html_body = render_to_string("emails/weekly_sales_report.html", context)
+    text_body = strip_tags(html_body)
 
     msg = EmailMultiAlternatives(
         subject="VULOR — Weekly Sales Report",
