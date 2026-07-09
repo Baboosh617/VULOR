@@ -19,8 +19,11 @@ HIGH_VALUE_THRESHOLD = 100000
 @receiver(post_save, sender=Order)
 def order_created(sender, instance, created, **kwargs):
     if created and not instance.admin_notified_new:
-        send_order_confirmation(instance.user, instance)
-        send_admin_new_order(instance)
+        try:
+            send_order_confirmation(instance.user, instance)
+            send_admin_new_order(instance)
+        except Exception:
+            logger.error(f"Failed to send new-order notifications for order {instance.id}", exc_info=True)
         instance.admin_notified_new = True
         instance.save(update_fields=["admin_notified_new"])
 
@@ -34,7 +37,10 @@ def payment_success(sender, instance, created, **kwargs):
         instance.inventory_adjusted = True
         instance.save(update_fields=["inventory_adjusted"])
     if instance.payment_status == "success" and not instance.payment_email_sent:
-        send_payment_receipt(instance.user, instance)
+        try:
+            send_payment_receipt(instance.user, instance)
+        except Exception:
+            logger.error(f"Failed to send payment receipt for order {instance.id}", exc_info=True)
         instance.payment_email_sent = True
         instance.save(update_fields=["payment_email_sent"])
 
@@ -44,7 +50,10 @@ def high_value_order(sender, instance, created, **kwargs):
     if created:
         return
     if instance.total_amount >= HIGH_VALUE_THRESHOLD and not instance.admin_notified_high_value:
-        send_admin_high_value_order(instance)
+        try:
+            send_admin_high_value_order(instance)
+        except Exception:
+            logger.error(f"Failed to send high-value order alert for order {instance.id}", exc_info=True)
         instance.admin_notified_high_value = True
         instance.save(update_fields=["admin_notified_high_value"])
 
@@ -54,7 +63,10 @@ def shipping_update(sender, instance, created, **kwargs):
     if created:
         return
     if instance.status == "shipped" and not instance.shipping_email_sent:
-        send_order_shipped(instance.user, instance)
+        try:
+            send_order_shipped(instance.user, instance)
+        except Exception:
+            logger.error(f"Failed to send shipping update for order {instance.id}", exc_info=True)
         instance.shipping_email_sent = True
         instance.save(update_fields=["shipping_email_sent"])
 
@@ -67,7 +79,10 @@ def cancellation_and_failure(sender, instance, created, **kwargs):
         if instance.inventory_adjusted:
             restock_order_items(instance)
             instance.inventory_adjusted = False
-        send_admin_order_cancellation(instance)
+        try:
+            send_admin_order_cancellation(instance)
+        except Exception:
+            logger.error(f"Failed to send cancellation notice for order {instance.id}", exc_info=True)
         instance.admin_notified_cancellation = True
         instance.save(update_fields=["admin_notified_cancellation", "inventory_adjusted"])
     if instance.payment_status == "failed" and instance.inventory_adjusted:
