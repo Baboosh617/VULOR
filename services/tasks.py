@@ -12,7 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={"max_retries": 3, "countdown": 5})
-def send_html_email_task(self, subject, template, context, to_email):
+def send_html_email_task(self, subject, template, user_id, order_id, to_email):
+    from django.contrib.auth import get_user_model
+    from orders.models import Order
+
+    User = get_user_model()
+    user = User.objects.get(pk=user_id)
+    order = Order.objects.get(pk=order_id)
+    context = {"user": user, "order": order}
+
     html_content = render_to_string(template, context)
     text_content = render_to_string(template, context).strip()
 

@@ -69,7 +69,7 @@ def initiate_payment(request, order_id):
             }
         )
     except Exception as e:
-       
+        logger.error(f"Paystack initialize_transaction failed for order {order.id}: {e}", exc_info=True)
         payment.status = 'failed'
         payment.metadata['init_error'] = str(e)
         payment.save()
@@ -189,6 +189,9 @@ def verify_payment(request):
             return HttpResponse("Amount mismatch", status=400)
         
     except Exception as e:
+        logger.error(f"Paystack verify_transaction failed for reference {reference}: {e}", exc_info=True)
+        payment.metadata['verify_error'] = str(e)
+        payment.save(update_fields=['metadata'])
         messages.info(
             request,
             "Payment received. Confirmation is pending. You will be updated shortly."
