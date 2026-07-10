@@ -27,12 +27,11 @@ if ON_RENDER:
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
             ssl_require=True,
-
-            options={
-                'connect_timeout': 10,  
-                'application_name': 'vulor-app',
-            },
         )
+    }
+    DATABASES['default']['OPTIONS'] = {
+        'connect_timeout': 10,
+        'application_name': 'vulor-app',
     }
     DATABASES['default']['ATOMIC_REQUESTS'] = True
 

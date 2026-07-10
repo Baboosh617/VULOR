@@ -15,6 +15,8 @@ def logout_success(sender, request, user, **kwargs):
     logger.info(f"Logout SUCCESS for {user.email} from IP {get_client_ip(request)}")
 
 def get_client_ip(request):
+    if request is None:
+        return 'unknown'
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
