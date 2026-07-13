@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 from products.models import Product, Review, ProductImage
 from orders.models import Order
+from payments.models import PaymentTransaction
 from dashboard.forms import ProductForm, ProductImageForm
 from django.contrib.auth import get_user_model
 from django import forms
@@ -112,7 +114,7 @@ def delete_review(request, review_id):
 
 @staff_member_required
 def order_list(request):
-    orders = Order.objects.all().order_by("-created_at")
+    orders = Order.objects.all().order_by("-created_at").prefetch_related("paymenttransaction_set")
 
     query = request.GET.get("q")
     if query:
@@ -122,11 +124,72 @@ def order_list(request):
     if status_filter in ["pending", "completed", "processing", "shipped", "cancelled"]:
         orders = orders.filter(status=status_filter)
 
+    payment_filter = request.GET.get("payment")
+    if payment_filter in dict(Order.PAYMENT_STATUS_CHOICES):
+        orders = orders.filter(payment_status=payment_filter)
+
     return render(request, "dashboard/orders.html", {
         "orders": orders,
         "query": query,
-        "status_filter": status_filter
+        "status_filter": status_filter,
+        "payment_filter": payment_filter,
     })
+
+
+@staff_member_required
+@require_POST
+def confirm_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if order.payment_status == "success":
+        messages.info(request, f"Order {order.order_number} is already marked paid.")
+        return redirect("dashboard:order_list")
+
+    txn = (
+        PaymentTransaction.objects
+        .filter(order=order, status__in=["pending", "pending_verification"])
+        .order_by("-created_at")
+        .first()
+    )
+    if txn:
+        txn.status = "success"
+        txn.verified_at = now()
+        txn.save(update_fields=["status", "verified_at"])
+
+    # Firing the payment_success signal: inventory reduction + customer receipt email.
+    order.payment_status = "success"
+    order.save()
+
+    logger.info(f"Payment for order {order.order_number} confirmed by {request.user.username}")
+    messages.success(request, f"Payment for order {order.order_number} confirmed.")
+    return redirect("dashboard:order_list")
+
+
+@staff_member_required
+@require_POST
+def reject_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if order.payment_status != "pending_verification":
+        messages.error(request, f"Order {order.order_number} has no receipt awaiting verification.")
+        return redirect("dashboard:order_list")
+
+    txn = (
+        PaymentTransaction.objects
+        .filter(order=order, status="pending_verification")
+        .order_by("-created_at")
+        .first()
+    )
+    if txn:
+        txn.status = "rejected"
+        txn.save(update_fields=["status"])
+
+    order.payment_status = "failed"
+    order.save()
+
+    logger.info(f"Payment for order {order.order_number} rejected by {request.user.username}")
+    messages.success(request, f"Payment for order {order.order_number} rejected. The customer can retry.")
+    return redirect("dashboard:order_list")
 
 
 @staff_member_required
