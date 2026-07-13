@@ -19,7 +19,14 @@ def send_html_email_task(self, subject, template, user_id, order_id, to_email):
     User = get_user_model()
     user = User.objects.get(pk=user_id)
     order = Order.objects.get(pk=order_id)
-    context = {"user": user, "order": order}
+    context = {
+        "user": user,
+        "order": order,
+        "site_url": settings.SITE_URL,
+        "bank_name": settings.BANK_TRANSFER_BANK_NAME,
+        "account_name": settings.BANK_TRANSFER_ACCOUNT_NAME,
+        "account_number": settings.BANK_TRANSFER_ACCOUNT_NUMBER,
+    }
 
     html_content = render_to_string(template, context)
     text_content = render_to_string(template, context).strip()

@@ -183,3 +183,56 @@ class CheckoutViewTests(TestCase):
         CartItem.objects.create(cart=self.user.cart, product=self.product, quantity=1)
         self._post_checkout()
         self.assertEqual(Order.objects.filter(user=self.user).count(), 1)
+
+
+from django.template.loader import render_to_string
+
+
+@override_settings(
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+)
+class EmailTemplateTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email="mail@example.com", username="mailuser",
+            password="strongpass123", first_name="Ada",
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("3000.00"),
+            shipping_fee=Decimal("500.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="mail@example.com",
+        )
+        self.context = {
+            "user": self.user,
+            "order": self.order,
+            "site_url": "https://vulor.test",
+            "bank_name": "GTBank",
+            "account_name": "VULOR Store",
+            "account_number": "0123456789",
+        }
+
+    def test_confirmation_email_shows_bank_details_while_pending(self):
+        html = render_to_string("emails/order_confirmation.html", self.context)
+        self.assertIn("GTBank", html)
+        self.assertIn("0123456789", html)
+        self.assertIn(self.order.order_number, html)
+        self.assertIn(f"/payments/transfer/{self.order.id}/", html)
+        self.assertIn("3500.00", html)  # grand total, not subtotal
+
+    def test_confirmation_email_hides_bank_details_once_paid(self):
+        self.order.payment_status = "success"
+        self.order.save(update_fields=["payment_status"])
+        html = render_to_string("emails/order_confirmation.html", self.context)
+        self.assertNotIn("Account Number", html)
+        self.assertNotIn("0123456789", html)
+
+    def test_payment_receipt_email_renders_grand_total(self):
+        html = render_to_string("emails/payment_receipt.html", self.context)
+        self.assertIn("3500.00", html)
+        self.assertIn("Bank Transfer", html)
+        self.assertIn(self.order.order_number, html)

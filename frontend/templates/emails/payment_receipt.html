@@ -3,15 +3,15 @@
   <body style="font-family: system-ui, sans-serif; background-color: #f9fafb; margin:0; padding:0;">
     <div style="max-width:600px; margin:auto; background-color:#fff; padding:20px; border-radius:8px;">
       <img src="{% static 'vulor-logo.png' %}" style="height:50px; margin-bottom:20px;" alt="VULOR Logo" />
-      <h1 style="font-size:24px; font-weight:bold; color:#111827;">Payment Received!</h1>
-      <p style="font-size:16px; color:#374151;">Hi {{ user.first_name }}, we’ve received your payment for order <strong>#{{ order.id }}</strong>.</p>
+      <h1 style="font-size:24px; font-weight:bold; color:#111827;">Payment Confirmed!</h1>
+      <p style="font-size:16px; color:#374151;">Hi {{ user.first_name }}, we’ve confirmed your payment for order <strong>{{ order.order_number }}</strong>. Your order is now being processed.</p>
 
       <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Payment Summary:</h2>
-      <p>Total Amount: ₦{{ order.total }}</p>
-      <p>Payment Method: {{ order.payment_method }}</p>
+      <p>Total Amount: ₦{{ order.grand_total }}</p>
+      <p>Payment Method: Bank Transfer</p>
 
       <p style="margin-top:20px; font-size:16px; color:#374151;">Thank you for shopping with VULOR!</p>
-      <a href="http://localhost:8000/orders/{{ order.id }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
+      <a href="{{ site_url }}/orders/detail/{{ order.order_number }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
     </div>
   </body>
 </html>
