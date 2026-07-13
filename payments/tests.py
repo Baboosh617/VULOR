@@ -195,3 +195,9 @@ class BankTransferFlowTests(TestCase):
             reverse("payments:transfer_instructions", args=[self.order.id])
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_result_pages_render(self):
+        for name in ("payment_success", "payment_failed"):
+            response = self.client.get(reverse(f"payments:{name}", args=[self.order.id]))
+            self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "3500.00")  # failed page shows grand total

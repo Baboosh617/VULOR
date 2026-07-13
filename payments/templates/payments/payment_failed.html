@@ -8,9 +8,9 @@
         <!-- Error Icon -->
         <div class="space-y-4">
             <div class="text-6xl text-[#111111]">❌</div>
-            <h1 class="text-3xl font-normal text-[#111111]">Payment Failed</h1>
+            <h1 class="text-3xl font-normal text-[#111111]">Payment Not Confirmed</h1>
             <p class="text-[#8E8E93] leading-relaxed">
-                Something went wrong with your payment. Please try again.
+                We couldn't confirm your bank transfer. Please try again.
             </p>
         </div>
 
@@ -25,7 +25,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-[#8E8E93]">Amount:</span>
-                    <span class="text-[#111111] font-medium">₦{{ order.total_amount }}</span>
+                    <span class="text-[#111111] font-medium">₦{{ order.grand_total }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-[#8E8E93]">Status:</span>
@@ -49,12 +49,12 @@
 
         <!-- Troubleshooting Tips -->
         <div class="pt-6 border-t border-[#8E8E93]/20">
-            <h3 class="text-[#111111] text-sm font-normal mb-3">Troubleshooting Tips</h3>
+            <h3 class="text-[#111111] text-sm font-normal mb-3">Before retrying, check that</h3>
             <ul class="text-[#8E8E93] text-xs space-y-1 text-left">
-                <li>• Check your card details are correct</li>
-                <li>• Ensure you have sufficient funds</li>
-                <li>• Try a different payment method</li>
-                <li>• Contact your bank if issues persist</li>
+                <li>• You transferred the exact order total shown above</li>
+                <li>• You sent it to the account number on the payment page</li>
+                <li>• You used your order number as the transfer narration</li>
+                <li>• Your uploaded receipt is clear and readable</li>
             </ul>
         </div>
 
