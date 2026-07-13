@@ -56,3 +56,8 @@ htmlcov/
 #Cache
 .cache/
 django_cache/
+
+#Claude
+docs/
+CLAUDE.md
+*.CLAUDE.md
