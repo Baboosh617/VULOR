@@ -224,10 +224,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Paystack Configuration
-PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
-PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
-PAYSTACK_WEBHOOK_SECRET = os.getenv('PAYSTACK_WEBHOOK_SECRET')
+# Bank transfer configuration — shown to customers at checkout
+BANK_TRANSFER_BANK_NAME = os.getenv('BANK_TRANSFER_BANK_NAME', '')
+BANK_TRANSFER_ACCOUNT_NAME = os.getenv('BANK_TRANSFER_ACCOUNT_NAME', '')
+BANK_TRANSFER_ACCOUNT_NUMBER = os.getenv('BANK_TRANSFER_ACCOUNT_NUMBER', '')
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 
 # Google OAuth Configuration
