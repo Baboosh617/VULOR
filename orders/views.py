@@ -1,15 +1,12 @@
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse
 from .models import Order, OrderItem
+from .forms import CheckoutForm
 from cart.models import Cart
 from django_ratelimit.decorators import ratelimit
 from django.db import transaction
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 import logging
 
@@ -29,32 +26,21 @@ def checkout(request):
             messages.error(request, "Your cart is empty.")
             return redirect("view_cart")
 
-        full_name = request.POST.get("full_name", "").strip()
-        phone_number = request.POST.get("phone_number", "").strip()
-        email = request.POST.get("email", "").strip()
-        address_line = request.POST.get("address_line", "").strip()
-        state = request.POST.get("state", "").strip()
-        city = request.POST.get("city", "").strip()
-        shipping_zone = request.POST.get("shipping_zone", "").strip()
-
-        required_fields = {
-            'full_name': full_name, 'phone_number': phone_number, 'email': email,
-            'address_line': address_line, 'state': state, 'city': city,
-        }
-        missing_fields = [f.replace('_', ' ').title() for f, v in required_fields.items() if not v]
-        if missing_fields:
-            messages.error(request, f"Please fill in: {', '.join(missing_fields)}")
+        form = CheckoutForm(request.POST)
+        if not form.is_valid():
+            for field, errors in form.errors.items():
+                label = field.replace('_', ' ').title()
+                messages.error(request, f"{label}: {errors[0]}")
             return render(request, "orders/checkout.html", {"cart": cart})
 
-        try:
-            validate_email(email)
-        except ValidationError:
-            messages.error(request, "Invalid email address.")
-            return render(request, "orders/checkout.html", {"cart": cart})
-
-        if not phone_number.isdigit() or len(phone_number) < 10:
-            messages.error(request, "Invalid phone number.")
-            return render(request, "orders/checkout.html", {"cart": cart})
+        full_name = form.cleaned_data["full_name"]
+        phone_number = form.cleaned_data["phone_number"]
+        email = form.cleaned_data["email"]
+        address_line = form.cleaned_data["address_line"]
+        state = form.cleaned_data["state"]
+        city = form.cleaned_data["city"]
+        shipping_zone = form.cleaned_data["shipping_zone"]
+        order_notes = form.cleaned_data["order_notes"]
 
         try:
             from decimal import Decimal
@@ -94,6 +80,7 @@ def checkout(request):
                     shipping_zone=shipping_zone,
                     customer_email=email,
                     customer_phone=phone_number,
+                    order_notes=order_notes,
                 )
                 for cart_item in cart.items.all():
                     OrderItem.objects.create(
@@ -103,7 +90,7 @@ def checkout(request):
                 logger.info(f"Order {order.id} created by {request.user.email}")
                 cart.items.all().delete()
 
-            return redirect('payments:initiate_payment', order_id=order.id)
+            return redirect('payments:transfer_instructions', order_id=order.id)
 
         except Exception as e:
             logger.error(f"Error creating order for user {request.user.email}: {str(e)}", exc_info=True)
