@@ -43,10 +43,6 @@ class OrderModelTests(TestCase):
         self.assertEqual(order.status, "pending")
         self.assertEqual(order.payment_status, "pending")
 
-    def test_paystack_amount_includes_shipping(self):
-        order = self._make_order(shipping_fee=Decimal("500.00"))
-        self.assertEqual(order.paystack_amount, 350000)
-
     def test_grand_total_includes_shipping(self):
         order = self._make_order(shipping_fee=Decimal("500.00"))
         self.assertEqual(order.grand_total, Decimal("3500.00"))
@@ -56,7 +52,7 @@ class OrderModelTests(TestCase):
         item = OrderItem.objects.create(
             order=order, product=self.product, quantity=2, price=Decimal("1500.00")
         )
-        self.assertEqual(item.get_total_price, Decimal("3000.00"))
+        self.assertEqual(item.get_total_price(), Decimal("3000.00"))
 
     def test_order_total_items(self):
         order = self._make_order()

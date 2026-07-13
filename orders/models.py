@@ -23,6 +23,7 @@ class Order(models.Model):
 
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('pending_verification', 'Pending Verification'),
         ('success', 'Success'),
         ('failed', 'Failed'),
         ('abandoned', 'Abandoned'),
@@ -63,12 +64,14 @@ class Order(models.Model):
     
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=20, blank=True, default='')
+    order_notes = models.TextField(blank=True, default='')
 
-    # Ps=aystack stfuu
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    # Legacy Paystack columns — still written by payments/views.py until the
+    # bank-transfer view rewrite lands; dropped in that same change.
     paystack_reference = models.CharField(max_length=100, blank=True)
     paystack_access_code = models.CharField(max_length=100, blank=True)
-    payment_method = models.CharField(max_length=50, default='paystack')
+    payment_method = models.CharField(max_length=50, default='bank_transfer')
 
     class Meta:
         ordering = ['-created_at']
@@ -76,12 +79,6 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
 
-    
-    @property
-    def paystack_amount(self):
-        total_with_shipping = self.total_amount + self.shipping_fee
-        return int(total_with_shipping * 100)
-    
     @property
     def grand_total(self):
         """Calculate grand total including shipping"""
