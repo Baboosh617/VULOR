@@ -1,33 +1,10 @@
 from django.test import TestCase
 from decimal import Decimal
-from django.db import IntegrityError
-from payments.models import Payment, PaymentTransaction
+from payments.models import PaymentTransaction
 from orders.models import Order
 from products.models import Product
 from accounts.models import CustomUser
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-
-class PaymentModelTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="payuser@example.com", username="payuser", password="strongpass123"
-        )
-
-    def test_amount_in_kobo(self):
-        payment = Payment.objects.create(
-            user=self.user,
-            amount=Decimal("2500.00"),
-            reference="ref-abc-123",
-        )
-        self.assertEqual(payment.amount_in_kobo, 250000)
-
-    def test_reference_must_be_unique(self):
-        Payment.objects.create(user=self.user, amount=Decimal("100.00"), reference="same-ref")
-        with self.assertRaises(IntegrityError):
-            Payment.objects.create(
-                user=self.user, amount=Decimal("100.00"), reference="same-ref"
-            )
 
 
 class PaymentTransactionTests(TestCase):
@@ -58,10 +35,13 @@ class PaymentTransactionTests(TestCase):
         self.assertIsInstance(ref1, str)
         self.assertNotEqual(ref1, ref2)
 
-    def test_amount_in_kobo(self):
+    def test_bank_transfer_fields_default_empty(self):
         tx = PaymentTransaction.objects.create(
             paystack_reference="ps-1",
             order=self.order,
             amount=Decimal("1200.00"),
         )
-        self.assertEqual(tx.amount_in_kobo, 120000)
+        self.assertEqual(tx.status, "pending")
+        self.assertFalse(tx.receipt)
+        self.assertEqual(tx.transaction_reference, "")
+        self.assertIsNone(tx.submitted_at)
