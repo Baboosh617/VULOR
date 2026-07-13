@@ -1,6 +1,7 @@
 import logging
+import mimetypes
 import os
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMessage, EmailMultiAlternatives, send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from .tasks import send_html_email_task
@@ -185,6 +186,52 @@ def send_admin_high_value_order(order):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[ADMIN_EMAIL],
     )
+
+
+def send_admin_payment_verification(order, txn):
+    """Notify the store owner that a customer uploaded a transfer receipt.
+    Synchronous with the receipt attached — this is the verification trigger
+    and must not depend on the Celery broker being up."""
+    if not ADMIN_EMAIL:
+        logger.warning("ADMIN_EMAIL not set — skipping payment verification email")
+        return
+
+    items_lines = "\n".join(
+        f"  - {item.quantity} x {item.product.name}"
+        f"{f' (size: {item.size})' if item.size else ''}"
+        f"{f' (color: {item.color})' if item.color else ''}"
+        f" — ₦{item.get_total_price()}"
+        for item in order.items.all()
+    )
+
+    body = (
+        f"A payment receipt was uploaded for order {order.order_number}.\n\n"
+        f"Customer: {order.shipping_full_name or order.user.username}\n"
+        f"Email: {order.customer_email}\n"
+        f"Phone: {order.customer_phone}\n"
+        f"Address: {order.shipping_address}, {order.shipping_city}, {order.shipping_state}\n"
+        f"Notes: {order.order_notes or '—'}\n\n"
+        f"Items:\n{items_lines}\n\n"
+        f"Subtotal: ₦{order.total_amount}\n"
+        f"Shipping: ₦{order.shipping_fee}\n"
+        f"Total due: ₦{order.grand_total}\n\n"
+        f"Customer transaction reference: {txn.transaction_reference or '—'}\n\n"
+        f"Verify the attached receipt, then confirm or reject the payment "
+        f"in the dashboard."
+    )
+
+    msg = EmailMessage(
+        subject=f"Verify payment – Order #{order.order_number}",
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[ADMIN_EMAIL],
+    )
+    if txn.receipt:
+        with txn.receipt.open("rb") as f:
+            content = f.read()
+        mimetype = mimetypes.guess_type(txn.receipt.name)[0] or "application/octet-stream"
+        msg.attach(os.path.basename(txn.receipt.name), content, mimetype)
+    msg.send()
 
 
 def send_admin_order_cancellation(order):
