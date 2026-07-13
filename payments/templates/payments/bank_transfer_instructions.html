@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Your Payment - VULOR{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12 bg-black">
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-center tracking-wide">COMPLETE YOUR PAYMENT</h1>
+    <p class="text-[#666666] text-sm text-center mb-12 tracking-wider">
+        ORDER {{ order.order_number }}
+    </p>
+
+    <!-- Amount due -->
+    <div class="border border-[#dc2626] bg-[#111111] p-8 rounded-lg mb-8 text-center">
+        <div class="text-[#666666] text-xs tracking-wider mb-2">TOTAL AMOUNT DUE</div>
+        <div class="text-[#dc2626] text-4xl font-bold tracking-wider">₦{{ order.grand_total }}</div>
+    </div>
+
+    <!-- Bank details -->
+    <div class="border border-[#333333] bg-[#111111] p-8 rounded-lg mb-8">
+        <h2 class="text-white text-lg font-bold mb-6 tracking-wider">TRANSFER TO</h2>
+
+        <div class="space-y-4">
+            <div class="flex justify-between items-center border-b border-[#333333] pb-3">
+                <span class="text-[#666666] text-sm tracking-wider">BANK NAME</span>
+                <span class="text-white text-sm font-bold tracking-wider">{{ bank_name }}</span>
+            </div>
+            <div class="flex justify-between items-center border-b border-[#333333] pb-3">
+                <span class="text-[#666666] text-sm tracking-wider">ACCOUNT NAME</span>
+                <span class="text-white text-sm font-bold tracking-wider">{{ account_name }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[#666666] text-sm tracking-wider">ACCOUNT NUMBER</span>
+                <span class="text-white text-lg font-bold tracking-widest">{{ account_number }}</span>
+            </div>
+        </div>
+
+        <p class="text-[#666666] text-xs mt-6 tracking-wider">
+            USE YOUR ORDER NUMBER <span class="text-[#dc2626] font-bold">{{ order.order_number }}</span>
+            AS THE TRANSFER NARRATION / REMARK.
+        </p>
+    </div>
+
+    <!-- Receipt upload -->
+    <div class="border border-[#333333] bg-[#111111] p-8 rounded-lg mb-8">
+        <h2 class="text-white text-lg font-bold mb-2 tracking-wider">UPLOAD YOUR RECEIPT</h2>
+        <p class="text-[#666666] text-xs mb-6 tracking-wider">
+            AFTER TRANSFERRING, UPLOAD YOUR PAYMENT RECEIPT SO WE CAN CONFIRM YOUR ORDER.
+        </p>
+
+        <form method="POST" action="{% url 'payments:submit_receipt' order.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-white text-sm mb-2 tracking-wider">PAYMENT RECEIPT (IMAGE OR PDF)</label>
+                    <input type="file" name="receipt" required
+                           accept=".jpg,.jpeg,.png,.webp,.pdf"
+                           class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] rounded file:bg-[#dc2626] file:text-white file:border-0 file:px-4 file:py-1 file:mr-4 file:rounded">
+                    {% for error in form.receipt.errors %}
+                    <p class="text-[#dc2626] text-xs mt-2 tracking-wider">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    <label class="block text-white text-sm mb-2 tracking-wider">TRANSACTION REFERENCE (OPTIONAL)</label>
+                    <input type="text" name="transaction_reference" value="{{ form.transaction_reference.value|default:'' }}"
+                           class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
+                           placeholder="e.g. the reference from your banking app">
+                    {% for error in form.transaction_reference.errors %}
+                    <p class="text-[#dc2626] text-xs mt-2 tracking-wider">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full mt-8 bg-[#dc2626] hover:bg-[#b91c1c] text-white text-base font-bold tracking-wider py-4 px-6 transition-all duration-300 border border-[#dc2626]">
+                I HAVE MADE THE TRANSFER
+            </button>
+        </form>
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'orders:order_detail' order.order_number %}"
+           class="inline-block text-[#dc2626] hover:text-white text-sm tracking-wider font-bold transition-all duration-300">
+            VIEW ORDER →
+        </a>
+    </div>
+</div>
+{% endblock %}

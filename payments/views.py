@@ -1,322 +1,125 @@
-from inspect import signature
-import json
-import hmac
-import hashlib
-from datetime import datetime
-from decimal import Decimal
-
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-from .models import PaymentTransaction
-from .services.paystack_service import PaystackService
-from orders.models import Order
-
-from django.urls import reverse
-from django.utils import timezone
-
-from cart.models import CartItem, Cart
 from django.db import transaction
+from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
+
+from .forms import ReceiptUploadForm
+from .models import PaymentTransaction
+from orders.models import Order
+from services.email_service import send_admin_payment_verification
+
 import logging
 
 logger = logging.getLogger(__name__)
 
-@ratelimit(key='user_or_ip', rate='5/m', block=True)
-@login_required
-def initiate_payment(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-   
-    if order.payment_status == 'success':
-        messages.info(request, "Order already paid.")
-        return redirect('orders:order_detail', order_number=order.order_number)
-
-    if order.total_amount <= 0:
-        messages.error(request, "Invalid order amount.")
-        return redirect('cart:view_cart')
-
-    
-    existing = PaymentTransaction.objects.filter(order=order, status__in=['pending', 'initiated']).order_by('-created_at').first()
-    if existing and (timezone.now() - existing.created_at).total_seconds() < 1800:
-        payment = existing
-    else:
-        payment = PaymentTransaction.objects.create(
-            order=order,
-            amount=order.total_amount + order.shipping_fee, 
-            paystack_reference=PaymentTransaction.generate_reference(),
-            status='pending',
-            metadata={'items_count': order.items.count(), 'delivery_fee': float(order.shipping_fee)}
-        )
-
-    paystack = PaystackService()
-    callback_url = request.build_absolute_uri(reverse('payments:verify_payment'))
-
-    try:
-        response = paystack.initialize_transaction(
-            email=order.customer_email,
-            amount=payment.amount_in_kobo,   
-            reference=payment.paystack_reference,
-            callback_url=callback_url,
-            metadata={
-                "order_id": order.id,
-                "payment_id": payment.id
-            }
-        )
-    except Exception as e:
-        logger.error(f"Paystack initialize_transaction failed for order {order.id}: {e}", exc_info=True)
-        payment.status = 'failed'
-        payment.metadata['init_error'] = str(e)
-        payment.save()
-        messages.error(request, "Payment service temporarily unavailable.")
-        return redirect('payments:payment_failed', order_id=order.id)
-
-    
-    data = response.get('data') or {}
-    if response.get('status') and data.get('authorization_url'):
-        payment.paystack_access_code = data.get('access_code', '')
-        payment.status = 'initiated'
-        payment.metadata['paystack_init'] = data
-        payment.save()
-        return redirect(data['authorization_url'])
-    else:
-        payment.status = 'failed'
-        payment.metadata['paystack_init_error'] = response
-        payment.save()
-        messages.error(request, "Could not start payment. Try again.")
-        return redirect('payments:payment_failed', order_id=order.id)
+def _bank_details():
+    return {
+        'bank_name': settings.BANK_TRANSFER_BANK_NAME,
+        'account_name': settings.BANK_TRANSFER_ACCOUNT_NAME,
+        'account_number': settings.BANK_TRANSFER_ACCOUNT_NUMBER,
+    }
 
 
-@ratelimit(key='user_or_ip', rate='5/m', block=True)
-@login_required
-def get_payment_details(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-
-
-    existing = (
+def _get_or_create_pending_transaction(order):
+    payment = (
         PaymentTransaction.objects
         .filter(order=order, status__in=['pending', 'initiated'])
         .order_by('-created_at')
         .first()
     )
-
-    if existing and (timezone.now() - existing.created_at).total_seconds() < 1800:
-        payment = existing
-    else:
-        total_with_shipping = float(order.total_amount + order.shipping_fee)
+    if payment is None:
         payment = PaymentTransaction.objects.create(
             order=order,
-            amount=total_with_shipping,
+            amount=order.grand_total,
             paystack_reference=PaymentTransaction.generate_reference(),
             status='pending',
-            metadata={'items_count': order.items.count()}
+            metadata={'items_count': order.items.count(), 'delivery_fee': float(order.shipping_fee)},
         )
-
-    data = {
-        'reference': payment.paystack_reference,
-        'amount': payment.amount_in_kobo,
-        'email': order.customer_email,
-        'public_key': settings.PAYSTACK_PUBLIC_KEY,
-        'callback_url': request.build_absolute_uri(
-            reverse('payments:verify_payment')
-        ),
-        'metadata': {k: float(v) if isinstance(v, Decimal) else v for k, v in payment.metadata.items()}
-    }
-
-    return JsonResponse({'status': 'success', 'data': data})
+    return payment
 
 
-
-
+@ratelimit(key='user_or_ip', rate='10/m', block=True)
 @login_required
-@require_GET
-def verify_payment(request):
-    reference = request.GET.get('reference')
-    if not reference:
-        messages.error(request, "No payment reference provided.")
-        return redirect('cart:view_cart')
+def transfer_instructions(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    try:
-        payment = PaymentTransaction.objects.get(paystack_reference=reference)
-    except PaymentTransaction.DoesNotExist:
-        messages.error(request, "Payment not found.")
-        return redirect('cart:view_cart')
+    if order.payment_status == 'success':
+        messages.info(request, "Order already paid.")
+        return redirect('orders:order_detail', order_number=order.order_number)
+
+    if order.payment_status == 'pending_verification':
+        messages.info(request, "We already received your receipt. Your payment is being verified.")
+        return redirect('orders:order_detail', order_number=order.order_number)
+
+    if order.grand_total <= 0:
+        messages.error(request, "Invalid order amount.")
+        return redirect('view_cart')
+
+    payment = _get_or_create_pending_transaction(order)
+
+    return render(request, 'payments/bank_transfer_instructions.html', {
+        'order': order,
+        'payment': payment,
+        'form': ReceiptUploadForm(),
+        **_bank_details(),
+    })
+
+
+@ratelimit(key='user_or_ip', rate='10/m', block=True)
+@login_required
+@require_POST
+def submit_receipt(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if order.payment_status == 'success':
+        messages.info(request, "Order already paid.")
+        return redirect('orders:order_detail', order_number=order.order_number)
+
+    if order.payment_status == 'pending_verification':
+        messages.info(request, "We already received your receipt. Your payment is being verified.")
+        return redirect('orders:order_detail', order_number=order.order_number)
+
+    payment = _get_or_create_pending_transaction(order)
+    form = ReceiptUploadForm(request.POST, request.FILES, instance=payment)
+
+    if not form.is_valid():
+        return render(request, 'payments/bank_transfer_instructions.html', {
+            'order': order,
+            'payment': payment,
+            'form': form,
+            **_bank_details(),
+        })
 
     with transaction.atomic():
-        payment = PaymentTransaction.objects.select_for_update().get(
-            paystack_reference=reference
-        )
+        payment = form.save(commit=False)
+        payment.status = 'pending_verification'
+        payment.submitted_at = timezone.now()
+        payment.save()
 
-        if payment.status == 'success':
-            return redirect('payments:payment_success', order_id=payment.order.id)
+        order.payment_status = 'pending_verification'
+        order.save(update_fields=['payment_status', 'updated_at'])
 
-        if payment.status == 'failed':
-            messages.error(request, "Payment failed.")
-            return redirect('payments:payment_failed', order_id=payment.order.id)
+    logger.info(f"Receipt uploaded for order {order.order_number} by {request.user.email}")
 
-
-
-    paystack = PaystackService()
     try:
-        verification = paystack.verify_transaction(reference)
-        txn = payment  # clarity
-
-        expected_kobo = txn.amount_in_kobo
-        paid_kobo = verification['data']['amount']
-        
-        if paid_kobo != expected_kobo:
-            txn.status = 'failed'
-            txn.metadata['amount_mismatch'] = {
-                'expected': expected_kobo,
-                'paid': paid_kobo
-            }
-            txn.save()
-        
-            logger.warning(
-                "PAYMENT AMOUNT MISMATCH",
-                extra={
-                    'order_id': txn.order.id,
-                    'expected': expected_kobo,
-                    'paid': paid_kobo,
-                    'reference': reference
-                }
-            )
-            return HttpResponse("Amount mismatch", status=400)
-        
-    except Exception as e:
-        logger.error(f"Paystack verify_transaction failed for reference {reference}: {e}", exc_info=True)
-        payment.metadata['verify_error'] = str(e)
-        payment.save(update_fields=['metadata'])
-        messages.info(
-            request,
-            "Payment received. Confirmation is pending. You will be updated shortly."
+        send_admin_payment_verification(order, payment)
+    except Exception:
+        logger.error(
+            f"Failed to send payment verification email for order {order.id}",
+            exc_info=True,
         )
-        return redirect('orders:order_detail', order_number=payment.order.order_number)
 
-    data = verification.get("data", {})
-    meta = data.get("metadata", {})
-    if meta.get("order_id") and str(meta["order_id"]) != str(payment.order.id):
-        return HttpResponse("Order mismatch", status=400)
-
-
-    if verification.get('status') and verification['data']['status'] == 'success':
-        
-        payment.status = 'success'
-        payment.verified_at = timezone.now()
-        payment.metadata['verify_data'] = verification['data']
-        payment.save()
-
-        
-        order = payment.order
-        order.payment_status = 'success'
-        order.paystack_reference = reference
-        order.save()
-
-        
-        cart = Cart.objects.filter(user=request.user).first()
-        if cart:
-            CartItem.objects.filter(cart=cart).delete()
-
-        messages.success(request, "Payment completed successfully.")
-        return redirect('payments:payment_success', order_id=order.id)
-        
-    if verification['data']['status'] == 'failed':
-        payment.status = 'failed'
-        payment.metadata['verify_data'] = verification
-        payment.save()
-        messages.error(request, "Payment failed.")
-        return redirect('payments:payment_failed', order_id=payment.order.id)
-
-    # otherwise treat as pending
-    messages.info(
+    messages.success(
         request,
-        "Payment is being confirmed. You will be updated shortly."
+        "Receipt received. We'll confirm your payment and start processing your order shortly."
     )
-    return redirect('orders:order_detail', order_number=payment.order.order_number)
+    return redirect('orders:order_detail', order_number=order.order_number)
 
-    
-    
-
-
-
-@csrf_exempt
-@require_POST
-def paystack_webhook(request):
-    payload = request.body
-    signature = request.headers.get("x-paystack-signature")
-
-    expected_signature = hmac.new(settings.PAYSTACK_SECRET_KEY.encode(), payload, hashlib.sha512).hexdigest()
-    if not hmac.compare_digest(signature or "", expected_signature):
-        return HttpResponse(status=400)
-
-    try:
-        event = json.loads(payload)
-    except ValueError:
-        return HttpResponse(status=400)
-    data = event.get("data", {})
-
-    if event.get("event") != "charge.success":
-        return HttpResponse(status=200)
-
-    if data.get("currency") != "NGN":
-        return HttpResponse(status=200)
-
-    reference = data.get("reference")
-    if not reference:
-        return HttpResponse(status=400)
-
-    try:
-        with transaction.atomic():
-            txn = PaymentTransaction.objects.select_for_update().get(
-                paystack_reference=reference
-            )
-
-            if txn.status == "success":
-                return HttpResponse(status=200)
-
-            paid_kobo = data.get("amount")
-            expected_kobo = txn.amount_in_kobo
-
-            if paid_kobo != expected_kobo:
-                logger.warning("Webhook amount mismatch", extra={
-                    "reference": reference,
-                    "expected": expected_kobo,
-                    "paid": paid_kobo,
-                })
-                return HttpResponse(status=400)
-
-            meta = data.get("metadata", {})
-            if str(meta.get("order_id")) != str(txn.order.id):
-                return HttpResponse(status=400)
-
-            
-            txn.status = "success"
-            txn.verified_at = timezone.now()
-            txn.metadata = txn.metadata or {}
-            txn.metadata["webhook_data"] = data
-            txn.save()
-
-            
-            order = txn.order
-            order.payment_status = "success"
-            order.paystack_reference = reference
-            order.save()
-
-            
-            cart = Cart.objects.filter(user=order.user).first()
-            if cart:
-                CartItem.objects.filter(cart=cart).delete()
-
-    except PaymentTransaction.DoesNotExist:
-        return HttpResponse(status=200)
-
-    return HttpResponse(status=200)
-    
 
 @login_required
 def payment_success(request, order_id):
@@ -324,6 +127,6 @@ def payment_success(request, order_id):
     return render(request, 'payments/success.html', {'order': order})
 
 @login_required
-def payment_failed(request, order_id): 
+def payment_failed(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'payments/payment_failed.html', {'order': order})

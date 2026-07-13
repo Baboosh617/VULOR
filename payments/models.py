@@ -22,8 +22,8 @@ class PaymentTransaction(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    # Legacy Paystack columns — still used by payments/views.py until the
-    # bank-transfer view rewrite lands; renamed/dropped in that same change.
+    # Holds the internal transfer reference; rename to `reference` (and drop
+    # paystack_access_code) pending in a follow-up migration.
     paystack_reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -50,12 +50,6 @@ class PaymentTransaction(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Payment Transaction'
         verbose_name_plural = 'Payment Transactions'
-
-    @property
-    def amount_in_kobo(self):
-        # Legacy — payments/views.py still cross-checks Paystack amounts in
-        # kobo; goes away with the bank-transfer view rewrite.
-        return int(self.amount * 100)
 
     @staticmethod
     def generate_reference():
