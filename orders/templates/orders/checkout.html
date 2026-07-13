@@ -158,11 +158,11 @@
                     <div class="mt-8 pt-8 border-t border-[#333333]">
                         <button type="submit" id="paymentButton"
                                 class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-base font-bold tracking-wider py-4 px-6 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-[#dc2626]">
-                            PAY ₦<span id="totalAmount">{{ cart.total_price }}</span>
+                            PLACE ORDER · ₦<span id="totalAmount">{{ cart.total_price }}</span>
                         </button>
-                        
+
                         <p class="text-[#666666] text-xs text-center mt-2 tracking-wider">
-                            SECURED BY PAYSTACK
+                            PAY BY BANK TRANSFER — ACCOUNT DETAILS ON THE NEXT PAGE
                         </p>
                     </div>
                 </form>
@@ -459,7 +459,6 @@
             }
             
             // Additional validation can be added here
-            // For now, let it proceed to Paystack
         });
 
         // Add input focus effects
