@@ -412,3 +412,74 @@ class OrderAdminActionTests(TestCase):
         self.assertEqual(self.order.payment_status, "failed")
         rejected = [m for m in mail.outbox if "Payment Not Confirmed" in m.subject]
         self.assertEqual(len(rejected), 1)
+
+
+from django.core.management import call_command
+from django.utils import timezone
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+)
+class AbandonStaleOrdersTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email="stale@example.com", username="staleuser", password="strongpass123"
+        )
+
+    def _order(self, payment_status="pending", age_hours=0, email="stale@example.com"):
+        order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("1000.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email=email,
+            payment_status=payment_status,
+        )
+        if age_hours:
+            Order.objects.filter(pk=order.pk).update(
+                created_at=timezone.now() - timezone.timedelta(hours=age_hours)
+            )
+            order.refresh_from_db()
+        return order
+
+    def test_old_pending_order_is_abandoned_and_transaction_failed(self):
+        order = self._order(age_hours=72)
+        txn = PaymentTransaction.objects.create(
+            order=order,
+            amount=Decimal("1000.00"),
+            reference=PaymentTransaction.generate_reference(),
+            status="pending",
+        )
+        call_command("abandon_stale_orders")
+        order.refresh_from_db()
+        txn.refresh_from_db()
+        self.assertEqual(order.payment_status, "abandoned")
+        self.assertEqual(txn.status, "failed")
+
+    def test_recent_pending_order_is_untouched(self):
+        order = self._order(age_hours=1)
+        call_command("abandon_stale_orders")
+        order.refresh_from_db()
+        self.assertEqual(order.payment_status, "pending")
+
+    def test_pending_verification_order_is_untouched(self):
+        order = self._order(payment_status="pending_verification", age_hours=72)
+        call_command("abandon_stale_orders")
+        order.refresh_from_db()
+        self.assertEqual(order.payment_status, "pending_verification")
+
+    def test_custom_hours_argument(self):
+        order = self._order(age_hours=5)
+        call_command("abandon_stale_orders", hours=4)
+        order.refresh_from_db()
+        self.assertEqual(order.payment_status, "abandoned")
+
+    def test_abandonment_unblocks_checkout_guard(self):
+        self._order(age_hours=72)
+        call_command("abandon_stale_orders")
+        self.assertFalse(
+            Order.objects.filter(user=self.user, payment_status="pending").exists()
+        )

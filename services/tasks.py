@@ -48,6 +48,13 @@ def send_html_email_task(self, subject, template, user_id, order_id, to_email):
 
 
 @shared_task(bind=True)
+def abandon_stale_orders_task(self, hours=48):
+    """Beat-schedulable wrapper around the abandon_stale_orders command."""
+    from django.core.management import call_command
+    call_command("abandon_stale_orders", hours=hours)
+
+
+@shared_task(bind=True)
 def send_weekly_sales_report_task(self):
     from orders.models import OrderItem, Order
     start_date = now() - timedelta(days=7)
