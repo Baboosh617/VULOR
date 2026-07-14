@@ -12,6 +12,17 @@ def receipt_upload_path(instance, filename):
     return f"payment_receipts/{timezone.now():%Y/%m}/{uuid.uuid4().hex}{ext}"
 
 
+class PaymentTransactionQuerySet(models.QuerySet):
+    def latest_for(self, order, statuses):
+        """The order's most recent transaction in the given statuses, or None.
+        The single owner of this lookup — don't hand-roll it in views."""
+        return (
+            self.filter(order=order, status__in=statuses)
+            .order_by('-created_at')
+            .first()
+        )
+
+
 class PaymentTransaction(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -20,6 +31,8 @@ class PaymentTransaction(models.Model):
         ('failed', 'Failed'),
         ('rejected', 'Rejected'),
     ]
+
+    objects = PaymentTransactionQuerySet.as_manager()
 
     reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)

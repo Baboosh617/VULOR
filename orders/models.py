@@ -170,6 +170,21 @@ class Order(models.Model):
 
        
 
+    # ---- Payment transitions — the only place payment_status changes ----
+
+    def submit_receipt(self, txn):
+        """Store the customer's uploaded receipt and move the order into
+        verification. `txn` is the (unsaved) transaction carrying the upload."""
+        from django.utils import timezone
+
+        with transaction.atomic():
+            txn.status = "pending_verification"
+            txn.submitted_at = timezone.now()
+            txn.save()
+
+            self.payment_status = "pending_verification"
+            self.save(update_fields=["payment_status", "updated_at"])
+
     def confirm_payment(self):
         """Mark the active transaction and this order as paid. The
         payment_success post_save signal then reduces inventory and sends
@@ -177,11 +192,8 @@ class Order(models.Model):
         from django.utils import timezone
         from payments.models import PaymentTransaction
 
-        txn = (
-            PaymentTransaction.objects
-            .filter(order=self, status__in=["pending", "pending_verification"])
-            .order_by("-created_at")
-            .first()
+        txn = PaymentTransaction.objects.latest_for(
+            self, ["pending", "pending_verification"]
         )
         if txn:
             txn.status = "success"
@@ -192,22 +204,26 @@ class Order(models.Model):
         self.save()
 
     def reject_payment(self):
-        """Reject the receipt awaiting verification; the customer can retry
-        from the transfer page. Used by the dashboard and Django admin."""
+        """Reject the receipt awaiting verification and email the customer to
+        retry from the transfer page. Used by the dashboard and Django admin."""
         from payments.models import PaymentTransaction
+        from services.email_service import send_payment_rejected
 
-        txn = (
-            PaymentTransaction.objects
-            .filter(order=self, status="pending_verification")
-            .order_by("-created_at")
-            .first()
-        )
+        txn = PaymentTransaction.objects.latest_for(self, ["pending_verification"])
         if txn:
             txn.status = "rejected"
             txn.save(update_fields=["status"])
 
         self.payment_status = "failed"
         self.save()
+
+        try:
+            send_payment_rejected(self.user, self)
+        except Exception:
+            logger.error(
+                f"Failed to send payment rejection email for order {self.id}",
+                exc_info=True,
+            )
 
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import PaymentTransaction
@@ -23,24 +24,25 @@ class PaymentTransactionAdmin(admin.ModelAdmin):
     def receipt_links(self, obj):
         if not obj.receipt:
             return '—'
+        url = reverse('payments:receipt_download', args=[obj.pk])
         return format_html(
-            '<a href="{0}" target="_blank">View</a> · <a href="{0}" download>Download</a>',
-            obj.receipt.url,
+            '<a href="{0}" target="_blank">View</a> · <a href="{0}?download=1">Download</a>',
+            url,
         )
 
     @admin.display(description='Receipt preview')
     def receipt_preview(self, obj):
         if not obj.receipt:
             return 'No receipt uploaded'
-        url = obj.receipt.url
-        if url.lower().endswith('.pdf'):
+        url = reverse('payments:receipt_download', args=[obj.pk])
+        if obj.receipt.name.lower().endswith('.pdf'):
             return format_html(
-                '<a href="{0}" target="_blank">Open PDF</a> · <a href="{0}" download>Download</a>',
+                '<a href="{0}" target="_blank">Open PDF</a> · <a href="{0}?download=1">Download</a>',
                 url,
             )
         return format_html(
             '<a href="{0}" target="_blank"><img src="{0}" alt="Payment receipt" '
             'style="max-width:400px; max-height:400px; border:1px solid #ddd;" /></a>'
-            '<br><a href="{0}" download>Download</a>',
+            '<br><a href="{0}?download=1">Download</a>',
             url,
         )

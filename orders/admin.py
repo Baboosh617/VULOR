@@ -1,11 +1,6 @@
-import logging
-
 from django.contrib import admin
 
 from .models import Order, OrderItem
-from services.email_service import send_payment_rejected
-
-logger = logging.getLogger(__name__)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -60,10 +55,6 @@ class OrderAdmin(admin.ModelAdmin):
         rejected = 0
         for order in queryset.filter(payment_status='pending_verification'):
             order.reject_payment()
-            try:
-                send_payment_rejected(order.user, order)
-            except Exception:
-                logger.error(f'Failed to send payment rejection email for order {order.id}', exc_info=True)
             rejected += 1
         self.message_user(request, f'{rejected} order(s) rejected; customers notified.')
 

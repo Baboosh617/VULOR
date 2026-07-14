@@ -269,75 +269,12 @@
     }
 </style>
 
+{{ shipping_zones|json_script:"shipping-zones" }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Zone-based shipping pricing (₦) — display only; the server charges
-        // from orders/shipping.py, which this table must match.
-        const shippingZones = {
-            'Kaduna': { price: 1500, days: '2-3', zone: 'Kaduna' },
-            
-            // North Zone
-            'Kano': { price: 2500, days: '3-4', zone: 'North' },
-            'Zaria': { price: 2500, days: '3-4', zone: 'North' },
-            'Jos': { price: 2500, days: '3-4', zone: 'North' },
-            'Katsina': { price: 2500, days: '3-4', zone: 'North' },
-            'Sokoto': { price: 2500, days: '3-4', zone: 'North' },
-            'Kebbi': { price: 2500, days: '3-4', zone: 'North' },
-            'Zamfara': { price: 2500, days: '3-4', zone: 'North' },
-            'Bauchi': { price: 2500, days: '3-4', zone: 'North' },
-            'Gombe': { price: 2500, days: '3-4', zone: 'North' },
-            'Yobe': { price: 2500, days: '3-4', zone: 'North' },
-            'Borno': { price: 2500, days: '3-4', zone: 'North' },
-            'Adamawa': { price: 2500, days: '3-4', zone: 'North' },
-            'Taraba': { price: 2500, days: '3-4', zone: 'North' },
-            'Niger': { price: 2500, days: '3-4', zone: 'North' },
-            'Plateau': { price: 2500, days: '3-4', zone: 'North' },
-            'Nasarawa': { price: 2500, days: '3-4', zone: 'North' },
-            'Kogi': { price: 2500, days: '3-4', zone: 'North' },
-            'Benue': { price: 2500, days: '3-4', zone: 'North' },
-            'Kwara': { price: 2500, days: '3-4', zone: 'North' },
-            
-            // West Zone
-            'Lagos': { price: 3500, days: '3-5', zone: 'West' },
-            'Ibadan': { price: 3500, days: '3-5', zone: 'West' },
-            'Abeokuta': { price: 3500, days: '3-5', zone: 'West' },
-            'Akure': { price: 3500, days: '3-5', zone: 'West' },
-            'Osogbo': { price: 3500, days: '3-5', zone: 'West' },
-            'Ado-Ekiti': { price: 3500, days: '3-5', zone: 'West' },
-            'Ilorin': { price: 3500, days: '3-5', zone: 'West' },
-            'Oyo': { price: 3500, days: '3-5', zone: 'West' },
-            'Ogun': { price: 3500, days: '3-5', zone: 'West' },
-            'Ondo': { price: 3500, days: '3-5', zone: 'West' },
-            'Osun': { price: 3500, days: '3-5', zone: 'West' },
-            'Ekiti': { price: 3500, days: '3-5', zone: 'West' },
-            
-            // East Zone
-            'Enugu': { price: 4000, days: '4-6', zone: 'East' },
-            'Owerri': { price: 4000, days: '4-6', zone: 'East' },
-            'Onitsha': { price: 4000, days: '4-6', zone: 'East' },
-            'Awka': { price: 4000, days: '4-6', zone: 'East' },
-            'Abakaliki': { price: 4000, days: '4-6', zone: 'East' },
-            'Umuahia': { price: 4000, days: '4-6', zone: 'East' },
-            'Abia': { price: 4000, days: '4-6', zone: 'East' },
-            'Anambra': { price: 4000, days: '4-6', zone: 'East' },
-            'Ebonyi': { price: 4000, days: '4-6', zone: 'East' },
-            'Imo': { price: 4000, days: '4-6', zone: 'East' },
-            
-            // South-South Zone
-            'Port Harcourt': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Uyo': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Calabar': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Yenagoa': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Asaba': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Warri': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Benin': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Akwa Ibom': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Bayelsa': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Cross River': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Delta': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Edo': { price: 4500, days: '4-7', zone: 'South-South' },
-            'Rivers': { price: 4500, days: '4-7', zone: 'South-South' }
-        };
+        // Shipping fees come from orders/shipping.py via the json_script
+        // block below — there is no second copy of the table to maintain.
+        const shippingZones = JSON.parse(document.getElementById('shipping-zones').textContent);
 
         // Get DOM elements
         const stateSelect = document.getElementById('stateSelect');

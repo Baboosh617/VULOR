@@ -11,6 +11,38 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def send_html(subject, template, context, to_email):
+    """Render and send one HTML email; the text alternative is derived from
+    the same render. The single email builder for the whole project."""
+    html_content = render_to_string(template, context)
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=strip_tags(html_content).strip(),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to_email],
+    )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def build_order_email_context(user, order):
+    """Context for every order-related customer email: bank details shared
+    with the transfer page, and absolute links built via reverse() so they
+    can't rot when routes move."""
+    from django.urls import reverse
+    from payments.utils import get_bank_details
+
+    return {
+        "user": user,
+        "order": order,
+        "site_url": settings.SITE_URL,
+        "order_url": settings.SITE_URL + reverse("orders:order_detail", args=[order.order_number]),
+        "payment_url": settings.SITE_URL + reverse("payments:transfer_instructions", args=[order.id]),
+        **get_bank_details(),
+    }
+
+
 def send_templated_email(subject, template, user_id, order_id, to_email):
     """Render and send a customer email. Called directly for synchronous
     delivery or via send_html_email_task when a Celery worker is available."""
@@ -20,26 +52,7 @@ def send_templated_email(subject, template, user_id, order_id, to_email):
     User = get_user_model()
     user = User.objects.get(pk=user_id)
     order = Order.objects.get(pk=order_id)
-    context = {
-        "user": user,
-        "order": order,
-        "site_url": settings.SITE_URL,
-        "bank_name": settings.BANK_TRANSFER_BANK_NAME,
-        "account_name": settings.BANK_TRANSFER_ACCOUNT_NAME,
-        "account_number": settings.BANK_TRANSFER_ACCOUNT_NUMBER,
-    }
-
-    html_content = render_to_string(template, context)
-    text_content = render_to_string(template, context).strip()
-
-    msg = EmailMultiAlternatives(
-        subject=subject,
-        body=text_content,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[to_email],
-    )
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
+    send_html(subject, template, build_order_email_context(user, order), to_email)
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={"max_retries": 3, "countdown": 5})

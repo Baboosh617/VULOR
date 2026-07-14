@@ -1,43 +1,20 @@
-import tempfile
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
-from payments.models import PaymentTransaction
 from payments.forms import ReceiptUploadForm, RECEIPT_MAX_SIZE
-from orders.models import Order
-from products.models import Product
-from accounts.models import CustomUser
-
-TEMP_MEDIA = tempfile.mkdtemp(prefix="vulor-test-media-")
+from payments.models import PaymentTransaction
+from vulor.testing import StoreTestCase, make_order, make_transaction, make_user
 
 
-@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-class PaymentTransactionTests(TestCase):
+class PaymentTransactionTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="txuser@example.com", username="txuser", password="strongpass123"
-        )
-        self.product = Product.objects.create(
-            name="Tx Product",
-            description="desc",
-            price=Decimal("1000.00"),
-            category="hoodies",
-            image=SimpleUploadedFile("p.jpg", b"x"),
-            inventory_count=10,
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("1000.00"),
-            shipping_address="1 St",
-            shipping_city="Lagos",
-            shipping_state="Lagos",
-            customer_email="txuser@example.com",
-        )
+        self.user = make_user("txuser")
+        self.order = make_order(self.user, total_amount=Decimal("1000.00"), shipping_fee=Decimal("0.00"))
 
     def test_generate_reference_returns_unique_strings(self):
         ref1 = PaymentTransaction.generate_reference()
@@ -46,15 +23,20 @@ class PaymentTransactionTests(TestCase):
         self.assertNotEqual(ref1, ref2)
 
     def test_bank_transfer_fields_default_empty(self):
-        tx = PaymentTransaction.objects.create(
-            reference="ps-1",
-            order=self.order,
-            amount=Decimal("1200.00"),
-        )
+        tx = make_transaction(self.order, amount=Decimal("1200.00"))
         self.assertEqual(tx.status, "pending")
         self.assertFalse(tx.receipt)
         self.assertEqual(tx.transaction_reference, "")
         self.assertIsNone(tx.submitted_at)
+
+    def test_latest_for_returns_newest_matching_transaction(self):
+        make_transaction(self.order, status="failed")
+        active = make_transaction(self.order)
+        found = PaymentTransaction.objects.latest_for(self.order, ["pending"])
+        self.assertEqual(found, active)
+        self.assertIsNone(
+            PaymentTransaction.objects.latest_for(self.order, ["pending_verification"])
+        )
 
 
 class ReceiptUploadFormTests(TestCase):
@@ -94,30 +76,11 @@ class ReceiptUploadFormTests(TestCase):
         self.assertIn("receipt", form.errors)
 
 
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    RATELIMIT_ENABLE=False,
-    MEDIA_ROOT=TEMP_MEDIA,
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    BANK_TRANSFER_BANK_NAME="GTBank",
-    BANK_TRANSFER_ACCOUNT_NAME="VULOR Store",
-    BANK_TRANSFER_ACCOUNT_NUMBER="0123456789",
-)
-class BankTransferFlowTests(TestCase):
+class BankTransferFlowTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="flow@example.com", username="flowuser", password="strongpass123"
-        )
+        self.user = make_user("flowuser")
         self.client.force_login(self.user)
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_fee=Decimal("500.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="flow@example.com",
-        )
+        self.order = make_order(self.user)
 
     def _submit_receipt(self, filename="receipt.jpg", reference=""):
         return self.client.post(
@@ -187,10 +150,17 @@ class BankTransferFlowTests(TestCase):
             reverse("orders:order_detail", args=[self.order.order_number]),
         )
 
-    def test_other_users_order_is_not_accessible(self):
-        other = CustomUser.objects.create_user(
-            email="other@example.com", username="other", password="strongpass123"
+    def test_already_submitted_order_rejects_second_receipt(self):
+        self._submit_receipt()
+        response = self._submit_receipt()
+        self.assertRedirects(
+            response,
+            reverse("orders:order_detail", args=[self.order.order_number]),
         )
+        self.assertEqual(PaymentTransaction.objects.filter(order=self.order).count(), 1)
+
+    def test_other_users_order_is_not_accessible(self):
+        other = make_user("other")
         self.client.force_login(other)
         response = self.client.get(
             reverse("payments:transfer_instructions", args=[self.order.id])
@@ -204,43 +174,73 @@ class BankTransferFlowTests(TestCase):
         self.assertContains(response, "3500.00")  # failed page shows grand total
 
 
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    MEDIA_ROOT=TEMP_MEDIA,
-)
-class ReceiptAdminTests(TestCase):
+class ReceiptAdminTests(StoreTestCase):
     def setUp(self):
-        self.admin = CustomUser.objects.create_superuser(
-            email="root@example.com", username="root", password="strongpass123"
-        )
-        self.user = CustomUser.objects.create_user(
-            email="rcpt@example.com", username="rcptuser", password="strongpass123"
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="rcpt@example.com",
-        )
-        self.txn = PaymentTransaction.objects.create(
-            order=self.order,
-            amount=Decimal("3000.00"),
-            reference=PaymentTransaction.generate_reference(),
+        self.admin = make_user("root", is_staff=True, is_superuser=True)
+        self.user = make_user("rcptuser")
+        self.order = make_order(self.user, shipping_fee=Decimal("0.00"))
+        self.txn = make_transaction(
+            self.order,
             status="pending_verification",
             receipt=SimpleUploadedFile("receipt.jpg", b"receipt-bytes"),
         )
         self.client.force_login(self.admin)
 
-    def test_changelist_shows_view_and_download_links(self):
+    def test_changelist_links_to_gated_view_not_media_url(self):
         response = self.client.get(reverse("admin:payments_paymenttransaction_changelist"))
-        self.assertContains(response, self.txn.receipt.url)
+        gated_url = reverse("payments:receipt_download", args=[self.txn.pk])
+        self.assertContains(response, gated_url)
         self.assertContains(response, "Download")
+        self.assertNotContains(response, self.txn.receipt.url)
 
     def test_change_page_shows_receipt_preview(self):
         response = self.client.get(
             reverse("admin:payments_paymenttransaction_change", args=[self.txn.pk])
         )
-        self.assertContains(response, f'<img src="{self.txn.receipt.url}"')
+        gated_url = reverse("payments:receipt_download", args=[self.txn.pk])
+        self.assertContains(response, f'<img src="{gated_url}"')
+
+
+class ReceiptDownloadTests(StoreTestCase):
+    def setUp(self):
+        self.staff = make_user("staff", is_staff=True)
+        self.customer = make_user("owner")
+        self.order = make_order(self.customer)
+        self.txn = make_transaction(
+            self.order,
+            status="pending_verification",
+            receipt=SimpleUploadedFile("receipt.jpg", b"receipt-bytes"),
+        )
+        self.url = reverse("payments:receipt_download", args=[self.txn.pk])
+
+    def test_staff_can_view_receipt(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(b"".join(response.streaming_content), b"receipt-bytes")
+        self.assertNotIn("attachment", response.get("Content-Disposition", ""))
+
+    def test_download_flag_sets_attachment_disposition(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url + "?download=1")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("attachment", response["Content-Disposition"])
+
+    def test_anonymous_is_redirected_to_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("login", response["Location"])
+
+    def test_order_owner_without_staff_is_blocked(self):
+        self.client.force_login(self.customer)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("login", response["Location"])
+
+    def test_missing_receipt_returns_404(self):
+        bare_txn = make_transaction(make_order(make_user("bare")), status="pending")
+        self.client.force_login(self.staff)
+        response = self.client.get(
+            reverse("payments:receipt_download", args=[bare_txn.pk])
+        )
+        self.assertEqual(response.status_code, 404)

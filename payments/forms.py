@@ -9,14 +9,12 @@ RECEIPT_MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 
 
 class ReceiptUploadForm(forms.ModelForm):
+    # The model field is nullable (a transaction exists before any upload),
+    # so the form must make it required. transaction_reference needs no
+    # override — the ModelForm derives it from the model.
     receipt = forms.FileField(
         required=True,
         error_messages={'required': 'Please upload your payment receipt.'},
-    )
-    transaction_reference = forms.CharField(
-        required=False,
-        max_length=100,
-        strip=True,
     )
 
     class Meta:

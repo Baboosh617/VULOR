@@ -1,10 +1,9 @@
 import logging
 import mimetypes
 import os
-from django.core.mail import EmailMessage, EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.conf import settings
-from django.template.loader import render_to_string
-from .tasks import send_html_email_task, send_templated_email
+from .tasks import send_html, send_html_email_task, send_templated_email
 
 logger = logging.getLogger(__name__)
 
@@ -37,19 +36,10 @@ def _dispatch(subject, template, user, order):
 
 # ─── Internal helper ──────────────────────────────────────────────────────────
 def send_html_email(subject, template, context, to_email):
-    """Synchronous HTML email — used for time-sensitive sends like abandoned cart."""
+    """Synchronous HTML email with caller-supplied context — used for sends
+    that aren't tied to an order, like abandoned cart."""
     try:
-        html_content = render_to_string(template, context)
-        text_content = render_to_string(template, context)
-
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to_email],
-        )
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
+        send_html(subject, template, context, to_email)
     except Exception:
         logger.error(f"Failed to send email: {subject}", exc_info=True)
 

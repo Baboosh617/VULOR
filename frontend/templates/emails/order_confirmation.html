@@ -27,13 +27,13 @@
           Use your order number <strong>{{ order.order_number }}</strong> as the transfer narration,
           then upload your payment receipt so we can confirm your order.
         </p>
-        <a href="{{ site_url }}/payments/transfer/{{ order.id }}/" style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#dc2626; color:#fff; text-decoration:none; border-radius:5px;">Upload Payment Receipt</a>
+        <a href="{{ payment_url }}" style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#dc2626; color:#fff; text-decoration:none; border-radius:5px;">Upload Payment Receipt</a>
       </div>
       {% else %}
       <p style="margin-top:20px; font-size:16px; color:#374151;">We’ll notify you when your order is shipped.</p>
       {% endif %}
 
-      <a href="{{ site_url }}/orders/detail/{{ order.order_number }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
+      <a href="{{ order_url }}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
     </div>
   </body>
 </html>

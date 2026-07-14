@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from products.models import Product, Review, ProductImage
 from orders.models import Order
-from services.email_service import send_payment_rejected
 from dashboard.forms import ProductForm
 from django.contrib.auth import get_user_model
 from django import forms
@@ -162,11 +161,6 @@ def reject_payment(request, order_id):
         return redirect("dashboard:order_list")
 
     order.reject_payment()
-
-    try:
-        send_payment_rejected(order.user, order)
-    except Exception:
-        logger.error(f"Failed to send payment rejection email for order {order.id}", exc_info=True)
 
     logger.info(f"Payment for order {order.order_number} rejected by {request.user.username}")
     messages.success(request, f"Payment for order {order.order_number} rejected. The customer can retry.")

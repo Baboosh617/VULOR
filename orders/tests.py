@@ -1,62 +1,57 @@
-from django.test import TestCase, override_settings
 from decimal import Decimal
-from orders.models import Order, OrderItem
+from unittest.mock import patch
+
+from django.core import mail
+from django.core.management import call_command
+from django.template.loader import render_to_string
+from django.test import TestCase, override_settings
+from django.urls import reverse
+from django.utils import timezone
+
+from cart.models import Cart, CartItem
 from orders.forms import CheckoutForm
-from products.models import Product
-from accounts.models import CustomUser
-from django.core.files.uploadedfile import SimpleUploadedFile
+from orders.models import Order, OrderItem
+from orders.shipping import get_shipping_info
+from payments.models import PaymentTransaction
+from services.email_service import send_order_confirmation
+from services.tasks import build_order_email_context
+from vulor.testing import (
+    StoreTestCase,
+    make_order,
+    make_product,
+    make_transaction,
+    make_user,
+)
 
 
-@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-class OrderModelTests(TestCase):
+class OrderModelTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="orderuser@example.com", username="orderuser", password="strongpass123"
-        )
-        self.product = Product.objects.create(
-            name="Order Product",
-            description="desc",
-            price=Decimal("1500.00"),
-            category="hoodies",
-            image=SimpleUploadedFile("p.jpg", b"x"),
-            inventory_count=20,
-        )
-
-    def _make_order(self, **kwargs):
-        data = {
-            "user": self.user,
-            "total_amount": Decimal("3000.00"),
-            "shipping_address": "1 Market St",
-            "shipping_city": "Lagos",
-            "shipping_state": "Lagos",
-            "customer_email": "orderuser@example.com",
-        }
-        data.update(kwargs)
-        return Order.objects.create(**data)
+        self.user = make_user("orderuser")
+        self.product = make_product(name="Order Product", price=Decimal("1500.00"), inventory_count=20)
 
     def test_order_number_generated_on_create(self):
-        order = self._make_order()
+        order = make_order(self.user)
         self.assertTrue(order.order_number)
         self.assertNotEqual(order.order_number, "")
 
     def test_default_status_and_payment_status(self):
-        order = self._make_order()
+        order = make_order(self.user)
         self.assertEqual(order.status, "pending")
         self.assertEqual(order.payment_status, "pending")
 
     def test_grand_total_includes_shipping(self):
-        order = self._make_order(shipping_fee=Decimal("500.00"))
+        order = make_order(self.user, total_amount=Decimal("3000.00"), shipping_fee=Decimal("500.00"))
         self.assertEqual(order.grand_total, Decimal("3500.00"))
 
     def test_order_item_total_price(self):
-        order = self._make_order()
+        order = make_order(self.user)
         item = OrderItem.objects.create(
             order=order, product=self.product, quantity=2, price=Decimal("1500.00")
         )
         self.assertEqual(item.get_total_price(), Decimal("3000.00"))
 
     def test_order_total_items(self):
-        order = self._make_order()
+        order = make_order(self.user)
         OrderItem.objects.create(
             order=order, product=self.product, quantity=2, price=Decimal("1500.00")
         )
@@ -75,7 +70,6 @@ class CheckoutFormTests(TestCase):
             "address_line": "1 Market St",
             "state": "Lagos",
             "city": "Ikeja",
-            "shipping_zone": "West",
             "order_notes": "",
         }
         data.update(overrides)
@@ -85,8 +79,8 @@ class CheckoutFormTests(TestCase):
         form = CheckoutForm(data=self._data())
         self.assertTrue(form.is_valid(), form.errors)
 
-    def test_notes_and_zone_are_optional(self):
-        form = CheckoutForm(data=self._data(order_notes="", shipping_zone=""))
+    def test_notes_are_optional(self):
+        form = CheckoutForm(data=self._data(order_notes=""))
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_notes_are_kept(self):
@@ -111,34 +105,10 @@ class CheckoutFormTests(TestCase):
         self.assertIn("address_line", form.errors)
 
 
-import tempfile
-
-from django.urls import reverse
-
-from cart.models import Cart, CartItem
-
-TEMP_MEDIA = tempfile.mkdtemp(prefix="vulor-test-media-")
-
-
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    RATELIMIT_ENABLE=False,
-    MEDIA_ROOT=TEMP_MEDIA,
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-)
-class CheckoutViewTests(TestCase):
+class CheckoutViewTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="buyer@example.com", username="buyer", password="strongpass123"
-        )
-        self.product = Product.objects.create(
-            name="Checkout Hoodie",
-            description="desc",
-            price=Decimal("2000.00"),
-            category="hoodies",
-            image=SimpleUploadedFile("p.jpg", b"x"),
-            inventory_count=5,
-        )
+        self.user = make_user("buyer")
+        self.product = make_product(name="Checkout Hoodie", price=Decimal("2000.00"), inventory_count=5)
         cart = Cart.objects.create(user=self.user)
         CartItem.objects.create(cart=cart, product=self.product, quantity=2)
         self.client.force_login(self.user)
@@ -151,11 +121,22 @@ class CheckoutViewTests(TestCase):
             "address_line": "1 Market St",
             "state": "Lagos",
             "city": "Ikeja",
-            "shipping_zone": "West",
             "order_notes": "Call before delivery",
         }
         data.update(overrides)
         return self.client.post(reverse("orders:checkout"), data)
+
+    def test_get_renders_checkout_page_without_errors(self):
+        response = self.client.get(reverse("orders:checkout"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "DELIVERY INFORMATION")
+        self.assertContains(response, "shipping-zones")  # json_script data block
+        self.assertEqual(len(list(response.context["messages"])), 0)
+
+    def test_get_with_empty_cart_redirects(self):
+        self.user.cart.items.all().delete()
+        response = self.client.get(reverse("orders:checkout"))
+        self.assertRedirects(response, reverse("view_cart"))
 
     def test_checkout_creates_order_and_redirects_to_transfer_page(self):
         response = self._post_checkout()
@@ -187,36 +168,11 @@ class CheckoutViewTests(TestCase):
         self.assertEqual(Order.objects.filter(user=self.user).count(), 1)
 
 
-from django.template.loader import render_to_string
-
-
-@override_settings(
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-)
-class EmailTemplateTests(TestCase):
+class EmailTemplateTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="mail@example.com", username="mailuser",
-            password="strongpass123", first_name="Ada",
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_fee=Decimal("500.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="mail@example.com",
-        )
-        self.context = {
-            "user": self.user,
-            "order": self.order,
-            "site_url": "https://vulor.test",
-            "bank_name": "GTBank",
-            "account_name": "VULOR Store",
-            "account_number": "0123456789",
-        }
+        self.user = make_user("mailuser", first_name="Ada")
+        self.order = make_order(self.user)
+        self.context = build_order_email_context(self.user, self.order)
 
     def test_confirmation_email_shows_bank_details_while_pending(self):
         html = render_to_string("emails/order_confirmation.html", self.context)
@@ -239,36 +195,15 @@ class EmailTemplateTests(TestCase):
         self.assertIn("Bank Transfer", html)
         self.assertIn(self.order.order_number, html)
 
-
-from unittest.mock import patch
-
-from django.core import mail
-
-from services.email_service import send_order_confirmation
+    def test_context_links_are_absolute(self):
+        self.assertTrue(self.context["order_url"].startswith("http"))
+        self.assertIn(f"/payments/transfer/{self.order.id}/", self.context["payment_url"])
 
 
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    BANK_TRANSFER_BANK_NAME="GTBank",
-    BANK_TRANSFER_ACCOUNT_NAME="VULOR Store",
-    BANK_TRANSFER_ACCOUNT_NUMBER="0123456789",
-)
-class EmailDispatchTests(TestCase):
+class EmailDispatchTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="dispatch@example.com", username="dispatchuser",
-            password="strongpass123", first_name="Ada",
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_fee=Decimal("500.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="dispatch@example.com",
-        )
+        self.user = make_user("dispatchuser", first_name="Ada")
+        self.order = make_order(self.user)
         mail.outbox.clear()  # drop the signal-driven creation emails
 
     @override_settings(EMAIL_ASYNC_ENABLED=False)
@@ -299,47 +234,16 @@ class EmailDispatchTests(TestCase):
 
     @override_settings(EMAIL_ASYNC_ENABLED=False)
     def test_order_creation_signal_delivers_confirmation(self):
-        order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("1000.00"),
-            shipping_address="2 Side St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="dispatch@example.com",
-        )
+        order = make_order(self.user, total_amount=Decimal("1000.00"), shipping_fee=Decimal("0.00"))
         subjects = [m.subject for m in mail.outbox]
         self.assertTrue(any(order.order_number in s for s in subjects))
 
 
-from payments.models import PaymentTransaction
-
-
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    MEDIA_ROOT=TEMP_MEDIA,
-)
-class OrderPaymentTransitionTests(TestCase):
+class OrderPaymentTransitionTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="trans@example.com", username="transuser", password="strongpass123"
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_fee=Decimal("500.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="trans@example.com",
-            payment_status="pending_verification",
-        )
-        self.txn = PaymentTransaction.objects.create(
-            order=self.order,
-            amount=Decimal("3500.00"),
-            reference=PaymentTransaction.generate_reference(),
-            status="pending_verification",
-        )
+        self.user = make_user("transuser")
+        self.order = make_order(self.user, payment_status="pending_verification")
+        self.txn = make_transaction(self.order, status="pending_verification")
 
     def test_confirm_payment_updates_order_and_transaction(self):
         self.order.confirm_payment()
@@ -356,41 +260,36 @@ class OrderPaymentTransitionTests(TestCase):
         self.assertEqual(self.order.payment_status, "failed")
         self.assertEqual(self.txn.status, "rejected")
 
+    def test_reject_payment_emails_customer(self):
+        mail.outbox.clear()
+        self.order.reject_payment()
+        rejected = [m for m in mail.outbox if "Payment Not Confirmed" in m.subject]
+        self.assertEqual(len(rejected), 1)
+        self.assertEqual(rejected[0].to, [self.user.email])
+
     def test_confirm_payment_works_without_transaction(self):
         self.txn.delete()
         self.order.confirm_payment()
         self.order.refresh_from_db()
         self.assertEqual(self.order.payment_status, "success")
 
+    def test_submit_receipt_moves_order_to_pending_verification(self):
+        order = make_order(self.user, payment_status="pending")
+        txn = make_transaction(order)
+        order.submit_receipt(txn)
+        order.refresh_from_db()
+        txn.refresh_from_db()
+        self.assertEqual(order.payment_status, "pending_verification")
+        self.assertEqual(txn.status, "pending_verification")
+        self.assertIsNotNone(txn.submitted_at)
 
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-    MEDIA_ROOT=TEMP_MEDIA,
-)
-class OrderAdminActionTests(TestCase):
+
+class OrderAdminActionTests(StoreTestCase):
     def setUp(self):
-        self.admin = CustomUser.objects.create_superuser(
-            email="root@example.com", username="root", password="strongpass123"
-        )
-        self.user = CustomUser.objects.create_user(
-            email="adm@example.com", username="admcust", password="strongpass123"
-        )
-        self.order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("3000.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email="adm@example.com",
-            payment_status="pending_verification",
-        )
-        self.txn = PaymentTransaction.objects.create(
-            order=self.order,
-            amount=Decimal("3000.00"),
-            reference=PaymentTransaction.generate_reference(),
-            status="pending_verification",
-        )
+        self.admin = make_user("root", is_staff=True, is_superuser=True)
+        self.user = make_user("admcust")
+        self.order = make_order(self.user, payment_status="pending_verification")
+        self.txn = make_transaction(self.order, status="pending_verification")
         self.client.force_login(self.admin)
 
     def test_confirm_action_marks_order_paid(self):
@@ -404,7 +303,6 @@ class OrderAdminActionTests(TestCase):
         self.assertEqual(self.txn.status, "success")
 
     def test_reject_action_notifies_customer(self):
-        from django.core import mail
         mail.outbox.clear()
         self.client.post(
             reverse("admin:orders_order_changelist"),
@@ -416,30 +314,12 @@ class OrderAdminActionTests(TestCase):
         self.assertEqual(len(rejected), 1)
 
 
-from django.core.management import call_command
-from django.utils import timezone
-
-
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
-)
-class AbandonStaleOrdersTests(TestCase):
+class AbandonStaleOrdersTests(StoreTestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="stale@example.com", username="staleuser", password="strongpass123"
-        )
+        self.user = make_user("staleuser")
 
-    def _order(self, payment_status="pending", age_hours=0, email="stale@example.com"):
-        order = Order.objects.create(
-            user=self.user,
-            total_amount=Decimal("1000.00"),
-            shipping_address="1 Market St",
-            shipping_city="Ikeja",
-            shipping_state="Lagos",
-            customer_email=email,
-            payment_status=payment_status,
-        )
+    def _order(self, payment_status="pending", age_hours=0):
+        order = make_order(self.user, payment_status=payment_status)
         if age_hours:
             Order.objects.filter(pk=order.pk).update(
                 created_at=timezone.now() - timezone.timedelta(hours=age_hours)
@@ -449,12 +329,7 @@ class AbandonStaleOrdersTests(TestCase):
 
     def test_old_pending_order_is_abandoned_and_transaction_failed(self):
         order = self._order(age_hours=72)
-        txn = PaymentTransaction.objects.create(
-            order=order,
-            amount=Decimal("1000.00"),
-            reference=PaymentTransaction.generate_reference(),
-            status="pending",
-        )
+        txn = make_transaction(order)
         call_command("abandon_stale_orders")
         order.refresh_from_db()
         txn.refresh_from_db()
@@ -487,7 +362,30 @@ class AbandonStaleOrdersTests(TestCase):
         )
 
 
-from orders.shipping import get_shipping_info
+class OrderSuccessViewTests(StoreTestCase):
+    def setUp(self):
+        self.user = make_user("successuser")
+        self.order = make_order(self.user, payment_status="success")
+        self.client.force_login(self.user)
+
+    def test_paid_order_renders_success_page(self):
+        response = self.client.get(
+            reverse("orders:order_success", args=[self.order.order_number])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.order.order_number)
+        self.assertContains(response, "Payment Successful")
+
+    def test_unpaid_order_redirects_to_detail(self):
+        self.order.payment_status = "pending"
+        self.order.save(update_fields=["payment_status"])
+        response = self.client.get(
+            reverse("orders:order_success", args=[self.order.order_number])
+        )
+        self.assertRedirects(
+            response,
+            reverse("orders:order_detail", args=[self.order.order_number]),
+        )
 
 
 class ShippingZoneTests(TestCase):

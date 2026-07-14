@@ -63,7 +63,7 @@
                     {% endif %}
                     {% with txn=order.paymenttransaction_set.all|first %}
                     {% if txn and txn.receipt %}
-                        <a href="{{ txn.receipt.url }}" target="_blank" class="block text-blue-500 hover:underline text-sm mt-1">View receipt</a>
+                        <a href="{% url 'payments:receipt_download' txn.id %}" target="_blank" class="block text-blue-500 hover:underline text-sm mt-1">View receipt</a>
                         {% if txn.transaction_reference %}
                         <span class="block text-gray-500 text-xs">Ref: {{ txn.transaction_reference }}</span>
                         {% endif %}

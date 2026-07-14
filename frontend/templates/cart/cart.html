@@ -101,13 +101,8 @@
             </div>
             
             
-             <form method="post" action="{% url 'orders:checkout' %}">
-               {% csrf_token %}
-
-
-
-             <button type="submit" class="block w-full border border-[#dc2626] text-[#dc2626] text-center my-6 py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">PROCEED TO PAYMENT</button>
-            </form>
+             <a href="{% url 'orders:checkout' %}"
+                class="block w-full border border-[#dc2626] text-[#dc2626] text-center my-6 py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">PROCEED TO PAYMENT</a>
             
             
             <a href="{% url 'product_list' %}" 
