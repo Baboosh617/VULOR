@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Order, OrderItem
 from .forms import CheckoutForm
+from .shipping import get_shipping_info
 from cart.models import Cart
 from django_ratelimit.decorators import ratelimit
 from django.db import transaction
@@ -39,13 +40,11 @@ def checkout(request):
         address_line = form.cleaned_data["address_line"]
         state = form.cleaned_data["state"]
         city = form.cleaned_data["city"]
-        shipping_zone = form.cleaned_data["shipping_zone"]
         order_notes = form.cleaned_data["order_notes"]
+        # Fee and zone come from the server-side table, never from the client.
+        shipping_zone, shipping_fee_decimal = get_shipping_info(state)
 
         try:
-            from decimal import Decimal
-            shipping_fee_decimal = Decimal("5000.00") if state.lower() == "lagos" else Decimal("3000.00")
-
             # fast-fail before touching the lock — optimization only, not the
             # authoritative check (see inside the atomic block below)
             if Order.objects.filter(user=request.user, payment_status='pending').exists():

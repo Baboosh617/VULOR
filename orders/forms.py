@@ -1,5 +1,6 @@
 from django import forms
 from .models import Order
+from .shipping import get_shipping_info
 
 
 class OrderUpdateForm(forms.ModelForm):
@@ -19,7 +20,6 @@ class CheckoutForm(forms.Form):
     address_line = forms.CharField(max_length=500)
     state = forms.CharField(max_length=100)
     city = forms.CharField(max_length=100)
-    shipping_zone = forms.CharField(max_length=50, required=False)
     order_notes = forms.CharField(
         max_length=2000,
         required=False,
@@ -31,3 +31,9 @@ class CheckoutForm(forms.Form):
         if not phone.isdigit() or len(phone) < 10:
             raise forms.ValidationError('Invalid phone number.')
         return phone
+
+    def clean_state(self):
+        state = self.cleaned_data['state'].strip()
+        if get_shipping_info(state) is None:
+            raise forms.ValidationError('Select a valid delivery state.')
+        return state

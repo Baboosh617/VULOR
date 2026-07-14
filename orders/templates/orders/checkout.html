@@ -271,7 +271,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Zone-based shipping pricing (₦)
+        // Zone-based shipping pricing (₦) — display only; the server charges
+        // from orders/shipping.py, which this table must match.
         const shippingZones = {
             'Kaduna': { price: 1500, days: '2-3', zone: 'Kaduna' },
             

@@ -170,6 +170,8 @@ class CheckoutViewTests(TestCase):
         self.assertEqual(order.payment_method, "bank_transfer")
         self.assertEqual(order.order_notes, "Call before delivery")
         self.assertEqual(order.total_amount, Decimal("4000.00"))
+        self.assertEqual(order.shipping_fee, Decimal("3500.00"))  # West zone (Lagos)
+        self.assertEqual(order.shipping_zone, "West")
         self.assertEqual(order.items.count(), 1)
         self.assertEqual(self.user.cart.items.count(), 0)
 
@@ -483,3 +485,39 @@ class AbandonStaleOrdersTests(TestCase):
         self.assertFalse(
             Order.objects.filter(user=self.user, payment_status="pending").exists()
         )
+
+
+from orders.shipping import get_shipping_info
+
+
+class ShippingZoneTests(TestCase):
+    def test_zone_fees(self):
+        self.assertEqual(get_shipping_info("Kaduna"), ("Kaduna", Decimal("1500.00")))
+        self.assertEqual(get_shipping_info("Kano"), ("North", Decimal("2500.00")))
+        self.assertEqual(get_shipping_info("Lagos"), ("West", Decimal("3500.00")))
+        self.assertEqual(get_shipping_info("Enugu"), ("East", Decimal("4000.00")))
+        self.assertEqual(get_shipping_info("Rivers"), ("South-South", Decimal("4500.00")))
+
+    def test_unknown_state_returns_none(self):
+        self.assertIsNone(get_shipping_info("Atlantis"))
+
+    def test_checkout_form_rejects_unknown_state(self):
+        form = CheckoutForm(data={
+            "full_name": "Ada Obi",
+            "phone_number": "08012345678",
+            "email": "ada@example.com",
+            "address_line": "1 Market St",
+            "state": "Atlantis",
+            "city": "Nowhere",
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn("state", form.errors)
+
+    def test_all_template_states_are_deliverable(self):
+        import re
+        with open("orders/templates/orders/checkout.html") as f:
+            html = f.read()
+        option_states = re.findall(r'<option value="([^"]+)" class="bg-black', html)
+        self.assertTrue(option_states)
+        for state in option_states:
+            self.assertIsNotNone(get_shipping_info(state), f"{state} missing from shipping table")
