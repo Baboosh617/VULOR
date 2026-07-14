@@ -307,3 +307,108 @@ class EmailDispatchTests(TestCase):
         )
         subjects = [m.subject for m in mail.outbox]
         self.assertTrue(any(order.order_number in s for s in subjects))
+
+
+from payments.models import PaymentTransaction
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+    MEDIA_ROOT=TEMP_MEDIA,
+)
+class OrderPaymentTransitionTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email="trans@example.com", username="transuser", password="strongpass123"
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("3000.00"),
+            shipping_fee=Decimal("500.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="trans@example.com",
+            payment_status="pending_verification",
+        )
+        self.txn = PaymentTransaction.objects.create(
+            order=self.order,
+            amount=Decimal("3500.00"),
+            paystack_reference=PaymentTransaction.generate_reference(),
+            status="pending_verification",
+        )
+
+    def test_confirm_payment_updates_order_and_transaction(self):
+        self.order.confirm_payment()
+        self.order.refresh_from_db()
+        self.txn.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "success")
+        self.assertEqual(self.txn.status, "success")
+        self.assertIsNotNone(self.txn.verified_at)
+
+    def test_reject_payment_updates_order_and_transaction(self):
+        self.order.reject_payment()
+        self.order.refresh_from_db()
+        self.txn.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "failed")
+        self.assertEqual(self.txn.status, "rejected")
+
+    def test_confirm_payment_works_without_transaction(self):
+        self.txn.delete()
+        self.order.confirm_payment()
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "success")
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+    MEDIA_ROOT=TEMP_MEDIA,
+)
+class OrderAdminActionTests(TestCase):
+    def setUp(self):
+        self.admin = CustomUser.objects.create_superuser(
+            email="root@example.com", username="root", password="strongpass123"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="adm@example.com", username="admcust", password="strongpass123"
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("3000.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="adm@example.com",
+            payment_status="pending_verification",
+        )
+        self.txn = PaymentTransaction.objects.create(
+            order=self.order,
+            amount=Decimal("3000.00"),
+            paystack_reference=PaymentTransaction.generate_reference(),
+            status="pending_verification",
+        )
+        self.client.force_login(self.admin)
+
+    def test_confirm_action_marks_order_paid(self):
+        self.client.post(
+            reverse("admin:orders_order_changelist"),
+            {"action": "mark_payment_confirmed", "_selected_action": [self.order.pk]},
+        )
+        self.order.refresh_from_db()
+        self.txn.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "success")
+        self.assertEqual(self.txn.status, "success")
+
+    def test_reject_action_notifies_customer(self):
+        from django.core import mail
+        mail.outbox.clear()
+        self.client.post(
+            reverse("admin:orders_order_changelist"),
+            {"action": "mark_payment_rejected", "_selected_action": [self.order.pk]},
+        )
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "failed")
+        rejected = [m for m in mail.outbox if "Payment Not Confirmed" in m.subject]
+        self.assertEqual(len(rejected), 1)

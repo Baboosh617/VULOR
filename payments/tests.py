@@ -202,3 +202,45 @@ class BankTransferFlowTests(TestCase):
             response = self.client.get(reverse(f"payments:{name}", args=[self.order.id]))
             self.assertEqual(response.status_code, 200)
         self.assertContains(response, "3500.00")  # failed page shows grand total
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+    MEDIA_ROOT=TEMP_MEDIA,
+)
+class ReceiptAdminTests(TestCase):
+    def setUp(self):
+        self.admin = CustomUser.objects.create_superuser(
+            email="root@example.com", username="root", password="strongpass123"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="rcpt@example.com", username="rcptuser", password="strongpass123"
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("3000.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="rcpt@example.com",
+        )
+        self.txn = PaymentTransaction.objects.create(
+            order=self.order,
+            amount=Decimal("3000.00"),
+            paystack_reference=PaymentTransaction.generate_reference(),
+            status="pending_verification",
+            receipt=SimpleUploadedFile("receipt.jpg", b"receipt-bytes"),
+        )
+        self.client.force_login(self.admin)
+
+    def test_changelist_shows_view_and_download_links(self):
+        response = self.client.get(reverse("admin:payments_paymenttransaction_changelist"))
+        self.assertContains(response, self.txn.receipt.url)
+        self.assertContains(response, "Download")
+
+    def test_change_page_shows_receipt_preview(self):
+        response = self.client.get(
+            reverse("admin:payments_paymenttransaction_change", args=[self.txn.pk])
+        )
+        self.assertContains(response, f'<img src="{self.txn.receipt.url}"')
