@@ -16,6 +16,7 @@ from accounts.models import CustomUser
 TEMP_MEDIA = tempfile.mkdtemp(prefix="vulor-test-media-")
 
 
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class PaymentTransactionTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(

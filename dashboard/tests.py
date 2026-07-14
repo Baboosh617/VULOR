@@ -133,3 +133,12 @@ class PaymentVerificationTests(TestCase):
         response = self.client.get(reverse("dashboard:order_list"))
         self.assertContains(response, "Confirm Payment")
         self.assertContains(response, "View receipt")
+
+    def test_reject_sends_customer_email(self):
+        from django.core import mail
+        mail.outbox.clear()
+        self.client.post(reverse("dashboard:reject_payment", args=[self.order.id]))
+        rejected = [m for m in mail.outbox if "Payment Not Confirmed" in m.subject]
+        self.assertEqual(len(rejected), 1)
+        self.assertEqual(rejected[0].to, ["cust@example.com"])
+        self.assertIn(self.order.order_number, rejected[0].alternatives[0][0])

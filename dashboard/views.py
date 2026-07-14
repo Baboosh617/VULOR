@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from products.models import Product, Review, ProductImage
 from orders.models import Order
 from payments.models import PaymentTransaction
+from services.email_service import send_payment_rejected
 from dashboard.forms import ProductForm, ProductImageForm
 from django.contrib.auth import get_user_model
 from django import forms
@@ -186,6 +187,11 @@ def reject_payment(request, order_id):
 
     order.payment_status = "failed"
     order.save()
+
+    try:
+        send_payment_rejected(order.user, order)
+    except Exception:
+        logger.error(f"Failed to send payment rejection email for order {order.id}", exc_info=True)
 
     logger.info(f"Payment for order {order.order_number} rejected by {request.user.username}")
     messages.success(request, f"Payment for order {order.order_number} rejected. The customer can retry.")
