@@ -236,3 +236,74 @@ class EmailTemplateTests(TestCase):
         self.assertIn("3500.00", html)
         self.assertIn("Bank Transfer", html)
         self.assertIn(self.order.order_number, html)
+
+
+from unittest.mock import patch
+
+from django.core import mail
+
+from services.email_service import send_order_confirmation
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage",
+    BANK_TRANSFER_BANK_NAME="GTBank",
+    BANK_TRANSFER_ACCOUNT_NAME="VULOR Store",
+    BANK_TRANSFER_ACCOUNT_NUMBER="0123456789",
+)
+class EmailDispatchTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email="dispatch@example.com", username="dispatchuser",
+            password="strongpass123", first_name="Ada",
+        )
+        self.order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("3000.00"),
+            shipping_fee=Decimal("500.00"),
+            shipping_address="1 Market St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="dispatch@example.com",
+        )
+        mail.outbox.clear()  # drop the signal-driven creation emails
+
+    @override_settings(EMAIL_ASYNC_ENABLED=False)
+    def test_sends_synchronously_by_default(self):
+        send_order_confirmation(self.user, self.order)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.order.order_number, mail.outbox[0].subject)
+        self.assertIn("0123456789", mail.outbox[0].alternatives[0][0])
+
+    @override_settings(EMAIL_ASYNC_ENABLED=True)
+    def test_falls_back_to_sync_when_broker_unavailable(self):
+        with patch(
+            "services.email_service.send_html_email_task.delay",
+            side_effect=ConnectionError("broker down"),
+        ):
+            send_order_confirmation(self.user, self.order)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.order.order_number, mail.outbox[0].subject)
+
+    @override_settings(EMAIL_ASYNC_ENABLED=True)
+    def test_queues_via_celery_when_async_enabled(self):
+        with patch(
+            "services.email_service.send_html_email_task.delay"
+        ) as mock_delay:
+            send_order_confirmation(self.user, self.order)
+        mock_delay.assert_called_once()
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(EMAIL_ASYNC_ENABLED=False)
+    def test_order_creation_signal_delivers_confirmation(self):
+        order = Order.objects.create(
+            user=self.user,
+            total_amount=Decimal("1000.00"),
+            shipping_address="2 Side St",
+            shipping_city="Ikeja",
+            shipping_state="Lagos",
+            customer_email="dispatch@example.com",
+        )
+        subjects = [m.subject for m in mail.outbox]
+        self.assertTrue(any(order.order_number in s for s in subjects))

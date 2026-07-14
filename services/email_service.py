@@ -4,11 +4,35 @@ import os
 from django.core.mail import EmailMessage, EmailMultiAlternatives, send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from .tasks import send_html_email_task
+from .tasks import send_html_email_task, send_templated_email
 
 logger = logging.getLogger(__name__)
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+
+
+def _dispatch(subject, template, user, order):
+    """Deliver a templated customer email. Queues via Celery only when
+    EMAIL_ASYNC_ENABLED is set (worker + broker present); otherwise — or if
+    the broker is unreachable — sends synchronously so emails are never
+    silently dropped."""
+    kwargs = dict(
+        subject=subject,
+        template=template,
+        user_id=user.id,
+        order_id=order.id,
+        to_email=user.email,
+    )
+    if getattr(settings, "EMAIL_ASYNC_ENABLED", False):
+        try:
+            send_html_email_task.delay(**kwargs)
+            return
+        except Exception:
+            logger.warning(
+                f"Celery broker unavailable — sending '{subject}' synchronously",
+                exc_info=True,
+            )
+    send_templated_email(**kwargs)
 
 
 # ─── Internal helper ──────────────────────────────────────────────────────────
@@ -32,12 +56,11 @@ def send_html_email(subject, template, context, to_email):
 
 # ─── Customer emails (async via Celery) ──────────────────────────────────────
 def send_order_confirmation(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"Your VULOR Order #{order.order_number} is Confirmed",
         template="emails/order_confirmation.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
@@ -60,72 +83,74 @@ def send_order_status_update(user, order):
     }
     template = template_map.get(order.status, "emails/order_confirmation.html")
 
-    send_html_email_task.delay(
+    _dispatch(
         subject=subject,
         template=template,
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
 def send_order_shipped(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"VULOR Order #{order.order_number} Shipped!",
         template="emails/shipping_update.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
 def send_order_out_for_delivery(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"Order #{order.order_number} is Out for Delivery",
         template="emails/shipping_update.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
 def send_order_delivered(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"Order #{order.order_number} Delivered Successfully",
         template="emails/order_confirmation.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
 def send_order_cancelled(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"VULOR Order #{order.order_number} Cancelled",
         template="emails/order_confirmation.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 
 def send_payment_receipt(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"Payment Receipt – Order #{order.order_number}",
         template="emails/payment_receipt.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
+    )
+
+
+def send_payment_rejected(user, order):
+    _dispatch(
+        subject=f"Payment Not Confirmed – Order #{order.order_number}",
+        template="emails/payment_rejected.html",
+        user=user,
+        order=order,
     )
 
 
 def send_review_request(user, order):
-    send_html_email_task.delay(
+    _dispatch(
         subject=f"Review Your Purchase – Order #{order.order_number}",
         template="emails/review_request.html",
-        user_id=user.id,
-        order_id=order.id,
-        to_email=user.email,
+        user=user,
+        order=order,
     )
 
 

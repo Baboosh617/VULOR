@@ -357,5 +357,9 @@ CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
+# Customer emails are sent synchronously unless a Celery worker + broker
+# actually run in the environment (the Render web service has neither).
+EMAIL_ASYNC_ENABLED = os.getenv('EMAIL_ASYNC_ENABLED', 'False') == 'True'
+
 
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']

@@ -11,8 +11,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={"max_retries": 3, "countdown": 5})
-def send_html_email_task(self, subject, template, user_id, order_id, to_email):
+def send_templated_email(subject, template, user_id, order_id, to_email):
+    """Render and send a customer email. Called directly for synchronous
+    delivery or via send_html_email_task when a Celery worker is available."""
     from django.contrib.auth import get_user_model
     from orders.models import Order
 
@@ -39,6 +40,11 @@ def send_html_email_task(self, subject, template, user_id, order_id, to_email):
     )
     msg.attach_alternative(html_content, "text/html")
     msg.send()
+
+
+@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={"max_retries": 3, "countdown": 5})
+def send_html_email_task(self, subject, template, user_id, order_id, to_email):
+    send_templated_email(subject, template, user_id, order_id, to_email)
 
 
 @shared_task(bind=True)
