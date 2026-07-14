@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from products.models import Product, Review, ProductImage
 from orders.models import Order
-from payments.models import PaymentTransaction
 from services.email_service import send_payment_rejected
 from dashboard.forms import ProductForm, ProductImageForm
 from django.contrib.auth import get_user_model
@@ -146,20 +145,7 @@ def confirm_payment(request, order_id):
         messages.info(request, f"Order {order.order_number} is already marked paid.")
         return redirect("dashboard:order_list")
 
-    txn = (
-        PaymentTransaction.objects
-        .filter(order=order, status__in=["pending", "pending_verification"])
-        .order_by("-created_at")
-        .first()
-    )
-    if txn:
-        txn.status = "success"
-        txn.verified_at = now()
-        txn.save(update_fields=["status", "verified_at"])
-
-    # Firing the payment_success signal: inventory reduction + customer receipt email.
-    order.payment_status = "success"
-    order.save()
+    order.confirm_payment()
 
     logger.info(f"Payment for order {order.order_number} confirmed by {request.user.username}")
     messages.success(request, f"Payment for order {order.order_number} confirmed.")
@@ -175,18 +161,7 @@ def reject_payment(request, order_id):
         messages.error(request, f"Order {order.order_number} has no receipt awaiting verification.")
         return redirect("dashboard:order_list")
 
-    txn = (
-        PaymentTransaction.objects
-        .filter(order=order, status="pending_verification")
-        .order_by("-created_at")
-        .first()
-    )
-    if txn:
-        txn.status = "rejected"
-        txn.save(update_fields=["status"])
-
-    order.payment_status = "failed"
-    order.save()
+    order.reject_payment()
 
     try:
         send_payment_rejected(order.user, order)

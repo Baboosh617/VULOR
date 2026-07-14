@@ -174,6 +174,45 @@ class Order(models.Model):
 
        
 
+    def confirm_payment(self):
+        """Mark the active transaction and this order as paid. The
+        payment_success post_save signal then reduces inventory and sends
+        the customer receipt email. Used by the dashboard and Django admin."""
+        from django.utils import timezone
+        from payments.models import PaymentTransaction
+
+        txn = (
+            PaymentTransaction.objects
+            .filter(order=self, status__in=["pending", "pending_verification"])
+            .order_by("-created_at")
+            .first()
+        )
+        if txn:
+            txn.status = "success"
+            txn.verified_at = timezone.now()
+            txn.save(update_fields=["status", "verified_at"])
+
+        self.payment_status = "success"
+        self.save()
+
+    def reject_payment(self):
+        """Reject the receipt awaiting verification; the customer can retry
+        from the transfer page. Used by the dashboard and Django admin."""
+        from payments.models import PaymentTransaction
+
+        txn = (
+            PaymentTransaction.objects
+            .filter(order=self, status="pending_verification")
+            .order_by("-created_at")
+            .first()
+        )
+        if txn:
+            txn.status = "rejected"
+            txn.save(update_fields=["status"])
+
+        self.payment_status = "failed"
+        self.save()
+
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())
     
