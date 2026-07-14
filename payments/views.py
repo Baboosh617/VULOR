@@ -28,7 +28,7 @@ def _bank_details():
 def _get_or_create_pending_transaction(order):
     payment = (
         PaymentTransaction.objects
-        .filter(order=order, status__in=['pending', 'initiated'])
+        .filter(order=order, status='pending')
         .order_by('-created_at')
         .first()
     )

@@ -15,7 +15,6 @@ def receipt_upload_path(instance, filename):
 class PaymentTransaction(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('initiated', 'Initiated'),  # legacy Paystack rows
         ('pending_verification', 'Pending Verification'),
         ('success', 'Success'),
         ('failed', 'Failed'),
@@ -41,7 +40,7 @@ class PaymentTransaction(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['order'],
-                condition=models.Q(status__in=['pending', 'initiated', 'pending_verification']),
+                condition=models.Q(status__in=['pending', 'pending_verification']),
                 name='one_active_payment_per_order'
             )]
         ordering = ['-created_at']

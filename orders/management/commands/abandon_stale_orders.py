@@ -28,7 +28,7 @@ class Command(BaseCommand):
         count = 0
         for order in stale:
             PaymentTransaction.objects.filter(
-                order=order, status__in=["pending", "initiated"]
+                order=order, status="pending"
             ).update(status="failed")
             order.payment_status = "abandoned"
             order.save(update_fields=["payment_status", "updated_at"])

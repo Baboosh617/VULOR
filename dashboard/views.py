@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from products.models import Product, Review, ProductImage
 from orders.models import Order
 from services.email_service import send_payment_rejected
-from dashboard.forms import ProductForm, ProductImageForm
+from dashboard.forms import ProductForm
 from django.contrib.auth import get_user_model
 from django import forms
 from datetime import timedelta
