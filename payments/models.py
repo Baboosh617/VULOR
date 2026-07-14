@@ -22,15 +22,12 @@ class PaymentTransaction(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    # Holds the internal transfer reference; rename to `reference` (and drop
-    # paystack_access_code) pending in a follow-up migration.
-    paystack_reference = models.CharField(max_length=100, unique=True)
+    reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
     verified_at = models.DateTimeField(null=True, blank=True)
-    paystack_access_code = models.CharField(max_length=200, blank=True, null=True)
     metadata = models.JSONField(default=dict, blank=True)
 
     receipt = models.FileField(upload_to=receipt_upload_path, blank=True, null=True)
@@ -38,7 +35,7 @@ class PaymentTransaction(models.Model):
     submitted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.paystack_reference} - {self.order.order_number}"
+        return f"{self.reference} - {self.order.order_number}"
 
     class Meta:
         constraints = [

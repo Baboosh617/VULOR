@@ -47,7 +47,7 @@ class PaymentTransactionTests(TestCase):
 
     def test_bank_transfer_fields_default_empty(self):
         tx = PaymentTransaction.objects.create(
-            paystack_reference="ps-1",
+            reference="ps-1",
             order=self.order,
             amount=Decimal("1200.00"),
         )
@@ -228,7 +228,7 @@ class ReceiptAdminTests(TestCase):
         self.txn = PaymentTransaction.objects.create(
             order=self.order,
             amount=Decimal("3000.00"),
-            paystack_reference=PaymentTransaction.generate_reference(),
+            reference=PaymentTransaction.generate_reference(),
             status="pending_verification",
             receipt=SimpleUploadedFile("receipt.jpg", b"receipt-bytes"),
         )

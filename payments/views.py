@@ -36,7 +36,7 @@ def _get_or_create_pending_transaction(order):
         payment = PaymentTransaction.objects.create(
             order=order,
             amount=order.grand_total,
-            paystack_reference=PaymentTransaction.generate_reference(),
+            reference=PaymentTransaction.generate_reference(),
             status='pending',
             metadata={'items_count': order.items.count(), 'delivery_fee': float(order.shipping_fee)},
         )

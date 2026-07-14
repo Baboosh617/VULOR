@@ -7,16 +7,16 @@ from .models import PaymentTransaction
 @admin.register(PaymentTransaction)
 class PaymentTransactionAdmin(admin.ModelAdmin):
     list_display = [
-        'paystack_reference', 'order', 'amount', 'status',
+        'reference', 'order', 'amount', 'status',
         'transaction_reference', 'receipt_links', 'submitted_at', 'created_at',
     ]
     list_filter = ['status', 'created_at']
-    search_fields = ['paystack_reference', 'transaction_reference', 'order__order_number']
+    search_fields = ['reference', 'transaction_reference', 'order__order_number']
     readonly_fields = ['receipt_preview', 'submitted_at', 'verified_at', 'created_at']
     fields = [
         'order', 'amount', 'status', 'transaction_reference',
         'receipt', 'receipt_preview', 'submitted_at', 'verified_at',
-        'created_at', 'paystack_reference', 'metadata',
+        'created_at', 'reference', 'metadata',
     ]
 
     @admin.display(description='Receipt')

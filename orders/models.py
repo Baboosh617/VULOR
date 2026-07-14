@@ -67,10 +67,6 @@ class Order(models.Model):
     order_notes = models.TextField(blank=True, default='')
 
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-    # Frozen legacy Paystack columns — no code writes them anymore; kept for
-    # historical orders until a follow-up drop migration.
-    paystack_reference = models.CharField(max_length=100, blank=True)
-    paystack_access_code = models.CharField(max_length=100, blank=True)
     payment_method = models.CharField(max_length=50, default='bank_transfer')
 
     class Meta:

@@ -335,7 +335,7 @@ class OrderPaymentTransitionTests(TestCase):
         self.txn = PaymentTransaction.objects.create(
             order=self.order,
             amount=Decimal("3500.00"),
-            paystack_reference=PaymentTransaction.generate_reference(),
+            reference=PaymentTransaction.generate_reference(),
             status="pending_verification",
         )
 
@@ -386,7 +386,7 @@ class OrderAdminActionTests(TestCase):
         self.txn = PaymentTransaction.objects.create(
             order=self.order,
             amount=Decimal("3000.00"),
-            paystack_reference=PaymentTransaction.generate_reference(),
+            reference=PaymentTransaction.generate_reference(),
             status="pending_verification",
         )
         self.client.force_login(self.admin)
