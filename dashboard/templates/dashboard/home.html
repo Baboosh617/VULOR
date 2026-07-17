@@ -1,101 +1,139 @@
 {% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block title %}Overview — Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">Dashboard Overview</h1>
+<span class="v-label text-ink-3 block mb-4">01 / OVERVIEW</span>
+<h1 class="v-display text-3xl md:text-4xl text-ink-1 mb-8">DASHBOARD.</h1>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-    <!-- Weekly Sales Summary -->
-    <div class="bg-white shadow rounded p-4">
-        <h2 class="font-semibold">Weekly Sales</h2>
-        <p class="text-2xl">₦{{ weekly_sales|floatformat:2 }}</p>
+<!-- Heartbeat + summary plates -->
+<div class="grid grid-cols-2 lg:grid-cols-4 v-hairline-t v-hairline-l mb-10">
+    <a href="{% url 'dashboard:order_list' %}?payment=pending_verification" class="v-hairline-r v-hairline-b p-5 block hover:bg-ground-900 transition-colors duration-fast {% if awaiting_verification > 0 %}v-current--signal{% endif %}">
+        <p class="v-label text-ink-3 mb-2">AWAITING VERIFICATION</p>
+        <p class="v-display text-3xl {% if awaiting_verification > 0 %}text-signal{% else %}text-ink-1{% endif %}">{{ awaiting_verification|stringformat:"02d" }}</p>
+    </a>
+    <div class="v-hairline-r v-hairline-b p-5">
+        <p class="v-label text-ink-3 mb-2">PENDING ORDERS</p>
+        <p class="v-display text-3xl text-ink-1">{{ pending_orders|stringformat:"02d" }}</p>
     </div>
+    <div class="v-hairline-r v-hairline-b p-5">
+        <p class="v-label text-ink-3 mb-2">WEEKLY SALES</p>
+        <p class="v-display text-3xl text-ink-1">&#8358;{{ weekly_sales|floatformat:0|intcomma }}</p>
+    </div>
+    <a href="{% url 'dashboard:product_list' %}?active=true" class="v-hairline-r v-hairline-b p-5 block hover:bg-ground-900 transition-colors duration-fast {% if low_stock_products > 0 %}v-current--signal{% endif %}">
+        <p class="v-label text-ink-3 mb-2">LOW STOCK</p>
+        <p class="v-display text-3xl {% if low_stock_products > 0 %}text-signal{% else %}text-ink-1{% endif %}">{{ low_stock_products|stringformat:"02d" }}</p>
+    </a>
+</div>
 
-    <!-- Pending Restock -->
-    <div class="bg-red-100 shadow rounded p-4">
-        <h2 class="font-semibold">Products Low in Stock</h2>
-        <ul class="mt-2">
-            {% for product in restock_needed %}
-            <li class="text-red-700">{{ product.name }} ({{ product.inventory_count }} left)</li>
-            {% empty %}
-            <li class="text-gray-500">All products stocked</li>
-            {% endfor %}
-        </ul>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Low stock products -->
+    <div>
+        <div class="flex items-baseline justify-between mb-4">
+            <span class="v-label text-ink-3">LOW STOCK PRODUCTS</span>
+            <a href="{% url 'dashboard:product_list' %}" class="v-label v-underline text-ink-3 hover:text-ink-1">ALL PRODUCTS &rarr;</a>
+        </div>
         {% if restock_needed %}
-        <a href="{% url 'dashboard:product_list' %}" class="text-red-800 hover:underline mt-1 inline-block">Go to products</a>
+        <table class="v-table">
+            <tbody>
+                {% for product in restock_needed %}
+                <tr>
+                    <td><a href="{% url 'dashboard:edit_product' product.id %}" class="v-underline text-ink-1">{{ product.name }}</a></td>
+                    <td class="is-num text-signal">{{ product.inventory_count }} LEFT</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="v-spec text-ink-3">ALL PRODUCTS STOCKED.</p>
         {% endif %}
     </div>
 
-    <!-- Example: Pending Reviews -->
-    <div class="bg-yellow-100 shadow rounded p-4">
-        <h2 class="font-semibold">Pending Reviews</h2>
-        <p class="text-2xl">{{ pending_reviews_count }}</p>
-        <a href="{% url 'dashboard:review_list' %}" class="text-yellow-800 hover:underline mt-1 inline-block">Go to reviews</a>
+    <!-- Store stats -->
+    <div>
+        <span class="v-label text-ink-3 block mb-4">STORE</span>
+        <table class="v-table">
+            <tbody>
+                <tr><td class="text-ink-2">TOTAL ORDERS</td><td class="is-num text-ink-1">{{ total_orders }}</td></tr>
+                <tr><td class="text-ink-2">COMPLETED ORDERS</td><td class="is-num text-ink-1">{{ completed_orders }}</td></tr>
+                <tr><td class="text-ink-2">TOTAL PRODUCTS</td><td class="is-num text-ink-1">{{ total_products }}</td></tr>
+                <tr>
+                    <td class="text-ink-2">PENDING REVIEWS</td>
+                    <td class="is-num"><a href="{% url 'dashboard:review_list' %}" class="v-underline text-ink-1">{{ pending_reviews_count }}</a></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
-
-<div class="mb-6 flex gap-4">
-    {% if pending_reviews_count > 0 %}
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded flex-1">
-        <p class="font-semibold">You have {{ pending_reviews_count }} pending review{% if pending_reviews_count > 1 %}s{% endif %}.</p>
-        <a href="{% url 'dashboard:review_list' %}" class="text-yellow-800 hover:underline mt-1 inline-block">Go to reviews</a>
-    </div>
-    {% endif %}
-
-    {% if low_stock_products > 0 %}
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded flex-1">
-        <p class="font-semibold">{{ low_stock_products }} product{% if low_stock_products > 1 %}s{% endif %} low in stock!</p>
-        <a href="{% url 'dashboard:product_list' %}" class="text-red-800 hover:underline mt-1 inline-block">Go to products</a>
-    </div>
-    {% endif %}
-</div>
-
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-    <div class="bg-white shadow rounded p-4">
-        <h2 class="font-semibold">Total Orders</h2>
-        <p class="text-2xl">{{ total_orders }}</p>
-    </div>
-    <div class="bg-white shadow rounded p-4">
-        <h2 class="font-semibold">Pending Reviews</h2>
-        <p class="text-2xl">{{ pending_reviews }}</p>
-    </div>
-    <div class="bg-white shadow rounded p-4">
-        <h2 class="font-semibold">Total Products</h2>
-        <p class="text-2xl">{{ total_products }}</p>
+<!-- Sales chart: dependency-free inline SVG — no CDN scripts on any page
+     (a flaky third-party request must never blank the staff overview). -->
+<div>
+    <span class="v-label text-ink-3 block mb-4">SALES — LAST 7 DAYS</span>
+    <div class="v-plate p-5">
+        <svg id="salesChart" viewBox="0 0 700 200" preserveAspectRatio="none"
+             class="w-full h-40" role="img" aria-label="Sales for the last 7 days"></svg>
+        <div id="salesLabels" class="flex justify-between mt-2"></div>
     </div>
 </div>
+{% endblock %}
 
-<div class="bg-white shadow rounded p-4">
-    <h2 class="font-semibold mb-4">Sales Last 7 Days</h2>
-    <canvas id="salesChart"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block scripts %}
+{{ sales_labels|json_script:"sales-labels" }}
+{{ sales_data|json_script:"sales-data" }}
 <script>
-const ctx = document.getElementById('salesChart').getContext('2d');
-const salesChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {{ sales_labels|safe }},
-        datasets: [{
-            label: 'Sales (₦)',
-            data: {{ sales_data|safe }},
-            fill: false,
-            borderColor: 'rgb(34,197,94)',
-            tension: 0.1
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: true },
-            tooltip: { mode: 'index' }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
+(function () {
+    var labels = JSON.parse(document.getElementById('sales-labels').textContent);
+    var data = JSON.parse(document.getElementById('sales-data').textContent).map(Number);
+    var svg = document.getElementById('salesChart');
+    var css = getComputedStyle(document.documentElement);
+    var lime = (css.getPropertyValue('--lime') || '#b6ff00').trim();
+    var line = (css.getPropertyValue('--line-dark') || 'rgba(255,255,255,0.14)').trim();
+
+    var W = 700, H = 200, PAD = 10;
+    var max = Math.max.apply(null, data.concat([1]));
+    var stepX = data.length > 1 ? (W - PAD * 2) / (data.length - 1) : 0;
+
+    function y(v) { return H - PAD - (v / max) * (H - PAD * 2); }
+    function x(i) { return PAD + i * stepX; }
+
+    var ns = 'http://www.w3.org/2000/svg';
+    // Horizontal grid rules (quarters)
+    for (var g = 1; g <= 3; g++) {
+        var gy = PAD + (H - PAD * 2) * g / 4;
+        var rule = document.createElementNS(ns, 'line');
+        rule.setAttribute('x1', PAD); rule.setAttribute('x2', W - PAD);
+        rule.setAttribute('y1', gy); rule.setAttribute('y2', gy);
+        rule.setAttribute('stroke', line); rule.setAttribute('stroke-width', '1');
+        svg.appendChild(rule);
     }
-});
+    // The line
+    var poly = document.createElementNS(ns, 'polyline');
+    poly.setAttribute('points', data.map(function (v, i) { return x(i) + ',' + y(v); }).join(' '));
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', lime);
+    poly.setAttribute('stroke-width', '2');
+    poly.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.appendChild(poly);
+    // Points
+    data.forEach(function (v, i) {
+        var dot = document.createElementNS(ns, 'circle');
+        dot.setAttribute('cx', x(i)); dot.setAttribute('cy', y(v)); dot.setAttribute('r', '3');
+        dot.setAttribute('fill', lime);
+        var t = document.createElementNS(ns, 'title');
+        t.textContent = labels[i] + ' — ₦ ' + v.toLocaleString('en-NG');
+        dot.appendChild(t);
+        svg.appendChild(dot);
+    });
+    // X labels
+    var row = document.getElementById('salesLabels');
+    labels.forEach(function (l) {
+        var s = document.createElement('span');
+        s.className = 'v-label text-ink-3';
+        s.textContent = l;
+        row.appendChild(s);
+    });
+})();
 </script>
 {% endblock %}

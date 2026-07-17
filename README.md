@@ -1,7 +1,8 @@
 # VULOR
 
 VULOR is a full-stack e-commerce web application for a fashion brand, built with
-Django, Tailwind CSS, vanilla JavaScript, and Paystack for payments. It supports
+Django, Tailwind CSS, and vanilla JavaScript. Payments are made by manual bank
+transfer: customers upload a payment receipt which store staff verify. It supports
 product listings, a shopping cart, orders, payments, user accounts (email + Google
 OAuth), and an admin dashboard.
 
@@ -9,7 +10,8 @@ Prices are denominated in Nigerian Naira (₦).
 
 ## Tech Stack
 
-- **Backend:** Django 5.0.4, django-allauth (email + Google OAuth), Paystack API
+- **Backend:** Django 5.0.4, django-allauth (email + Google OAuth)
+- **Payments:** manual bank transfer — receipt upload + staff verification
 - **Async / scheduling:** Celery 5.6 + Redis, django-celery-beat (weekly sales report)
 - **Frontend:** Tailwind CSS (django-tailwind), vanilla JS (`cart.js`, `toast.js`)
 - **Database:** PostgreSQL (production) / SQLite (local development)
@@ -21,7 +23,9 @@ Prices are denominated in Nigerian Naira (₦).
 - Product catalog with categories, sizes, colors, and per-category measurements
 - Customer reviews with moderation (admin approval) and aggregate ratings
 - Shopping cart with per-item size/color variants
-- Checkout with shipping details and Paystack payment integration
+- Checkout with zone-based shipping fees, optional order notes, and bank-transfer
+  payment (bank details page, receipt upload, staff verification in the dashboard
+  or Django admin)
 - Order lifecycle (pending → processing → shipped → completed / cancelled) with
   automated email notifications and inventory adjustment
 - Email + Google OAuth authentication (django-allauth)
@@ -37,7 +41,7 @@ VULOR/
 ├── products/        # Product, Review, Category, ProductImage, StoreReview
 ├── cart/            # Cart, CartItem, context processor
 ├── orders/          # Order, OrderItem, status/payment signals
-├── payments/        # Payment, PaymentTransaction (Paystack)
+├── payments/        # PaymentTransaction, transfer instructions, receipt upload
 ├── dashboard/       # Custom admin UI (not Django admin)
 ├── services/        # email_service, inventory_service, admin_report_service, tasks
 ├── error_pages/     # Custom HTTP error handlers
@@ -100,9 +104,10 @@ Create a `.env` file in the project root. Key variables:
 | `SECRET_KEY` | Django secret key |
 | `DEBUG` | Set automatically from `ON_RENDER` (True locally, False on Render) |
 | `DATABASE_URL` | PostgreSQL connection string (used on Render) |
-| `PAYSTACK_SECRET_KEY` | Paystack secret key |
-| `PAYSTACK_PUBLIC_KEY` | Paystack public key |
-| `PAYSTACK_WEBHOOK_SECRET` | Paystack webhook secret |
+| `BANK_TRANSFER_BANK_NAME` | Bank name shown to customers at checkout |
+| `BANK_TRANSFER_ACCOUNT_NAME` | Account name shown to customers |
+| `BANK_TRANSFER_ACCOUNT_NUMBER` | Account number shown to customers |
+| `EMAIL_ASYNC_ENABLED` | `True` only where a Celery worker + Redis run (default `False` = synchronous email) |
 | `SITE_URL` | Public site URL (default `http://127.0.0.1:8000`) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client id |
 | `GOOGLE_SECRET_KEY` | Google OAuth secret |

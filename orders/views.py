@@ -1,15 +1,13 @@
-from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse
 from .models import Order, OrderItem
+from .forms import CheckoutForm
+from .shipping import get_shipping_info, client_table
 from cart.models import Cart
+from products.models import Product
 from django_ratelimit.decorators import ratelimit
 from django.db import transaction
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 import logging
 
@@ -17,122 +15,134 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
+
+def _render_checkout(request, cart):
+    return render(request, "orders/checkout.html", {
+        "cart": cart,
+        "shipping_zones": client_table(),
+    })
+
+
 @ratelimit(key='user_or_ip', rate='10/m', block=True)
 @login_required
-@require_POST
 def checkout(request):
+    # checkout.html reads item.product.* per cart line, and the OrderItem
+    # creation loop below reads cart_item.product.price per item too —
+    # prefetching once covers both the GET-rendered page and the POST path.
+    cart, _ = Cart.objects.prefetch_related('items__product').get_or_create(user=request.user)
+
+    if not cart.items.exists():
+        messages.error(request, "Your cart is empty.")
+        return redirect("view_cart")
+
+    if request.method != "POST":
+        return _render_checkout(request, cart)
+
     logger.info(f"User {request.user.email} is checking out.")
+
+    form = CheckoutForm(request.POST)
+    if not form.is_valid():
+        for field, errors in form.errors.items():
+            label = field.replace('_', ' ').title()
+            messages.error(request, f"{label}: {errors[0]}")
+        return _render_checkout(request, cart)
+
+    cd = form.cleaned_data
+    # Fee and zone come from the server-side table, never from the client.
+    shipping_zone, shipping_fee = get_shipping_info(cd["state"])
+
     try:
-        cart = get_object_or_404(Cart, user=request.user)
+        # fast-fail before touching the lock — optimization only, not the
+        # authoritative check (see inside the atomic block below)
+        if Order.objects.filter(user=request.user, payment_status='pending').exists():
+            messages.error(request, "You already have a pending order.")
+            return redirect('view_cart')
 
-        if not cart.items.exists():
-            messages.error(request, "Your cart is empty.")
-            return redirect("view_cart")
+        if cart.total_price + shipping_fee <= 0:
+            messages.error(request, "Order total is less than or equal to zero.")
+            return redirect('view_cart')
 
-        full_name = request.POST.get("full_name", "").strip()
-        phone_number = request.POST.get("phone_number", "").strip()
-        email = request.POST.get("email", "").strip()
-        address_line = request.POST.get("address_line", "").strip()
-        state = request.POST.get("state", "").strip()
-        city = request.POST.get("city", "").strip()
-        shipping_zone = request.POST.get("shipping_zone", "").strip()
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
 
-        required_fields = {
-            'full_name': full_name, 'phone_number': phone_number, 'email': email,
-            'address_line': address_line, 'state': state, 'city': city,
-        }
-        missing_fields = [f.replace('_', ' ').title() for f, v in required_fields.items() if not v]
-        if missing_fields:
-            messages.error(request, f"Please fill in: {', '.join(missing_fields)}")
-            return render(request, "orders/checkout.html", {"cart": cart})
-
-        try:
-            validate_email(email)
-        except ValidationError:
-            messages.error(request, "Invalid email address.")
-            return render(request, "orders/checkout.html", {"cart": cart})
-
-        if not phone_number.isdigit() or len(phone_number) < 10:
-            messages.error(request, "Invalid phone number.")
-            return render(request, "orders/checkout.html", {"cart": cart})
-
-        try:
-            from decimal import Decimal
-            shipping_fee_decimal = Decimal("5000.00") if state.lower() == "lagos" else Decimal("3000.00")
-
-            # fast-fail before touching the lock — optimization only, not the
-            # authoritative check (see inside the atomic block below)
+            # authoritative recheck — the row lock above serializes concurrent
+            # requests from the same user, so this check is now race-safe
             if Order.objects.filter(user=request.user, payment_status='pending').exists():
                 messages.error(request, "You already have a pending order.")
                 return redirect('view_cart')
 
-            calculated_total = cart.total_price + shipping_fee_decimal
-            if calculated_total <= 0:
-                messages.error(request, "Order total is less than or equal to zero.")
-                return redirect('view_cart')
-
-            # ---- THIS replaces the old dead `Order.objects.select_for_update().filter(...)` ----
-            with transaction.atomic():
-                User.objects.select_for_update().get(pk=request.user.pk)
-
-                # authoritative recheck — the row lock above serializes concurrent
-                # requests from the same user, so this check is now race-safe
-                if Order.objects.filter(user=request.user, payment_status='pending').exists():
-                    messages.error(request, "You already have a pending order.")
+            # Stock check, row-locked so it can't race with another
+            # checkout reducing the same product's inventory concurrently.
+            for cart_item in cart.items.all():
+                product = Product.objects.select_for_update().get(id=cart_item.product_id)
+                if product.inventory_count < cart_item.quantity:
+                    messages.error(
+                        request,
+                        f"Only {product.inventory_count} of {product.name} left in stock. "
+                        f"Please update your cart quantity."
+                    )
                     return redirect('view_cart')
 
-                order = Order.objects.create(
-                    user=request.user,
-                    total_amount=cart.total_price,
-                    shipping_full_name=full_name,
-                    shipping_address=address_line,
-                    shipping_city=city,
-                    shipping_state=state,
-                    shipping_zipcode="",
-                    shipping_country="Nigeria",
-                    shipping_fee=shipping_fee_decimal,
-                    shipping_zone=shipping_zone,
-                    customer_email=email,
-                    customer_phone=phone_number,
+            order = Order.objects.create(
+                user=request.user,
+                total_amount=cart.total_price,
+                shipping_full_name=cd["full_name"],
+                shipping_address=cd["address_line"],
+                shipping_city=cd["city"],
+                shipping_state=cd["state"],
+                shipping_zipcode="",
+                shipping_country="Nigeria",
+                shipping_fee=shipping_fee,
+                shipping_zone=shipping_zone,
+                customer_email=cd["email"],
+                customer_phone=cd["phone_number"],
+                order_notes=cd["order_notes"],
+            )
+            for cart_item in cart.items.all():
+                OrderItem.objects.create(
+                    order=order, product=cart_item.product, quantity=cart_item.quantity,
+                    price=cart_item.product.price, size=cart_item.size, color=cart_item.color,
                 )
-                for cart_item in cart.items.all():
-                    OrderItem.objects.create(
-                        order=order, product=cart_item.product, quantity=cart_item.quantity,
-                        price=cart_item.product.price, size=cart_item.size, color=cart_item.color,
-                    )
-                logger.info(f"Order {order.id} created by {request.user.email}")
-                cart.items.all().delete()
+            logger.info(f"Order {order.id} created by {request.user.email}")
+            cart.items.all().delete()
 
-            return redirect('payments:initiate_payment', order_id=order.id)
+        return redirect('payments:transfer_instructions', order_id=order.id)
 
-        except Exception as e:
-            logger.error(f"Error creating order for user {request.user.email}: {str(e)}", exc_info=True)
-            messages.error(request, "Something went wrong while creating your order. Please try again.")
-            return render(request, "orders/checkout.html", {"cart": cart})
+    except Exception:
+        logger.error(f"Error creating order for user {request.user.email}", exc_info=True)
+        messages.error(request, "Something went wrong while creating your order. Please try again.")
+        return _render_checkout(request, cart)
 
-    except Cart.DoesNotExist:
-        messages.error(request, "Your cart is empty.")
-        return redirect("view_cart")
+
 @login_required
 def order_success(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
-    
-    
+
+    # order_detail is the single canonical result screen (it owns the confirmed
+    # celebration and every other state), so this legacy success URL now always
+    # redirects there instead of rendering a duplicate celebration template.
     if order.payment_status != 'success':
         messages.warning(request, "Payment not completed yet.")
-        return redirect('orders:order_detail', order_number=order.order_number)
-    
-    return render(request, 'orders/success.html', {'order': order})
+    return redirect('orders:order_detail', order_number=order.order_number)
+
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    # history.html calls order.get_total_items() per row, which touches
+    # order.items.all() — prefetching once avoids one query per order.
+    orders = Order.objects.filter(user=request.user).order_by('-created_at').prefetch_related('items')
     return render(request, 'orders/history.html', {'orders': orders})
+
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def order_detail(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    # detail.html iterates order.items.all() and reads item.product.* per
+    # line item — prefetching items with their products avoids a query per
+    # line item.
+    order = get_object_or_404(
+        Order.objects.prefetch_related('items__product'),
+        order_number=order_number, user=request.user,
+    )
     return render(request, 'orders/detail.html', {'order': order})
-

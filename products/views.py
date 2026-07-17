@@ -1,32 +1,19 @@
-import json
 import logging
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Q
-from .models import Product
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Q, Avg
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import Review, StoreReview
-from .forms import ReviewForm
 from django.contrib import messages
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django_ratelimit.decorators import ratelimit
-from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 
+from .models import Product, Review, StoreReview
+from .forms import ReviewForm
 from .cache_utils import get_products_cache_version
 
 logger = logging.getLogger(__name__)
-
-from django.shortcuts import render
-from django.db.models import Avg
-from django.core.cache import cache
-from .models import Product, Review
-from .forms import ReviewForm
 
 def home(request):
     

@@ -23,6 +23,7 @@ class Order(models.Model):
 
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('pending_verification', 'Pending Verification'),
         ('success', 'Success'),
         ('failed', 'Failed'),
         ('abandoned', 'Abandoned'),
@@ -63,25 +64,26 @@ class Order(models.Model):
     
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=20, blank=True, default='')
+    order_notes = models.TextField(blank=True, default='')
 
-    # Ps=aystack stfuu
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-    paystack_reference = models.CharField(max_length=100, blank=True)
-    paystack_access_code = models.CharField(max_length=100, blank=True)
-    payment_method = models.CharField(max_length=50, default='paystack')
+    payment_method = models.CharField(max_length=50, default='bank_transfer')
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            # payment_status/status/created_at are each filtered or ordered
+            # on constantly (dashboard stats, order_list, abandon_stale_orders,
+            # the default ordering itself) with no index today — invisible on
+            # SQLite, a real cost on Postgres production as tables grow.
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return self.order_number
 
-    
-    @property
-    def paystack_amount(self):
-        total_with_shipping = self.total_amount + self.shipping_fee
-        return int(total_with_shipping * 100)
-    
     @property
     def grand_total(self):
         """Calculate grand total including shipping"""
@@ -94,88 +96,85 @@ class Order(models.Model):
             self.order_number = f"VU{self.user.id:06d}{int(time.time())}{uuid4().hex[:4]}"
         super().save(*args, **kwargs)
 
-     
-            
-    # def handle_status_change(self, old_status):
-    #     """Handle inventory changes when order status changes"""
-    #     if old_status != self.status and self.payment_status == 'success':
-    #         self.reduce_inventory()
-    #         if not self.payment_email_sent:
-    #             send_order_confirmation(self.user, self)
-    #             self.payment_email_sent = True
-    #             self.save(update_fields=['payment_email_sent'])
-            
-    #         if not self.admin_notified_new:
-    #             send_admin_high_value_order(self)
-    #             self.admin_notified_new = True
-    #             self.save(update_fields=['admin_notified_new'])
-    #     elif old_status != self.status and self.payment_status == 'cancelled':
-    #         self.restore_inventory()
-          
+    # ---- Payment transitions — the only place payment_status changes ----
 
-        
-    #     elif old_status == 'success' and self.status == 'cancelled':
-    #         self.restore_inventory()
-        
-       
-    
-    # def reduce_inventory(self):
-    #     """Reduce inventory for all items in this order"""
-    #     if self.inventory_adjusted:
-    #         return
+    def submit_receipt(self, txn):
+        """Store the customer's uploaded receipt and move the order into
+        verification. `txn` is the (unsaved) transaction carrying the upload."""
+        from django.utils import timezone
 
-    #     with transaction.atomic():
-    #         for item in self.items.all():
-    #             product = Product.objects.select_for_update().get(id=item.product.id)
-    #             quantity = item.quantity
-                
-    #             # Check if enough stock
-    #             if product.inventory_count < quantity:
-    #                 # If not enough, set order to pending and notify admin
-    #                 self.status = 'pending'
-    #                 self.save(update_fields=['status'])
-    #                 raise ValueError(
-    #                     f"Insufficient stock for {product.name}. "
-    #                     f"Available: {product.inventory_count}, "
-    #                     f"Requested: {quantity}"
-    #                 )
-                
-    #             # Reduce inventory safely
-    #             Product.objects.filter(id=product.id).update(
-    #                 inventory_count=F('inventory_count') - quantity
-    #             )
-                
-    #             # Refresh product instance
-    #             product.refresh_from_db()
-                
-    #             # Check if low stock and send alert (optional)
-    #             if product.inventory_count <= 5 and not product.low_stock_email_sent:
-    #                 # You could add a low stock email here
-    #                 product.low_stock_email_sent = True
-    #                 product.save(update_fields=['low_stock_email_sent'])
-    #     logger.info(f"Inventory adjusted for order {self.id}")
-    #     self.inventory_adjusted = True
-    #     self.save(update_fields=['inventory_adjusted'])                    
-    
-    # def restore_inventory(self):
-    #     """Restore inventory when order is cancelled"""
-    #     with transaction.atomic():
-    #         for item in self.items.all():
-    #             product = item.product
-    #             quantity = item.quantity
-                
-    #             # Restore inventory
-    #             Product.objects.filter(id=product.id).update(
-    #                 inventory_count=F('inventory_count') + quantity
-    #             )
-                
-    #             # Reset low stock flag if inventory is now above threshold
-    #             product.refresh_from_db()
-    #             if product.inventory_count > 5:
-    #                 product.low_stock_email_sent = False
-    #                 product.save(update_fields=['low_stock_email_sent'])
+        with transaction.atomic():
+            txn.status = "pending_verification"
+            txn.submitted_at = timezone.now()
+            txn.save()
 
-       
+            self.payment_status = "pending_verification"
+            self.save(update_fields=["payment_status", "updated_at"])
+
+    def confirm_payment(self):
+        """Mark the active transaction and this order as paid. The
+        payment_success post_save signal then reduces inventory and sends
+        the customer receipt email. Used by the dashboard and Django admin.
+
+        Row-locked and re-checked inside the lock: two overlapping calls for
+        the same order (a double-submitted confirm click, two staff acting
+        on the same order) must not both pass and both trigger inventory
+        reduction — only the caller that wins the lock while the order is
+        still not 'success' performs the transition; a loser is a no-op."""
+        from django.utils import timezone
+        from payments.models import PaymentTransaction
+
+        with transaction.atomic():
+            locked = Order.objects.select_for_update().get(pk=self.pk)
+            if locked.payment_status != "success":
+                txn = PaymentTransaction.objects.latest_for(
+                    locked, ["pending", "pending_verification"]
+                )
+                if txn:
+                    txn.status = "success"
+                    txn.verified_at = timezone.now()
+                    txn.save(update_fields=["status", "verified_at"])
+
+                locked.payment_status = "success"
+                locked.save()
+
+        self.refresh_from_db()
+
+    def reject_payment(self, reason=None):
+        """Reject the receipt awaiting verification and email the customer to
+        retry from the transfer page. Used by the dashboard and Django admin.
+        `reason` (optional) is a staff note included in the rejection email.
+
+        Row-locked the same way as confirm_payment, so two overlapping
+        rejects for the same order don't both mutate state or both send the
+        customer a rejection email."""
+        from payments.models import PaymentTransaction
+        from services.email_service import send_payment_rejected
+
+        with transaction.atomic():
+            locked = Order.objects.select_for_update().get(pk=self.pk)
+            already_rejected = locked.payment_status != "pending_verification"
+            if not already_rejected:
+                txn = PaymentTransaction.objects.latest_for(locked, ["pending_verification"])
+                if txn:
+                    txn.status = "rejected"
+                    txn.save(update_fields=["status"])
+
+                locked.payment_status = "failed"
+                locked.save()
+
+        self.refresh_from_db()
+
+        if already_rejected:
+            return
+
+        try:
+            send_payment_rejected(self.user, self, reason=reason)
+        except Exception:
+            logger.error(
+                f"Failed to send payment rejection email for order {self.id}",
+                exc_info=True,
+            )
 
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())

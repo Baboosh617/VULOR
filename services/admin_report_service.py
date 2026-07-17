@@ -6,11 +6,8 @@ from django.db.models import Sum, F
 from django.utils.timezone import now, timedelta
 from orders.models import Order, OrderItem
 from products.models import Product
-from django.http import HttpResponse
 from django.db.models import DecimalField, ExpressionWrapper
-import os 
 
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 def send_weekly_sales_report():
     start_date = now() - timedelta(days=7)
@@ -63,7 +60,3 @@ def send_weekly_sales_report():
     )
     msg.attach_alternative(html_body, "text/html")
     msg.send()
-
-def test_weekly_report(request):
-    send_weekly_sales_report()
-    return HttpResponse("Weekly sales report sent!")

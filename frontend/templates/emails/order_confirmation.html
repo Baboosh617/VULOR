@@ -4,7 +4,7 @@
     <div style="max-width:600px; margin:auto; background-color:#fff; padding:20px; border-radius:8px;">
       <img src="{% static 'vulor-logo.png' %}" style="height:50px; margin-bottom:20px;" alt="VULOR Logo" />
       <h1 style="font-size:24px; font-weight:bold; color:#111827;">Thanks for your order, {{ user.first_name }}!</h1>
-      <p style="font-size:16px; color:#374151;">Your order <strong>#{{ order.id }}</strong> has been placed successfully.</p>
+      <p style="font-size:16px; color:#374151;">Your order <strong>{{ order.order_number }}</strong> has been placed successfully.</p>
 
       <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Order Details:</h2>
       <ul>
@@ -12,10 +12,28 @@
           <li style="margin-bottom:5px;">{{ item.quantity }} x {{ item.product.name }} - ₦{{ item.get_total_price }}</li>
         {% endfor %}
       </ul>
+      <p style="font-size:14px; color:#374151; margin:5px 0;">Subtotal: ₦{{ order.total_amount }}</p>
+      <p style="font-size:14px; color:#374151; margin:5px 0;">Shipping: ₦{{ order.shipping_fee }}</p>
+      <p style="font-size:16px; color:#111827; margin:5px 0;"><strong>Total: ₦{{ order.grand_total }}</strong></p>
 
+      {% if order.payment_status == 'pending' %}
+      <div style="margin-top:20px; padding:15px; background-color:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+        <h2 style="font-size:18px; font-weight:bold; color:#111827; margin-top:0;">Complete your payment</h2>
+        <p style="font-size:14px; color:#374151;">Transfer <strong>₦{{ order.grand_total }}</strong> to:</p>
+        <p style="font-size:14px; color:#374151; margin:5px 0;">Bank Name: <strong>{{ bank_name }}</strong></p>
+        <p style="font-size:14px; color:#374151; margin:5px 0;">Account Name: <strong>{{ account_name }}</strong></p>
+        <p style="font-size:14px; color:#374151; margin:5px 0;">Account Number: <strong>{{ account_number }}</strong></p>
+        <p style="font-size:13px; color:#6b7280; margin-top:10px;">
+          Use your order number <strong>{{ order.order_number }}</strong> as the transfer narration,
+          then upload your payment receipt so we can confirm your order.
+        </p>
+        <a href="{{ payment_url }}" style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#dc2626; color:#fff; text-decoration:none; border-radius:5px;">Upload Payment Receipt</a>
+      </div>
+      {% else %}
       <p style="margin-top:20px; font-size:16px; color:#374151;">We’ll notify you when your order is shipped.</p>
+      {% endif %}
 
-      <a href="http://localhost:8000/orders/{{ order.id }}/" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
+      <a href="{{ order_url }}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#1f2937; color:#fff; text-decoration:none; border-radius:5px;">View Order</a>
     </div>
   </body>
 </html>

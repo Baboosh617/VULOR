@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Payment — Order {{ order.order_number }} — VULOR{% endblock %}
+
+{% block header_nav %}{% include "includes/spine_steps.html" with step=3 %}{% endblock %}
+{% block footer %}{% include "includes/spine_footer.html" %}{% endblock %}
+
+{% block content %}
+<div class="c-gutter py-12 max-w-2xl mx-auto">
+
+    <p class="c-reg text-ink-3 mb-4">Order {{ order.order_number }} — awaiting transfer</p>
+    <h1 class="c-monolith text-4xl md:text-5xl mb-12">Pay by transfer.</h1>
+
+    {% if form.non_field_errors %}
+    <div class="v-alert v-alert--error mb-8" role="alert">{{ form.non_field_errors.0 }}</div>
+    {% endif %}
+
+    <!-- Amount -->
+    <div class="v-plate p-6 mb-6">
+        <p class="c-reg text-ink-3 mb-3">Amount due</p>
+        <p class="v-price text-3xl md:text-4xl text-ink-1 tracking-wide">&#8358;&nbsp;{{ order.grand_total|intcomma }}</p>
+    </div>
+
+    <!-- Account details -->
+    <div class="v-plate mb-10">
+        <table class="v-table">
+            <tbody>
+                <tr>
+                    <td class="w-36 pl-5 text-ink-2">Bank</td>
+                    <td class="text-ink-1">{{ bank_name }}</td>
+                    <td class="is-num pr-5"></td>
+                </tr>
+                <tr>
+                    <td class="pl-5 text-ink-2">Account name</td>
+                    <td class="text-ink-1">{{ account_name }}</td>
+                    <td class="is-num pr-5"></td>
+                </tr>
+                <tr>
+                    <td class="pl-5 text-ink-2">Account no.</td>
+                    <td class="text-ink-1 v-price text-[15px] tracking-widest" id="acct-number">{{ account_number }}</td>
+                    <td class="is-num pr-5">
+                        <button type="button" class="c-reg-lg v-underline text-ink-2 hover:text-ink-1 copy-btn h-11" data-copy="{{ account_number }}">Copy</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="pl-5 text-ink-2">Narration</td>
+                    <td class="text-ink-1">{{ order.order_number }}</td>
+                    <td class="is-num pr-5">
+                        <button type="button" class="c-reg-lg v-underline text-ink-2 hover:text-ink-1 copy-btn h-11" data-copy="{{ order.order_number }}">Copy</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="v-spec text-ink-3 px-5 py-4">Use your order number as the transfer narration.</p>
+    </div>
+    <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+
+    <!-- Receipt upload -->
+    <form method="POST" action="{% url 'payments:submit_receipt' order.id %}" enctype="multipart/form-data" id="receipt-form">
+        {% csrf_token %}
+
+        <span class="c-reg text-ink-3 block mb-6">Upload your transfer receipt</span>
+
+        <div class="v-plate p-6 mb-6" id="drop-zone">
+            <label for="id_receipt" class="v-field-label">Receipt — JPG, PNG, WEBP or PDF, max 5 MB</label>
+            <input id="id_receipt" type="file" name="receipt" required
+                   accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+                   class="v-spec text-ink-1 w-full file:c-reg-lg file:mr-4 file:h-11 file:px-4 file:border file:border-line-dark-strong file:bg-transparent file:text-ink-1 file:cursor-pointer">
+            {% if form.receipt.errors %}
+            <p class="v-field-error">{{ form.receipt.errors.0 }}</p>
+            {% endif %}
+            <p id="file-line" class="v-spec text-ink-3 mt-4" aria-live="polite" hidden></p>
+        </div>
+
+        <div class="mb-8">
+            <label for="id_transaction_reference" class="v-field-label">Transaction reference — optional</label>
+            <input id="id_transaction_reference" type="text" name="transaction_reference" maxlength="100"
+                   class="v-input" value="{{ form.transaction_reference.value|default:'' }}"
+                   placeholder="From your banking app, if you have it">
+            {% if form.transaction_reference.errors %}
+            <p class="v-field-error">{{ form.transaction_reference.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <button type="submit" id="submit-receipt-btn" class="v-btn v-btn--primary v-btn--lg w-full">Submit receipt</button>
+        <p class="v-spec text-ink-3 mt-6">Can't upload right now? Your order holds — this page and the link in your email bring you back here.</p>
+    </form>
+
+    <p class="c-reg text-ink-3 mt-16">Ref — {{ payment.reference }}</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var status = document.getElementById('copy-status');
+
+    function announce(text) {
+        if (status) status.textContent = text;
+    }
+
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var value = btn.dataset.copy;
+            var done = function () {
+                var original = btn.textContent;
+                btn.textContent = 'Copied';
+                announce('Copied to clipboard');
+                setTimeout(function () { btn.textContent = original; announce(''); }, 2000);
+            };
+            // Fails closed: if the Clipboard API is unavailable or denied,
+            // select the value in the row so it can be copied manually.
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(done, function () { fallback(); });
+            } else {
+                fallback();
+            }
+            function fallback() {
+                var cell = btn.closest('tr').querySelector('td:nth-child(2)');
+                if (cell && window.getSelection) {
+                    var range = document.createRange();
+                    range.selectNodeContents(cell);
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    announce('Select and copy the highlighted value');
+                }
+            }
+        });
+    });
+
+    var fileInput = document.getElementById('id_receipt');
+    var fileLine = document.getElementById('file-line');
+    fileInput.addEventListener('change', function () {
+        var f = fileInput.files[0];
+        if (!f) { fileLine.hidden = true; return; }
+        fileLine.hidden = false;
+        fileLine.textContent = f.name + ' — ' + (f.size / (1024 * 1024)).toFixed(1) + ' MB';
+    });
+
+    // Drag-and-drop onto the plate (progressive — the file input always works).
+    // Drag-over = hairline upgrade only, per the design system: no glow.
+    var dropZone = document.getElementById('drop-zone');
+    if (dropZone) {
+        var depth = 0;
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            dropZone.addEventListener(ev, function (e) {
+                e.preventDefault();
+                if (ev === 'dragenter') depth++;
+                dropZone.classList.add('is-dragover');
+            });
+        });
+        dropZone.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            depth = Math.max(0, depth - 1);
+            if (depth === 0) dropZone.classList.remove('is-dragover');
+        });
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            depth = 0;
+            dropZone.classList.remove('is-dragover');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    document.getElementById('receipt-form').addEventListener('submit', function () {
+        var btn = document.getElementById('submit-receipt-btn');
+        btn.textContent = 'Uploading…';
+        btn.setAttribute('aria-busy', 'true');
+    });
+})();
+</script>
+{% endblock %}

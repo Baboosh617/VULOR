@@ -18,7 +18,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
 
-DEBUG = not ON_RENDER
+# DEBUG must be its own explicit, default-closed flag — it must never be
+# inferred from ON_RENDER, or any deployment target other than this specific
+# Render service (self-hosted Docker, another PaaS) runs wide open by default.
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 if ON_RENDER:
     
@@ -81,11 +84,13 @@ INSTALLED_APPS = [
     'error_pages',
     'payments',
     'dashboard',
-    'django_recaptcha',
+    'services',
+    'csp',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -111,6 +116,31 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF =True
+
+# Content-Security-Policy — Report-Only for now: violations are logged by
+# the browser (visible in devtools) but nothing is blocked. This lets the
+# policy be verified against real traffic across every page (Google Fonts,
+# the Chart.js CDN script on the dashboard, several un-nonced inline
+# <script> blocks) before a future change switches to
+# CONTENT_SECURITY_POLICY (enforcing). Do not add an enforcing policy
+# without first confirming Report-Only shows zero unexpected violations.
+CONTENT_SECURITY_POLICY_REPORT_ONLY = {
+    'DIRECTIVES': {
+        'default-src': ["'self'"],
+        # 'unsafe-inline' reflects current reality (the mobile-menu toggle,
+        # dashboard polling, and Chart.js setup are all inline, un-nonced
+        # scripts today) — tightening this to nonces is follow-up work, not
+        # part of standing this policy up in Report-Only mode.
+        'script-src': [
+            "'self'", "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',  # Chart.js (dashboard sales chart)
+        ],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'img-src': ["'self'", 'data:'],
+        'connect-src': ["'self'"],
+    },
+}
 
 
 ROOT_URLCONF = 'vulor.urls'
@@ -162,10 +192,14 @@ if DEBUG:
         "https://*.ngrok-free.dev",
     ]
 else:
+    # Django's wildcard subdomain matching (https://*.example.com) never
+    # matches the apex host itself, so a wildcard-only list here silently
+    # fails CSRF for the bare production domain. Read the real origin(s)
+    # from env instead.
     CSRF_TRUSTED_ORIGINS = [
-        "https://*.vulor.onrender.com",
-        "https://*.vulor.com",
-        "https://*.vulor-1.onrender.com",
+        origin.strip()
+        for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+        if origin.strip()
     ]
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -189,8 +223,16 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_ALLOW_REGISTRATION = False
+# Registration is intentionally open — /accounts/register/ is a custom view
+# (accounts.views.register), not allauth's own signup view, and it never
+# reads ACCOUNT_ALLOW_REGISTRATION. That setting used to sit here implying
+# registration was closed when it never actually was; removed rather than
+# left as misleading dead config.
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[VULOR] '
+# Allauth emails (verification, password reset) are sent synchronously inside
+# the request; the resilient adapter logs SMTP failures instead of 500ing the
+# signup/reset flow after the user row is already committed.
+ACCOUNT_ADAPTER = 'accounts.adapter.ResilientAccountAdapter'
 
 #social account settings
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -224,10 +266,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Paystack Configuration
-PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
-PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
-PAYSTACK_WEBHOOK_SECRET = os.getenv('PAYSTACK_WEBHOOK_SECRET')
+# Bank transfer configuration — shown to customers at checkout
+BANK_TRANSFER_BANK_NAME = os.getenv('BANK_TRANSFER_BANK_NAME', '')
+BANK_TRANSFER_ACCOUNT_NAME = os.getenv('BANK_TRANSFER_ACCOUNT_NAME', '')
+BANK_TRANSFER_ACCOUNT_NUMBER = os.getenv('BANK_TRANSFER_ACCOUNT_NUMBER', '')
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 
 # Google OAuth Configuration
@@ -243,7 +285,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID', default=''),
-            'secret': os.getenv('GOOGLE_SECRET_KEY', default=''),
+            # GOOGLE_SECRET_KEY is the legacy name this var had in the Render
+            # environment before 2026-07; keep it as a fallback so OAuth
+            # survives a deploy where the rename hasn't happened yet.
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET') or os.getenv('GOOGLE_SECRET_KEY', ''),
             'key': ''
         }
     }
@@ -263,9 +308,10 @@ SOCIALACCOUNT_FORMS = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 587)
-EMAIL_USE_TLS = True  # IMPORTANT
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "")
@@ -295,19 +341,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
-
-# Custom error handlers
-if not DEBUG:
-    # Production error handlers
-    handler404 = 'error_pages.views.custom_404'  
-    handler500 = 'error_pages.views.custom_500'
-    handler403 = 'error_pages.views.custom_403'
-    handler400 = 'error_pages.views.custom_400'
 
 #Logging
 LOGGING = {
@@ -320,16 +358,19 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        # stdout, not a local file: Render's filesystem is ephemeral, so a
+        # FileHandler here silently lost every login-event record on each
+        # restart/redeploy. Container-native platforms capture stdout for
+        # log aggregation; a local file does not survive to be aggregated.
+        'auth_console': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'auth.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django.security.login': {
-            'handlers': ['file'],
+            'handlers': ['auth_console'],
             'level': 'INFO',
             'propagate': False,
         },
@@ -343,11 +384,21 @@ if DEBUG:
             'LOCATION': BASE_DIR / 'django_cache',
         }
     }
-else:
+elif os.getenv('REDIS_URL'):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379'),
+            'LOCATION': os.getenv('REDIS_URL'),
+        }
+    }
+else:
+    # No Redis is deployed today, and django-ratelimit reads this cache too
+    # — hardcoding RedisCache here made register/login/checkout/receipt
+    # upload all 500 in production. LocMemCache makes rate limits
+    # per-process rather than global, which is accepted at current scale.
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         }
     }
 
@@ -357,5 +408,6 @@ CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
-
-SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
+# Customer emails are sent synchronously unless a Celery worker + broker
+# actually run in the environment (the Render web service has neither).
+EMAIL_ASYNC_ENABLED = os.getenv('EMAIL_ASYNC_ENABLED', 'False') == 'True'

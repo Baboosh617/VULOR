@@ -1,0 +1,13 @@
+{% comment %}
+Commerce-spine step indicator. Replaces primary nav on cart → checkout →
+payment → tracking. Usage: {% include "includes/spine_steps.html" with step=2 %}
+{% endcomment %}
+<nav class="hidden md:flex items-center gap-6" aria-label="Checkout progress">
+    <span {% if step == 1 %}aria-current="step"{% endif %} class="c-reg {% if step == 1 %}text-lime pl-2 v-current{% else %}text-ink-3{% endif %}">01&nbsp;Cart</span>
+    <span {% if step == 2 %}aria-current="step"{% endif %} class="c-reg {% if step == 2 %}text-lime pl-2 v-current{% else %}text-ink-3{% endif %}">02&nbsp;Checkout</span>
+    <span {% if step == 3 %}aria-current="step"{% endif %} class="c-reg {% if step == 3 %}text-lime pl-2 v-current{% else %}text-ink-3{% endif %}">03&nbsp;Payment</span>
+    <span {% if step == 4 %}aria-current="step"{% endif %} class="c-reg {% if step == 4 %}text-lime pl-2 v-current{% else %}text-ink-3{% endif %}">04&nbsp;Confirmed</span>
+</nav>
+<div class="flex md:hidden items-center">
+    <span class="c-reg text-ink-2">Step&nbsp;0{{ step }}&nbsp;/&nbsp;04</span>
+</div>

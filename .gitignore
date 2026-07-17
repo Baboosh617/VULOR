@@ -29,6 +29,10 @@ staticfiles/
 
 # media/
 
+# Payment receipts are confidential customer bank documents — never commit
+# them. Product images under media/ are still tracked intentionally.
+media/payment_receipts/
+
 # Logs
 *.log
 
@@ -56,3 +60,8 @@ htmlcov/
 #Cache
 .cache/
 django_cache/
+
+#Claude
+docs/
+CLAUDE.md
+*.CLAUDE.md

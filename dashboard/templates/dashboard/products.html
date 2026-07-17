@@ -1,200 +1,100 @@
 {% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block title %}Products — Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <!-- Header -->
-  <div class="md:flex md:items-center md:justify-between mb-8">
+<div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Products</h1>
-      <p class="mt-2 text-sm text-gray-600">Manage your product inventory</p>
+        <span class="v-label text-ink-3 block mb-4">03 / PRODUCTS</span>
+        <h1 class="v-display text-3xl md:text-4xl text-ink-1">CATALOG.</h1>
     </div>
-    <div class="mt-4 md:mt-0">
-      <a href="{% url 'dashboard:add_product' %}" 
-         class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Add Product
-      </a>
-    </div>
-  </div>
-
-  <!-- Search and Filters -->
-  <div class="bg-white shadow rounded-lg p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- Search -->
-      <div>
-        <form method="GET" class="relative">
-          <input type="text" 
-                 name="q" 
-                 value="{{ query }}" 
-                 placeholder="Search products..." 
-                 class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-        </form>
-      </div>
-      
-      <!-- Category Filter -->
-      <div>
-        <form method="GET">
-          <select name="category" 
-                  onchange="this.form.submit()" 
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">All Categories</option>
-            {% for value, label in category_choices %}
-              <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </form>
-      </div>
-      
-      <!-- Active Filter -->
-      <div>
-        <form method="GET">
-          <select name="active" 
-                  onchange="this.form.submit()" 
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">All Status</option>
-            <option value="true" {% if active_filter == "true" %}selected{% endif %}>Active Only</option>
-            <option value="false" {% if active_filter == "false" %}selected{% endif %}>Inactive Only</option>
-          </select>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Products Table -->
-  <div class="bg-white shadow rounded-lg overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inventory</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          {% for product in products %}
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div class="h-10 w-10 flex-shrink-0">
-                  <img class="h-10 w-10 rounded-lg object-cover" src="{{ product.image.url }}" alt="{{ product.name }}">
-                </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                  <div class="text-sm text-gray-500">{{ product.slug }}</div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                {% if product.category == 'cargo-jeans' %}bg-blue-100 text-blue-800
-                {% elif product.category == 'hoodies' %}bg-purple-100 text-purple-800
-                {% elif product.category == 'tee-shirts' %}bg-green-100 text-green-800
-                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {{ product.get_category_display }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              ₦{{ product.price }}
-              {% if product.compare_price %}
-                <span class="ml-2 text-xs text-red-600 line-through">₦{{ product.compare_price }}</span>
-              {% endif %}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ product.inventory_count }}</div>
-              {% if product.inventory_count <= 5 %}
-                <div class="text-xs text-red-600">Low stock!</div>
-              {% endif %}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {% if product.is_active %}
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  Active
-                </span>
-              {% else %}
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                  Inactive
-                </span>
-              {% endif %}
-              {% if product.featured %}
-                <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                  Featured
-                </span>
-              {% endif %}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex space-x-2">
-                <a href="{% url 'dashboard:edit_product' product.id %}" 
-                   class="text-blue-600 hover:text-blue-900">
-                  Edit
-                </a>
-                <form method="POST" action="{% url 'dashboard:delete_product' product.id %}" 
-                      class="inline" 
-                      onsubmit="return confirm('Are you sure you want to delete {{ product.name }}?');">
-                  {% csrf_token %}
-                  <button type="submit" class="text-red-600 hover:text-red-900">
-                    Delete
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-              </svg>
-              <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-              <p class="mt-1 text-sm text-gray-500">Get started by creating a new product.</p>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Pagination (if needed) -->
-  {% if products.has_other_pages %}
-  <div class="mt-6 flex justify-center">
-    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-      {% if products.has_previous %}
-        <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-          Previous
-        </a>
-      {% endif %}
-      
-      {% for i in products.paginator.page_range %}
-        {% if products.number == i %}
-          <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
-            {{ i }}
-          </span>
-        {% else %}
-          <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" 
-             class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            {{ i }}
-          </a>
-        {% endif %}
-      {% endfor %}
-      
-      {% if products.has_next %}
-        <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-           class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-          Next
-        </a>
-      {% endif %}
-    </nav>
-  </div>
-  {% endif %}
+    <a href="{% url 'dashboard:add_product' %}" class="v-btn v-btn--primary">ADD PRODUCT</a>
 </div>
+
+<!-- Filters -->
+<div class="flex flex-wrap items-center gap-3 mb-8">
+    <form method="GET" class="flex items-center gap-3">
+        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="SEARCH PRODUCTS" class="v-input !h-11 w-48 !text-[12px] uppercase">
+        <button type="submit" class="v-btn v-btn--secondary v-btn--sm">SEARCH</button>
+    </form>
+    <form method="GET">
+        <select name="category" onchange="this.form.submit()" class="v-select v-btn-label !h-11 !w-auto pr-8">
+            <option value="">ALL CATEGORIES</option>
+            {% for value, label in category_choices %}
+            <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label|upper }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <form method="GET">
+        <select name="active" onchange="this.form.submit()" class="v-select v-btn-label !h-11 !w-auto pr-8">
+            <option value="">ALL STATUS</option>
+            <option value="true" {% if active_filter == "true" %}selected{% endif %}>ACTIVE ONLY</option>
+            <option value="false" {% if active_filter == "false" %}selected{% endif %}>INACTIVE ONLY</option>
+        </select>
+    </form>
+</div>
+
+{% if products %}
+<div class="overflow-x-auto">
+    <table class="v-table min-w-[800px]">
+        <thead>
+            <tr><th>PRODUCT</th><th>CATEGORY</th><th class="is-num">PRICE</th><th class="is-num">STOCK</th><th>STATUS</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr class="hover:bg-ground-900 transition-colors duration-fast">
+                <td>
+                    <div class="flex items-center gap-3">
+                        <span class="v-plate w-10 h-10 shrink-0 overflow-hidden">
+                            {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">{% endif %}
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-ink-1 truncate">{{ product.name }}</p>
+                            <p class="v-label text-ink-3 truncate">{{ product.slug }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-ink-2">{{ product.get_category_display|upper }}</td>
+                <td class="is-num v-price text-ink-1">
+                    &#8358;&nbsp;{{ product.price|intcomma }}
+                    {% if product.compare_price %}<span class="text-ink-3 line-through block">&#8358;&nbsp;{{ product.compare_price|intcomma }}</span>{% endif %}
+                </td>
+                <td class="is-num {% if product.inventory_count <= 5 %}text-signal{% else %}text-ink-1{% endif %}">{{ product.inventory_count }}</td>
+                <td>
+                    {% if product.is_active %}<span class="v-badge">ACTIVE</span>{% else %}<span class="v-badge v-badge--error">INACTIVE</span>{% endif %}
+                    {% if product.featured %}<span class="v-badge v-badge--signal ml-1">FEATURED</span>{% endif %}
+                </td>
+                <td class="is-num">
+                    <div class="flex gap-4 justify-end">
+                        <a href="{% url 'dashboard:edit_product' product.id %}" class="v-btn-label v-underline text-ink-1">EDIT</a>
+                        <form method="POST" action="{% url 'dashboard:delete_product' product.id %}" onsubmit="return confirm('Delete {{ product.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="v-btn-label v-underline text-error">DELETE</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if products.has_other_pages %}
+<nav class="flex items-center gap-2 mt-8 v-spec" aria-label="Pagination">
+    {% if products.has_previous %}<a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="v-btn-label v-underline text-ink-2">&larr; PREV</a>{% endif %}
+    {% for i in products.paginator.page_range %}
+        {% if products.number == i %}
+        <span class="v-btn-label bg-ink-1 text-ground-950 h-9 min-w-9 px-2 inline-flex items-center justify-center">{{ i }}</span>
+        {% else %}
+        <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" class="v-btn-label text-ink-2 hover:text-ink-1 h-9 min-w-9 px-2 inline-flex items-center justify-center v-plate">{{ i }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if products.has_next %}<a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="v-btn-label v-underline text-ink-2">NEXT &rarr;</a>{% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<p class="v-spec text-ink-3">NO PRODUCTS FOUND.</p>
+{% endif %}
 {% endblock %}

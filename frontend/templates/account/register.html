@@ -1,445 +1,64 @@
 {% extends "base.html" %}
-{% load static %}
 {% load socialaccount %}
 
-{% block title %}Register - VULOR{% endblock %}
+{% block title %}Register — VULOR{% endblock %}
 
 {% block content %}
-<style>
-    
-    @keyframes floatIn {
-        0% {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes progressFill {
-        0% {
-            width: 0%;
-        }
-        100% {
-            width: var(--target-width);
-        }
-    }
-    
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
-    
-    @keyframes glassFloat {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-    
-    @keyframes shimmer {
-        0% {
-            background-position: -200px 0;
-        }
-        100% {
-            background-position: 200px 0;
-        }
-    }
-    
-    .animate-float-in {
-        animation: floatIn 0.8s ease-out forwards;
-        opacity: 0;
-    }
-    
-    .animate-float-in-delay {
-        animation: floatIn 0.8s ease-out 0.3s forwards;
-        opacity: 0;
-    }
-    
-    .animate-float-in-delay-2 {
-        animation: floatIn 0.8s ease-out 0.6s forwards;
-        opacity: 0;
-    }
-    
-    .form-shadow {
-        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1),
-                    0 10px 25px rgba(0, 0, 0, 0.3);
-        animation: glassFloat 6s ease-in-out infinite;
-    }
-    
-    .form-shadow:hover {
-        box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15),
-                    0 15px 30px rgba(0, 0, 0, 0.4);
-        transform: translateY(-5px);
-        transition: all 0.3s ease;
-    }
-    
-    
-    .strength-0 { width: 20%; background-color: #dc2626; } 
-    .strength-1 { width: 40%; background-color: #b91c1c; } 
-    .strength-2 { width: 60%; background-color: #991b1b; } 
-    .strength-3 { width: 80%; background-color: #7f1d1d; } 
-    .strength-4 { width: 100%; background-color: #450a0a; }
-</style>
+<div class="px-4 py-16 min-h-[calc(100svh-4rem)] flex items-center justify-center">
+    <div class="w-full max-w-md v-plate v-fade-in">
+        <div class="p-8 sm:p-10">
+            <p class="c-reg text-ink-3 mb-3">Access</p>
+            <h1 class="c-monolith text-4xl mb-3">Get your <span class="c-serif-i normal-case">number.</span></h1>
+            <p class="v-spec text-ink-3 mb-8">Track orders. Save pieces. Nothing else.</p>
 
-<div class="min-h-screen bg-black flex items-center justify-center p-4">
-    
-    <div class="max-w-md w-full animate-float-in">
-        
-        <div class="form-shadow bg-[#111111] border border-[#333333] p-8 rounded-lg hover:border-[#dc2626] transition-all duration-500 relative overflow-hidden">
-            
-            <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-[#dc2626] rounded-tl-lg"></div>
-            <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#dc2626] rounded-tr-lg"></div>
-            <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#dc2626] rounded-bl-lg"></div>
-            <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-[#dc2626] rounded-br-lg"></div>
-            
-            
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 border-2 border-[#dc2626] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-[#dc2626] text-2xl font-bold">V</span>
-                </div>
-                
-                
-                <div class="text-center relative">
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#dc2626]/10 to-transparent animate-shimmer" 
-                         style="background-size: 200px 100%; animation: shimmer 3s infinite linear;"></div>
-                    <h2 class="text-white text-3xl font-bold tracking-wide relative">JOIN VULOR</h2>
-                    <p class="text-[#dc2626] text-sm mt-2 tracking-wider font-bold relative">CREATE YOUR PREMIUM STREETWEAR ACCOUNT</p>
-                </div>
-                
-                
-                <!-- <div class="mt-6 space-y-3 animate-float-in-delay">
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
-                        <span class="text-[#cccccc] text-sm tracking-wider">Early access to new collections</span>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
-                        <span class="text-[#cccccc] text-sm tracking-wider">Member-only discounts</span>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="w-2 h-2 rounded-full bg-[#dc2626]"></div>
-                        <span class="text-[#cccccc] text-sm tracking-wider">Priority customer support</span>
-                    </div>
-                </div> -->
-            </div>
-            
-            
-            {% if form.errors %}
-            <div class="bg-[#dc2626]/10 border border-[#dc2626]/30 text-white p-4 rounded-lg text-sm mb-6 animate-float-in-delay">
-                <strong class="block mb-2 tracking-wider">PLEASE FIX THE FOLLOWING ERRORS:</strong>
-                <ul class="space-y-1">
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li class="text-[#dc2626]">• {{ field.label }}: {{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}
-                        <li class="text-[#dc2626]">• {{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+            {% if form.non_field_errors %}
+            <div class="v-alert v-alert--error mb-6" role="alert">{{ form.non_field_errors.0 }}</div>
             {% endif %}
 
-            <!-- Signup Form -->
-            <form class="space-y-6" method="POST" action="{% url 'register' %}" id="signupForm">
+            <form method="POST" action="{% url 'register' %}" class="space-y-5">
                 {% csrf_token %}
-                
-                <div class="space-y-4 animate-float-in-delay">
-                    
-                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_username" class="block text-white text-sm mb-2 tracking-wider">NAME</label>
-                        <input type="text" name="username" id="id_username" required
-                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
-                               placeholder="John Doe"
-                               value="{{ form.username.value|default:'' }}">
-                    </div>
-                    
-                    
-                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_email" class="block text-white text-sm mb-2 tracking-wider">EMAIL</label>
-                        <input type="email" name="email" id="id_email" required
-                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
-                               placeholder="you@example.com"
-                               value="{{ form.email.value|default:'' }}">
-                    </div>
-                    
-                    <!-- Password Field with Strength Indicator -->
-                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_password1" class="block text-white text-sm mb-2 tracking-wider">PASSWORD</label>
-                        <div class="relative">
-                            <input type="password" name="password1" id="id_password1" required
-                                   class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666] pr-10"
-                                   placeholder="Create a password"
-                                   oninput="checkPasswordStrength(this.value)">
-                            <button type="button" onclick="togglePassword('id_password1')"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#666666] hover:text-[#dc2626] transition-colors duration-300">
-                                👁️
-                            </button>
-                        </div>
-                        
-                        <!-- Password Strength Indicator -->
-                        <div class="mt-2 space-y-2">
-                            <div class="h-1 w-full bg-[#333333] rounded-full overflow-hidden">
-                                <div id="passwordStrength" class="password-strength strength-0"></div>
-                            </div>
-                            <div id="strengthText" class="text-xs text-[#666666] tracking-wider">VERY WEAK</div>
-                            
-                            
-                            <!-- <div id="passwordRequirements" class="space-y-1 mt-2">
-                                <div class="flex items-center text-xs" id="reqLength">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
-                                    <span class="text-[#666666] tracking-wider">At least 8 characters</span>
-                                </div>
-                                <div class="flex items-center text-xs" id="reqUppercase">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
-                                    <span class="text-[#666666] tracking-wider">One uppercase letter</span>
-                                </div>
-                                <div class="flex items-center text-xs" id="reqLowercase">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
-                                    <span class="text-[#666666] tracking-wider">One lowercase letter</span>
-                                </div>
-                                <div class="flex items-center text-xs" id="reqNumber">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
-                                    <span class="text-[#666666] tracking-wider">One number</span>
-                                </div>
-                                <div class="flex items-center text-xs" id="reqSpecial">
-                                    <span class="w-4 h-4 flex items-center justify-center mr-2 text-[#666666]">○</span>
-                                    <span class="text-[#666666] tracking-wider">One special character</span>
-                                </div>
-                            </div> -->
-                        </div>
-                    </div>
-                    
-                    
-                    <div class="transform transition-all duration-300 hover:scale-[1.02]">
-                        <label for="id_password2" class="block text-white text-sm mb-2 tracking-wider">CONFIRM PASSWORD</label>
-                        <input type="password" name="password2" id="id_password2" required
-                               class="w-full bg-black border border-[#333333] text-white px-4 py-3 text-sm focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] transition-all duration-300 rounded placeholder-[#666666]"
-                               placeholder="Confirm your password"
-                               oninput="checkPasswordMatch()">
-                        <div id="passwordMatch" class="text-xs mt-1 hidden tracking-wider"></div>
-                    </div>
+
+                <div>
+                    <label for="id_username" class="v-field-label">Username</label>
+                    <input id="id_username" type="text" name="username" required class="v-input {% if form.username.errors %}has-error{% endif %}"
+                           value="{{ form.username.value|default:'' }}" autocomplete="username">
+                    {% if form.username.errors %}<p class="v-field-error">{{ form.username.errors.0 }}</p>{% endif %}
                 </div>
 
-                
-                <div class="animate-float-in-delay-2">
-                    <button type="submit" 
-                            class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider uppercase py-3 px-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#dc2626] transform hover:scale-[1.02] active:scale-[0.98] rounded border border-[#dc2626] relative overflow-hidden"
-                            id="submitButton">
-                        SIGN UP
-                    </button>
+                <div>
+                    <label for="id_email" class="v-field-label">Email</label>
+                    <input id="id_email" type="email" name="email" required class="v-input {% if form.email.errors %}has-error{% endif %}"
+                           value="{{ form.email.value|default:'' }}" autocomplete="email">
+                    {% if form.email.errors %}<p class="v-field-error">{{ form.email.errors.0 }}</p>{% endif %}
                 </div>
-                
-                
-                <div class="my-6 animate-float-in-delay-2">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-[#333333]"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-4 bg-[#111111] text-[#666666] tracking-wider">OR</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Login Link -->
-                <div class="text-center animate-float-in-delay-2">
-                    <p class="text-[#cccccc] text-sm tracking-wider">
-                        ALREADY HAVE AN ACCOUNT?
-                        <a href="{% url 'account_login' %}" 
-                           class="text-[#dc2626] hover:text-white font-bold transition-all duration-300 transform hover:scale-105 inline-block ml-2 tracking-wider">
-                            LOGIN HERE
-                        </a>
-                    </p>
-                </div>
-                
-                <div class="mb-4">
-                    {{ form.captcha.label_tag }}
-                    {{ form.captcha }}
-                    {% for error in form.captcha.errors %}
-                     <p class="text-red-500 text-sm">{{ error }}</p>
-    {% endfor %}
-</div>
 
+                <div>
+                    <label for="id_password1" class="v-field-label">Password</label>
+                    <input id="id_password1" type="password" name="password1" required class="v-input {% if form.password1.errors %}has-error{% endif %}"
+                           autocomplete="new-password">
+                    {% if form.password1.errors %}<p class="v-field-error">{{ form.password1.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="id_password2" class="v-field-label">Confirm password</label>
+                    <input id="id_password2" type="password" name="password2" required class="v-input {% if form.password2.errors %}has-error{% endif %}"
+                           autocomplete="new-password">
+                    {% if form.password2.errors %}<p class="v-field-error">{{ form.password2.errors.0 }}</p>{% endif %}
+                </div>
+
+                <button type="submit" class="v-btn v-btn--primary v-btn--lg w-full">Create account</button>
             </form>
+
+            <div class="v-hairline-t my-8"></div>
+
+            <a href="{% provider_login_url 'google' %}" class="v-btn v-btn--secondary v-btn--lg w-full">
+                Continue with Google
+            </a>
+
+            <p class="v-spec text-ink-3 mt-8 text-center">
+                Already have an account? <a href="{% url 'login' %}" class="v-underline text-ink-1">Sign in</a>
+            </p>
         </div>
     </div>
 </div>
-
-
-<script>
-function togglePassword(fieldId) {
-    const field = document.getElementById(fieldId);
-    const button = field.nextElementSibling;
-    
-    if (field.type === 'password') {
-        field.type = 'text';
-        button.innerHTML = '👁️‍🗨️';
-    } else {
-        field.type = 'password';
-        button.innerHTML = '👁️';
-    }
-}
-
-function checkPasswordStrength(password) {
-    let strength = 0;
-    const requirements = {
-        length: password.length >= 8,
-        uppercase: /[A-Z]/.test(password),
-        lowercase: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
-        special: /[^A-Za-z0-9]/.test(password)
-    };
-    
-    
-    updateRequirement('reqLength', requirements.length);
-    updateRequirement('reqUppercase', requirements.uppercase);
-    updateRequirement('reqLowercase', requirements.lowercase);
-    updateRequirement('reqNumber', requirements.number);
-    updateRequirement('reqSpecial', requirements.special);
-    
-    
-    if (requirements.length) strength++;
-    if (requirements.uppercase) strength++;
-    if (requirements.lowercase) strength++;
-    if (requirements.number) strength++;
-    if (requirements.special) strength++;
-    
-    
-    const strengthBar = document.getElementById('passwordStrength');
-    const strengthText = document.getElementById('strengthText');
-    
-    strengthBar.className = `password-strength strength-${strength}`;
-    
-    
-    strengthBar.style.setProperty('--target-width', `${(strength + 1) * 20}%`);
-    
-    
-    const texts = ['VERY WEAK', 'WEAK', 'FAIR', 'GOOD', 'STRONG'];
-    const colors = ['#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a'];
-    strengthText.textContent = texts[strength];
-    strengthText.style.color = colors[strength];
-    
-    
-    if (strength < 2 && password.length > 0) {
-        strengthBar.classList.add('shake');
-        setTimeout(() => strengthBar.classList.remove('shake'), 500);
-    }
-}
-
-function updateRequirement(elementId, met) {
-    const element = document.getElementById(elementId);
-    const circle = element.querySelector('span');
-    const text = element.querySelector('span:last-child');
-    
-    if (met) {
-        circle.innerHTML = '✓';
-        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-[#dc2626]';
-        text.className = 'text-[#dc2626]';
-    } else {
-        circle.innerHTML = '○';
-        circle.className = 'w-4 h-4 flex items-center justify-center mr-2 text-[#666666]';
-        text.className = 'text-[#666666]';
-    }
-}
-
-function checkPasswordMatch() {
-    const password1 = document.getElementById('id_password1').value;
-    const password2 = document.getElementById('id_password2').value;
-    const matchDiv = document.getElementById('passwordMatch');
-    const submitButton = document.getElementById('submitButton');
-    
-    if (password2.length === 0) {
-        matchDiv.classList.add('hidden');
-        submitButton.disabled = false;
-        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-        return;
-    }
-    
-    if (password1 === password2) {
-        matchDiv.textContent = '✓ PASSWORDS MATCH';
-        matchDiv.className = 'text-xs mt-1 text-[#dc2626]';
-        matchDiv.classList.remove('hidden');
-        submitButton.disabled = false;
-        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-    } else {
-        matchDiv.textContent = '✗ PASSWORDS DO NOT MATCH';
-        matchDiv.className = 'text-xs mt-1 text-[#dc2626] shake';
-        matchDiv.classList.remove('hidden');
-        submitButton.disabled = true;
-        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-}
-
-// Form validation enhancement
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('signupForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const password1 = document.getElementById('id_password1').value;
-            const password2 = document.getElementById('id_password2').value;
-            
-            if (password1 !== password2) {
-                e.preventDefault();
-                document.getElementById('passwordMatch').classList.add('shake');
-                setTimeout(() => {
-                    document.getElementById('passwordMatch').classList.remove('shake');
-                }, 500);
-            }
-        });
-    }
-    
-    
-    const signupButton = document.getElementById('submitButton');
-    if (signupButton) {
-        signupButton.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.cssText = `
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.4);
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                width: ${size}px;
-                height: ${size}px;
-                top: ${y}px;
-                left: ${x}px;
-                pointer-events: none;
-            `;
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    }
-    
-    
-    if (!document.querySelector('style[data-ripple]')) {
-        const style = document.createElement('style');
-        style.setAttribute('data-ripple', 'true');
-        style.textContent = `
-            @keyframes ripple {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-});
-</script>
 {% endblock %}

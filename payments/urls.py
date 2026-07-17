@@ -4,10 +4,9 @@ from . import views
 app_name = 'payments'
 
 urlpatterns = [
-    path('initiate/<int:order_id>/', views.initiate_payment, name='initiate_payment'),
-    path('get-details/<int:order_id>/', views.get_payment_details, name='get_payment_details'),
-    path('verify/', views.verify_payment, name='verify_payment'),
-    path('webhook/paystack-9xK3Qp/', views.paystack_webhook),
+    path('transfer/<int:order_id>/', views.transfer_instructions, name='transfer_instructions'),
+    path('transfer/<int:order_id>/submit/', views.submit_receipt, name='submit_receipt'),
+    path('receipts/<int:txn_id>/', views.receipt_download, name='receipt_download'),
     path('success/<int:order_id>/', views.payment_success, name='payment_success'),
     path('failed/<int:order_id>/', views.payment_failed, name='payment_failed'),
 ]

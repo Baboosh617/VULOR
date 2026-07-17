@@ -1,43 +1,61 @@
 {% extends "dashboard/base.html" %}
-{% block content %}
-<h1 class="text-3xl font-bold mb-4">Customers</h1>
 
-<form method="get" class="mb-4">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search users..." class="px-3 py-1 border rounded">
-    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Search</button>
+{% block title %}Customers — Dashboard{% endblock %}
+
+{% block content %}
+<span class="v-label text-ink-3 block mb-4">04 / CUSTOMERS</span>
+<h1 class="v-display text-3xl md:text-4xl text-ink-1 mb-8">CUSTOMER FILE.</h1>
+
+<form method="get" class="flex items-center gap-3 mb-8">
+    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="SEARCH USERS" class="v-input !h-11 w-56 !text-[12px] uppercase">
+    <button type="submit" class="v-btn v-btn--secondary v-btn--sm">SEARCH</button>
 </form>
 
-<table class="min-w-full bg-white shadow rounded">
-<thead class="bg-gray-200">
-<tr>
-    <th class="px-4 py-2">Username</th>
-    <th class="px-4 py-2">Email</th>
-    <th class="px-4 py-2">Joined</th>
-    <th class="px-4 py-2">Status</th>
-    <th class="px-4 py-2">Actions</th>
-</tr>
-</thead>
-<tbody>
-{% for user in users %}
-<tr class="border-b hover:bg-gray-50">
-    <td class="px-4 py-2">{{ user.username }}</td>
-    <td class="px-4 py-2">{{ user.email }}</td>
-    <td class="px-4 py-2">{{ user.date_joined }}</td>
-    <td class="px-4 py-2">{% if user.is_active %}Active{% else %}Inactive{% endif %}</td>
-    <td class="px-4 py-2">
-        {% if not user.is_superuser %}
-        <a href="{% url 'dashboard:toggle_user_active' user.id %}" class="text-blue-500 hover:underline">
-            {% if user.is_active %}Disable{% else %}Enable{% endif %}
-        </a> |
-        <a href="{% url 'dashboard:edit_customer' user.id %}" class="text-green-500 hover:underline">Edit</a>
-        {% else %}
-        <span class="text-gray-500">—</span>
-        {% endif %}
-    </td>
-</tr>
-{% empty %}
-<tr><td colspan="5" class="px-4 py-2 text-center text-gray-500">No users found.</td></tr>
-{% endfor %}
-</tbody>
-</table>
+{% if users %}
+<div class="overflow-x-auto">
+    <table class="v-table min-w-[700px]">
+        <thead>
+            <tr><th>USERNAME</th><th>EMAIL</th><th>JOINED</th><th>STATUS</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="hover:bg-ground-900 transition-colors duration-fast">
+                <td class="text-ink-1">{{ user.username }}</td>
+                <td class="text-ink-2">{{ user.email }}</td>
+                <td class="text-ink-3">{{ user.date_joined|date:"d/m/Y" }}</td>
+                <td>
+                    {% if user.is_active %}<span class="v-badge">ACTIVE</span>{% else %}<span class="v-badge v-badge--error">INACTIVE</span>{% endif %}
+                </td>
+                <td class="is-num">
+                    {% if not user.is_superuser %}
+                    <div class="flex gap-4 justify-end">
+                        <a href="{% url 'dashboard:edit_customer' user.id %}" class="v-btn-label v-underline text-ink-1">EDIT</a>
+                        <form method="post" action="{% url 'dashboard:toggle_user_active' user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="v-btn-label v-underline {% if user.is_active %}text-error{% else %}text-ink-1{% endif %}">
+                                {% if user.is_active %}DISABLE{% else %}ENABLE{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="v-label text-ink-3">&mdash;</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if users.has_other_pages %}
+<nav class="flex items-center gap-2 mt-8 v-spec" aria-label="Pagination">
+    {% if users.has_previous %}<a href="?page={{ users.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="v-btn-label v-underline text-ink-2">&larr; PREV</a>{% endif %}
+    <span class="v-label text-ink-3 mx-2">{{ users.number }} / {{ users.paginator.num_pages }}</span>
+    {% if users.has_next %}<a href="?page={{ users.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="v-btn-label v-underline text-ink-2">NEXT &rarr;</a>{% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<p class="v-spec text-ink-3">NO USERS FOUND.</p>
+{% endif %}
 {% endblock %}

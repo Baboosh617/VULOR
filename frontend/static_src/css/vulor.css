@@ -1,0 +1,827 @@
+/* ==========================================================================
+   VULOR design system v3 — "the Campaign"
+   Black page / dark-violet surfaces / lime charge / white ink.
+   Softly rounded (~20%, see radius tokens). Flat surfaces. No shadows.
+   No glass. No gradients. No glow. Collisions are engineered: one per
+   screen.
+
+   Voices: Archivo Black (the Monolith — colossal statements, may crop),
+   Instrument Serif italic (the Editorial — the collision voice),
+   Archivo (the Registrar — labels, UI, prices; tabular figures).
+   The monospace voice of v1/v2 is retired.
+
+   Class layers:
+     .c-*  — v3 campaign primitives (new templates use these)
+     .v-*  — legacy vocabulary, kept ALIVE and re-themed so unmigrated
+             templates render coherently during the flow-by-flow rebuild.
+             When the last template migrates, the .v-* layer is deleted.
+
+   Token VALUES live here and in the @theme block of style.css — kept in
+   sync on purpose (Tailwind needs literals to generate utilities).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fonts — self-hosted (frontend/static/fonts). Relative URLs resolve from
+   the compiled sheet at static/css/dist/style.css. ~97 KB total, subset
+   latin, font-display swap; the display face is preloaded in base.html.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Archivo Black';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/archivo-black-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 600; /* variable */
+  font-display: swap;
+  src: url('../../fonts/archivo-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/instrument-serif-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/instrument-serif-400-italic.woff2') format('woff2');
+}
+
+:root {
+  /* ---- Brand palette (owner's boards — black is the page) ---- */
+  --black: #000000;
+  --slate: #242834;
+  --lime: #b6ff00;
+  --violet: #7d53ff;
+  --white: #ffffff;
+
+  /* Ground ladder: the page is a DEEP PURPLE (owner decision 2026-07-17,
+     replacing true black); raised surfaces are lighter dark-violet
+     accents — panels, hovers, dropdowns and bars lift off the ground in
+     the brand's purple, tinted so ink stays AA-legible. True black
+     (--black) remains in the palette for photo caption chips, text on
+     lime, and the favicon tile. */
+  --ground-950: #1a1233;        /* the page */
+  --ground-900: #383161;        /* raised: panels, dropdowns, headers, hovers */
+  --ground-800: #3f3571;        /* second step: modals, drawers */
+  --ground-700: #4c3b8f;        /* pressed */
+  --line-dark: rgba(255, 255, 255, 0.14);
+  --line-dark-strong: rgba(255, 255, 255, 0.28);
+
+  /* Paper (the inverted page: emails, receipts, editorial inversions) */
+  --paper-50: #ffffff;
+  --paper-100: #f2f2f4;
+  --paper-200: #e5e6ea;
+  --line-paper: rgba(0, 0, 0, 0.14);
+  --line-paper-strong: rgba(0, 0, 0, 0.32);
+
+  /* Ink. Body copy uses --ink-body on true black (halation management);
+     display type and captions stay pure white. */
+  --ink-1: #ffffff;
+  --ink-body: #eceef4;
+  --ink-2: #c3c6d1;
+  --ink-3: #979cb0;            /* >= 12px only */
+  --ink-on-paper-1: #000000;
+  --ink-on-paper-2: #43485a;
+  --ink-on-paper-3: #6a6f80;   /* >= 12px only */
+
+  /* Spot colors in function */
+  --signal: var(--lime);        /* legacy alias */
+  --signal-press: #93cc00;
+  --ink-on-signal: var(--black);
+  --ink-on-violet: var(--white);
+
+  --error: #ff5470;
+  --error-on-paper: #c42a50;
+
+  --scrim: rgba(0, 0, 0, 0.7);
+
+  /* Radius — softened ~20% by owner decision (2026-07-16): quietly
+     rounded, never pill-soft. One closed scale; nothing improvises. */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* Motion — one easing (cinematic decelerate), three durations.
+     Slowed globally by owner decision (2026-07-16): every transition
+     on the site should feel smooth and unhurried. */
+  --motion-fast: 400ms;
+  --motion-base: 550ms;
+  --motion-slow: 700ms;
+  --ease-mech: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Voices */
+  --font-display: 'Archivo Black', 'Arial Black', sans-serif;
+  --font-editorial: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Archivo', system-ui, sans-serif;
+  --font-body: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'Archivo', system-ui, sans-serif; /* retired voice → text voice */
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+html { background: var(--ground-950); }
+
+body {
+  font-family: var(--font-body);
+  background: var(--ground-950);
+  color: var(--ink-body);
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+::selection { background: var(--lime); color: var(--black); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ground-950); }
+::-webkit-scrollbar-thumb { background: var(--ground-700); border-radius: var(--radius-xs); }
+::-webkit-scrollbar-thumb:hover { background: var(--line-dark-strong); }
+
+/* Square focus ring in the brand lime — a recurring micro-moment on every
+   keyboard journey. No glow, ever. (Lime fails on white, so paper pages
+   fall back to ink.) */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+.v-paper :focus-visible, .c-paper :focus-visible { outline-color: var(--ink-on-paper-1); }
+
+img { max-width: 100%; display: block; }
+
+/* Skip link — first focusable element of every shell (system law A17) */
+.c-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--lime);
+  color: var(--black);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+}
+.c-skip:focus { left: 0; }
+
+/* ==========================================================================
+   VOICES
+   ========================================================================== */
+
+/* The Monolith — colossal statements. Cropping is sanctioned (see .c-bleed). */
+.c-monolith,
+.v-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.86;
+  color: var(--ink-1);
+}
+
+/* The Editorial — the collision voice. One italic interruption per screen. */
+.c-serif {
+  font-family: var(--font-editorial);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.c-serif-i {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The Registrar — archive labels: designations, folios, indices.
+   Non-interactive micro-labels (11px floor for non-interactive only). */
+.c-reg,
+.v-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Interactive labels — buttons, chips, nav, form labels (12px floor) */
+.c-reg-lg,
+.v-btn-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Spec text: tables, metadata, timelines — text voice, quiet */
+.v-spec {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prices are brand moments: every live amount is set in the lime.
+   (Paper/light contexts fall back to ink — lime fails on white.) */
+.v-price {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  color: var(--lime);
+}
+.v-paper .v-price, .c-paper .v-price { color: var(--ink-on-paper-1); }
+
+.v-mono { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   CAMPAIGN PRIMITIVES
+   ========================================================================== */
+
+/* The charge — lime's signature mark. A thick flat bar, never a glow.
+   .c-charge      : standalone bar element
+   .c-charge-link : interactive element that carries/draws the bar beneath */
+.c-charge {
+  display: block;
+  height: 6px;
+  width: 72px;
+  background: var(--lime);
+}
+.c-charge-link {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  padding-bottom: 8px;
+}
+.c-charge-link::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 4px; width: 100%;
+  background: var(--lime);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-base) var(--ease-mech);
+}
+.c-charge-link:hover::after,
+.c-charge-link:focus-visible::after,
+.c-charge-link[aria-current]::after,
+.c-charge-link.is-active::after { transform: scaleX(1); }
+
+/* Bleed — the sanctioned crop. Type larger than its container, sliced by
+   the viewport edge. Apply to a wrapper that hides the overflow. */
+.c-bleed { overflow: hidden; }
+.c-bleed-l { margin-left: -0.045em; }   /* optical flush-crop on the left */
+.c-bleed-r { margin-right: -0.045em; }
+
+/* B/W campaign treatment — monochrome grade fused to the black page.
+   Commerce imagery stays true color; this class is for campaign surfaces
+   only. Hover/focus performs the reveal: the garment's real color. */
+.c-bw img, img.c-bw {
+  filter: grayscale(1) contrast(1.05);
+  transition: filter var(--motion-slow) var(--ease-mech);
+}
+.group:hover .c-bw img,
+.group:focus-visible .c-bw img,
+a:hover > .c-bw img,
+a:focus-visible > .c-bw img { filter: grayscale(0) contrast(1); }
+
+/* Kinetic track — the one perpetual-motion element on the site. Decorative
+   only (aria-hidden in markup); functional links live elsewhere. Pauses on
+   hover; reduced-motion stops it entirely. */
+.c-track { overflow: hidden; white-space: nowrap; }
+.c-track__inner {
+  display: inline-block;
+  padding-right: 4rem;
+  animation: c-crawl 28s linear infinite;
+}
+.c-track:hover .c-track__inner { animation-play-state: paused; }
+@keyframes c-crawl { to { transform: translateX(-100%); } }
+
+/* Mobile menu overlay — slow, smooth entrance: fades and settles in on
+   the house easing instead of snapping. Kept in the DOM (visibility
+   toggles after the fade), so the transition can run; while closed,
+   visibility:hidden keeps it out of the tab order. */
+.c-menu {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity var(--motion-slow) var(--ease-mech),
+              transform var(--motion-slow) var(--ease-mech),
+              visibility 0s linear var(--motion-slow);
+}
+.c-menu.is-open {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--motion-slow) var(--ease-mech),
+              transform var(--motion-slow) var(--ease-mech);
+}
+
+/* Hamburger — three bars that morph into an X when open. 44×44 touch
+   target (mobile-first floor); hover charges lime like every control. */
+.c-burger {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-1);
+}
+.c-burger:hover { color: var(--lime); }
+.c-burger .bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  transition: transform var(--motion-fast) var(--ease-mech),
+              opacity var(--motion-fast) var(--ease-mech);
+}
+.c-burger.is-open .bar:nth-child(2) { transform: translateY(7px) rotate(45deg); }
+.c-burger.is-open .bar:nth-child(3) { opacity: 0; }
+.c-burger.is-open .bar:nth-child(4) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Horizontal slide row — for control rows (category chips) that must not
+   wrap into a jumble on small screens. Scrollbar hidden; the row itself
+   is the affordance. */
+.c-scroll-x {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.c-scroll-x::-webkit-scrollbar { display: none; }
+.c-scroll-x > * { flex-shrink: 0; }
+
+/* Folio — the running page-edge line */
+.c-folio {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Shared page gutter — written once (system law A6) */
+.c-gutter { padding-inline: 16px; }
+@media (min-width: 640px) { .c-gutter { padding-inline: 24px; } }
+@media (min-width: 1024px) { .c-gutter { padding-inline: 48px; } }
+
+/* Spot fields — the sanctioned large fills. At most one per page. */
+.c-field-lime { background: var(--lime); color: var(--black); }
+.c-field-lime ::selection { background: var(--black); color: var(--lime); }
+.c-field-violet { background: var(--violet); color: var(--ink-on-violet); }
+.c-paper, .v-paper { background: var(--paper-50); color: var(--ink-on-paper-1); }
+
+/* ==========================================================================
+   STRUCTURE — hairlines, plates, current-line idiom
+   ========================================================================== */
+.v-hairline-t { border-top: 1px solid var(--line-dark); }
+.v-hairline-b { border-bottom: 1px solid var(--line-dark); }
+.v-hairline-r { border-right: 1px solid var(--line-dark); }
+.v-hairline-l { border-left: 1px solid var(--line-dark); }
+
+.v-plate { border: 1px solid var(--line-dark); background: transparent; overflow: hidden; border-radius: var(--radius-lg); }
+.v-plate--raised { background: var(--ground-900); }
+
+/* Media motion: slow settle scale on plate hover — kept subtle. Where a
+   second image exists, templates hard-cut to it instead (camera cut). */
+.v-media { overflow: hidden; }
+.v-media img {
+  transition: transform var(--motion-slow) var(--ease-mech);
+  transform-origin: center;
+}
+.group:hover .v-media img,
+.group:focus-visible .v-media img { transform: scale(1.04); }
+
+.v-paper .v-hairline-t, .v-paper .v-hairline-b,
+.v-paper .v-hairline-r, .v-paper .v-hairline-l { border-color: var(--line-paper); }
+.v-paper .v-plate { border-color: var(--line-paper); }
+
+/* Current-line idiom: 3px lime charge marks the active thing */
+.v-current { border-left: 3px solid var(--lime); }
+.v-current--signal { border-left: 3px solid var(--lime); }
+
+/* ==========================================================================
+   BUTTONS — flat, square, label-swap loading. No spinners.
+   ========================================================================== */
+.v-btn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 44px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease-mech),
+              border-color var(--motion-fast) var(--ease-mech),
+              color var(--motion-fast) var(--ease-mech);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.v-btn:disabled { opacity: 0.4; cursor: default; }
+
+.v-btn--lg { height: 52px; padding: 0 32px; }
+.v-btn--sm { height: 32px; padding: 0 16px; }
+
+.v-btn--primary { background: var(--lime); color: var(--black); }
+.v-btn--primary:hover:not(:disabled) { background: var(--signal-press); }
+.v-btn--primary:active:not(:disabled) { background: var(--signal-press); }
+
+.v-btn--secondary {
+  background: transparent;
+  color: var(--ink-1);
+  border-color: var(--line-dark-strong);
+}
+/* Hover is lime's job (brand function: active/hover) — flat ink, no glow */
+.v-btn--secondary:hover:not(:disabled) {
+  background: var(--ground-900);
+  border-color: var(--lime);
+  color: var(--lime);
+}
+.v-paper .v-btn--secondary, .c-paper .v-btn--secondary { color: var(--ink-on-paper-1); border-color: var(--line-paper-strong); }
+.v-paper .v-btn--secondary:hover:not(:disabled), .c-paper .v-btn--secondary:hover:not(:disabled) { background: var(--paper-100); }
+
+/* On paper and on lime fields, the action is black (lime fails on light) */
+.v-paper .v-btn--primary, .c-paper .v-btn--primary,
+.c-field-lime .v-btn--primary { background: var(--black); color: var(--white); }
+
+.v-btn--ghost {
+  background: transparent;
+  color: var(--ink-1);
+  padding: 0;
+  height: auto;
+  border: 0;
+}
+
+.v-btn--destructive {
+  background: transparent;
+  color: var(--error);
+  border-color: var(--error);
+}
+.v-btn--destructive:hover:not(:disabled) { background: var(--ground-900); }
+.v-btn--destructive-solid { background: var(--error); color: var(--ink-1); border-color: var(--error); }
+
+/* Two-step disclosure (e.g. dashboard reject-with-reason) */
+details.v-disclose > summary { list-style: none; }
+details.v-disclose > summary::-webkit-details-marker { display: none; }
+
+/* Drop-zone drag-over: hairline upgrades — no glow, no color flood */
+.v-plate.is-dragover { border-color: var(--line-dark-strong); }
+
+/* --------------------------------------------------------------------------
+   Underline draw (legacy links; new templates prefer .c-charge-link)
+   -------------------------------------------------------------------------- */
+.v-underline {
+  position: relative;
+  text-decoration: none;
+  padding-bottom: 3px;
+}
+.v-underline::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 1px; width: 0;
+  background: currentColor;
+  transition: width var(--motion-fast) var(--ease-mech);
+}
+.v-underline:hover::after,
+.v-underline:focus-visible::after,
+.v-underline[aria-current]::after,
+.v-underline.is-active::after { width: 100%; }
+
+/* ==========================================================================
+   BADGES (facts) and CHIPS (choices)
+   ========================================================================== */
+.v-badge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--ink-3);
+  color: var(--ink-2);
+  border-radius: var(--radius-xs);
+}
+.v-badge--signal { border-color: var(--lime); color: var(--lime); }
+.v-badge--error { border-color: var(--error); color: var(--error); }
+.v-paper .v-badge--signal { border-color: var(--ink-on-paper-1); color: var(--ink-on-paper-1); }
+.v-paper .v-badge--error { border-color: var(--error-on-paper); color: var(--error-on-paper); }
+
+.v-chip {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-dark);
+  color: var(--ink-2);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--motion-fast) var(--ease-mech),
+              background-color var(--motion-fast) var(--ease-mech),
+              color var(--motion-fast) var(--ease-mech);
+}
+.v-chip:hover { border-color: var(--lime); color: var(--lime); }
+/* A chosen size/filter is a brand moment: selected chips wear the lime. */
+.v-chip.is-selected,
+.v-chip[aria-pressed="true"],
+.v-chip[aria-checked="true"] {
+  background: var(--lime);
+  color: var(--black);
+  border-color: var(--lime);
+}
+.v-chip:has(input:focus-visible) {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
+.v-paper .v-chip:has(input:focus-visible) { outline-color: var(--ink-on-paper-1); }
+.v-chip.is-unavailable {
+  opacity: 0.4;
+  cursor: not-allowed;
+  position: relative;
+  overflow: hidden;
+}
+.v-chip.is-unavailable::before {
+  content: "";
+  position: absolute;
+  left: -10%; right: -10%;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(-18deg);
+}
+
+/* ==========================================================================
+   FORMS — visible labels, hairline boxes, factual errors
+   ========================================================================== */
+.v-field-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  display: block;
+  margin-bottom: 8px;
+}
+.v-paper .v-field-label { color: var(--ink-on-paper-2); }
+
+.v-input, .v-select, .v-textarea {
+  font-family: var(--font-sans);
+  font-size: 16px; /* prevents mobile zoom */
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  background: transparent;
+  color: var(--ink-1);
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius-sm);
+  height: 48px;
+  padding: 0 14px;
+  transition: border-color var(--motion-fast) var(--ease-mech);
+}
+.v-textarea { height: auto; min-height: 120px; padding: 12px 14px; line-height: 1.5; }
+.v-input::placeholder, .v-textarea::placeholder { color: var(--ink-3); }
+.v-input:focus, .v-select:focus, .v-textarea:focus { border-color: var(--line-dark-strong); }
+.v-input.has-error, .v-select.has-error, .v-textarea.has-error { border-color: var(--error); }
+
+/* Selects draw their own chevron — a select must never be mistakable for
+   a text input (system law A10). */
+.v-select {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23c3c6d1' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.v-paper .v-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2343485a' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.v-paper .v-input, .v-paper .v-select, .v-paper .v-textarea {
+  color: var(--ink-on-paper-1);
+  border-color: var(--line-paper);
+}
+.v-paper .v-input:focus, .v-paper .v-select:focus, .v-paper .v-textarea:focus {
+  border-color: var(--line-paper-strong);
+}
+
+.v-field-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--error);
+  margin-top: 6px;
+}
+.v-paper .v-field-error { color: var(--error-on-paper); }
+
+input[type="checkbox"].v-check, input[type="radio"].v-check {
+  appearance: none;
+  width: 18px; height: 18px;
+  border: 1px solid var(--line-dark-strong);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+}
+input[type="checkbox"].v-check:checked,
+input[type="radio"].v-check:checked { background: var(--lime); border-color: var(--lime); }
+
+/* ==========================================================================
+   ALERTS — flat strips, 3px charge rule carries the semantics
+   ========================================================================== */
+.v-alert {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-top: 1px solid var(--line-dark);
+  border-bottom: 1px solid var(--line-dark);
+  border-left: 3px solid var(--ink-1);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-1);
+  background: transparent;
+}
+.v-alert--signal { border-left-color: var(--lime); }
+.v-alert--error { border-left-color: var(--error); }
+
+/* ==========================================================================
+   TABLES — invoice discipline
+   ========================================================================== */
+.v-table { width: 100%; border-collapse: collapse; }
+.v-table th {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-align: left;
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--line-dark-strong);
+}
+.v-table td {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--line-dark);
+  vertical-align: middle;
+}
+.v-table th.is-num, .v-table td.is-num { text-align: right; padding-right: 0; }
+.v-paper .v-table th { color: var(--ink-on-paper-2); border-color: var(--line-paper-strong); }
+.v-paper .v-table td { border-color: var(--line-paper); }
+
+/* ==========================================================================
+   LOADING — rules that draw; no spinners anywhere
+   ========================================================================== */
+.v-loading-rule {
+  position: relative;
+  height: 1px;
+  background: var(--line-dark);
+  overflow: hidden;
+}
+.v-loading-rule::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -40%;
+  width: 40%; height: 100%;
+  background: var(--lime);
+  animation: v-sweep 1s var(--ease-mech) infinite;
+}
+@keyframes v-sweep { to { left: 100%; } }
+
+.v-skeleton { background: var(--ground-900); animation: v-breathe 1.6s ease-in-out infinite; }
+@keyframes v-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+/* ==========================================================================
+   MOTION — entrances are choreography, then stillness
+   ========================================================================== */
+.v-unmask {
+  clip-path: inset(100% 0 0 0);
+  animation: v-unmask var(--motion-slow) var(--ease-mech) forwards;
+}
+@keyframes v-unmask { to { clip-path: inset(0 0 0 0); } }
+
+/* Sequenced cover entrance: stagger children of the cover choreography */
+.c-enter { opacity: 0; animation: v-fade var(--motion-slow) var(--ease-mech) forwards; }
+.c-enter--2 { animation-delay: 120ms; }
+.c-enter--3 { animation-delay: 240ms; }
+
+.v-fade-in { opacity: 0; animation: v-fade var(--motion-base) var(--ease-mech) forwards; }
+.v-fade-in--late { animation-delay: 100ms; }
+@keyframes v-fade { to { opacity: 1; } }
+
+/* Scroll reveal: fired once by IntersectionObserver (cart.js). JS-off /
+   reduced-motion / no-IO fall back to fully visible. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--motion-slow) var(--ease-mech),
+              transform var(--motion-slow) var(--ease-mech);
+}
+[data-reveal].is-revealed { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .v-unmask { clip-path: inset(0 0 0 0); }
+  .v-fade-in, .c-enter { opacity: 1; }
+  .v-skeleton { animation: none; }
+  .c-track__inner { animation: none; transform: none; }
+  .c-bw img, img.c-bw { transition: none; }
+}
+
+/* --------------------------------------------------------------------------
+   PDP gallery — one frame, alternates on hover (desktop) / tap (mobile).
+   Frames FADE between each other (motion-base, house easing); reduced
+   motion collapses the fade to an instant cut. The container is a real
+   button so keyboard users can cycle too.
+   -------------------------------------------------------------------------- */
+.c-pdp-gallery {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  border: 2px solid var(--lime); /* the product frame wears the brand */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.c-pdp-gallery img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--motion-slow) var(--ease-mech); /* slow fade between frames */
+}
+.c-pdp-gallery img.is-on { opacity: 1; }
+.c-pdp-gallery img:first-child { position: relative; } /* sizes the box */
+@media (prefers-reduced-motion: reduce) {
+  .c-pdp-gallery img { transition: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Utilities the templates lean on
+   -------------------------------------------------------------------------- */
+.v-scrim { background: var(--scrim); }

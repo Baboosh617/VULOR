@@ -1,12 +1,44 @@
 {% extends "dashboard/base.html" %}
+
+{% block title %}Edit {{ user.username }} — Dashboard{% endblock %}
+
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Edit Customer: {{ user.username }}</h1>
+<span class="v-label text-ink-3 block mb-4">04 / CUSTOMERS</span>
+<h1 class="v-display text-3xl md:text-4xl text-ink-1 mb-8">{{ user.username|upper }}</h1>
 
-<form method="post" class="bg-white shadow rounded p-4">
+<form method="post" class="max-w-lg space-y-6">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Save</button>
-</form>
 
-<a href="{% url 'dashboard:customer_list' %}" class="text-gray-500 hover:underline mt-4 inline-block">← Back to customers</a>
+    <div>
+        <label for="id_username" class="v-field-label">USERNAME</label>
+        <input id="id_username" type="text" name="username" required class="v-input {% if form.username.errors %}has-error{% endif %}" value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}<p class="v-field-error">{{ form.username.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+        <label for="id_email" class="v-field-label">EMAIL</label>
+        <input id="id_email" type="email" name="email" required class="v-input {% if form.email.errors %}has-error{% endif %}" value="{{ form.email.value|default:'' }}">
+        {% if form.email.errors %}<p class="v-field-error">{{ form.email.errors.0 }}</p>{% endif %}
+    </div>
+    <div class="grid grid-cols-2 gap-6">
+        <div>
+            <label for="id_first_name" class="v-field-label">FIRST NAME</label>
+            <input id="id_first_name" type="text" name="first_name" class="v-input" value="{{ form.first_name.value|default:'' }}">
+        </div>
+        <div>
+            <label for="id_last_name" class="v-field-label">LAST NAME</label>
+            <input id="id_last_name" type="text" name="last_name" class="v-input" value="{{ form.last_name.value|default:'' }}">
+        </div>
+    </div>
+    <div class="flex items-center gap-6">
+        <label class="flex items-center gap-2 v-spec text-ink-2 cursor-pointer">
+            <input type="checkbox" name="is_active" class="v-check" {% if form.is_active.value %}checked{% endif %}>
+            ACTIVE
+        </label>
+    </div>
+
+    <div class="flex items-center gap-4 pt-4">
+        <button type="submit" class="v-btn v-btn--primary">SAVE</button>
+        <a href="{% url 'dashboard:customer_list' %}" class="v-label v-underline text-ink-3 hover:text-ink-1">CANCEL</a>
+    </div>
+</form>
 {% endblock %}

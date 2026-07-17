@@ -18,7 +18,10 @@ def _is_ajax(request):
 @ratelimit(key='ip', rate='20/m', block=True)
 @login_required
 def view_cart(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
+    # cart.html iterates cart.items.all() and reads item.product.* per row
+    # (name, image, price) — prefetching items with their products avoids a
+    # query per line item.
+    cart, _ = Cart.objects.prefetch_related('items__product').get_or_create(user=request.user)
     return render(request, 'cart/cart.html', {'cart': cart})
 
 

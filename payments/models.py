@@ -1,66 +1,71 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
 from django.utils import timezone
 
+import os
 import uuid
 
-class Payment(models.Model):
-    PAYMENT_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    order_id = models.CharField(max_length=100, blank=True, null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    reference = models.CharField(max_length=100, unique=True)
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-    channel = models.CharField(max_length=50, blank=True, null=True) 
-    gateway_response = models.TextField(blank=True, null=True) 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    verified_at = models.DateTimeField(blank=True, null=True)
+def receipt_upload_path(instance, filename):
+    """Store receipts under a date folder with an unguessable name —
+    /media/ is publicly served, so the original filename must never be used."""
+    ext = os.path.splitext(filename)[1].lower()
+    return f"payment_receipts/{timezone.now():%Y/%m}/{uuid.uuid4().hex}{ext}"
 
-    def __str__(self):
-        return f"Payment {self.reference} - {self.user.username} - ₦{self.amount}"
 
-    @property
-    def amount_in_kobo(self):
-        return int(self.amount * 100)
-    
+class PaymentTransactionQuerySet(models.QuerySet):
+    def latest_for(self, order, statuses):
+        """The order's most recent transaction in the given statuses, or None.
+        The single owner of this lookup — don't hand-roll it in views."""
+        return (
+            self.filter(order=order, status__in=statuses)
+            .order_by('-created_at')
+            .first()
+        )
+
+
 class PaymentTransaction(models.Model):
-    paystack_reference = models.CharField(max_length=100, unique=True)
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('pending_verification', 'Pending Verification'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('rejected', 'Rejected'),
+    ]
+
+    objects = PaymentTransactionQuerySet.as_manager()
+
+    reference = models.CharField(max_length=100, unique=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  
-    status = models.CharField(max_length=20, default="pending")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
     verified_at = models.DateTimeField(null=True, blank=True)
-    paystack_access_code = models.CharField(max_length=200, blank=True, null=True)
     metadata = models.JSONField(default=dict, blank=True)
 
+    receipt = models.FileField(upload_to=receipt_upload_path, blank=True, null=True)
+    transaction_reference = models.CharField(max_length=100, blank=True, default='')
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
-        return f"{self.paystack_reference} - {self.order.order_number}"    
+        return f"{self.reference} - {self.order.order_number}"
+
     class Meta:
-            constraints = [
-                models.UniqueConstraint(
+        constraints = [
+            models.UniqueConstraint(
                 fields=['order'],
-                condition=models.Q(status__in=['pending', 'initiated']),
+                condition=models.Q(status__in=['pending', 'pending_verification']),
                 name='one_active_payment_per_order'
             )]
-            ordering = ['-created_at']
-            verbose_name = 'Payment Transaction'
-            verbose_name_plural = 'Payment Transactions'
-
-    @property
-    def amount_in_kobo(self):
-        return int(self.amount * 100)
+        ordering = ['-created_at']
+        verbose_name = 'Payment Transaction'
+        verbose_name_plural = 'Payment Transactions'
+        indexes = [
+            # status is filtered on every latest_for() call — the single
+            # most frequently used payments lookup in the app.
+            models.Index(fields=['status']),
+        ]
 
     @staticmethod
     def generate_reference():
-        
+
         return f"{uuid.uuid4().hex[:12]}-{int(timezone.now().timestamp())}"

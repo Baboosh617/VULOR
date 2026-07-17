@@ -1,766 +1,375 @@
 {% extends "base.html" %}
+{% load humanize %}
 
-{% block title %}{{ product.name }} - VULOR{% endblock %}
+{% block title %}{{ product.name }} — VULOR{% endblock %}
+{% block meta_description %}{{ product.name }} — VU–{{ product.id|stringformat:"02d" }}. {{ product.get_category_display }} from VULOR, &#8358;{{ product.price|intcomma }}.{% endblock %}
+{% block og_title %}{{ product.name }} — VULOR{% endblock %}
+{% block og_extra %}{% if product.image %}<meta property="og:image" content="{{ product.image.url }}">{% endif %}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        
-        <div>
-            
-            <div class="bg-black border border-[#333333] aspect-[0.9] overflow-hidden mb-4 relative image-container">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" 
-                     id="main-product-image"
-                     class="w-full h-full object-cover main-image">
-                
-                
-                {% if product.images.all %}
-                    {% with product.images.all|first as first_alt_image %}
-                    <img src="{{ first_alt_image.image.url }}" alt="{{ product.name }} alternative view" 
-                         id="hover-product-image"
-                         class="w-full h-full object-cover hover-image absolute inset-0 opacity-0 transition-opacity duration-500">
-                    {% endwith %}
-                {% endif %}
-            </div>
-            
-            
-            {% if product.images.all %}
-            <div class="flex space-x-2 mt-4">
-                
-                <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer thumbnail-image"
-                     data-full-image="{{ product.image.url }}">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" 
-                         class="w-full h-full object-cover">
-                </div>
-                
-                {% for img in product.images.all %}
-                <div class="w-20 h-20 bg-black border border-[#333333] overflow-hidden cursor-pointer hover:border-[#dc2626] thumbnail-image"
-                     data-full-image="{{ img.image.url }}">
-                    <img src="{{ img.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}" 
-                         class="w-full h-full object-cover">
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        
-        
-        <div>
-            
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{{ product.name }}</h1>
-            
-            
-            <div class="mb-6">
-                <span class="text-2xl font-bold text-[#dc2626]">₦{{ product.price }}</span>
-                {% if product.compare_price %}
-                <span class="text-lg text-[#666666] line-through ml-2">₦{{ product.compare_price }}</span>
-                {% endif %}
-                {% if product.get_discount_percentage > 0 %}
-                <span class="text-white text-sm font-bold bg-[#dc2626] px-2 py-1 ml-2">
-                    -{{ product.get_discount_percentage }}%
-                </span>
-                {% endif %}
-            </div>
-            
-            
-            {% if product.short_description %}
-            <div class="mb-8">
-                <p class="text-[#cccccc] text-base font-light leading-relaxed">{{ product.short_description }}</p>
-            </div>
-            {% endif %}
 
-            
-            <!-- Replace the size selection section in product_detail.html -->
+<!-- ============ THE FEATURE — gallery + buy rail ============ -->
+<section class="v-hairline-b">
+    <div class="grid grid-cols-1 lg:grid-cols-12">
 
-{% if product.category == 'cargo-jeans' or product.category == 'sweatpants' %}
-
-<!-- Fit Type -->
-<div class="border-t border-[#333333] pt-6 mb-6">
-    <h3 class="text-white text-sm font-bold mb-4 tracking-widest">FIT TYPE</h3>
-    <div class="flex gap-3">
-        {% for fit_value, fit_label in FIT_CHOICES %}
-        <label class="cursor-pointer">
-            <input type="radio" name="fit_type" value="{{ fit_value }}"
-                   id="fit_{{ fit_value }}"
-                   class="hidden peer"
-                   {% if product.fit_type == fit_value %}checked{% endif %}>
-            <span class="block px-6 py-3 border-2 border-[#333333] text-[#cccccc] text-sm
-                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
-                         hover:border-[#666666] transition-all duration-200 rounded">
-                {{ fit_label }}
-            </span>
-        </label>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Waist Size Selection -->
-{% if product.get_available_sizes_list %}
-<div class="border-t border-[#333333] pt-6 mb-6">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-white text-sm font-bold tracking-widest">WAIST SIZE</h3>
-        <button type="button" onclick="toggleMeasurementsTable()"
-                class="text-[#dc2626] text-xs hover:text-white transition-colors">
-            View Size Chart ↓
-        </button>
-    </div>
-
-    <div class="flex flex-wrap gap-2 mb-4">
-        {% for size in product.get_available_sizes_list %}
-        <label class="cursor-pointer">
-            <input type="radio" name="size" value="{{ size }}"
-                   id="size_{{ size }}"
-                   class="hidden peer"
-                   onchange="onSizeSelected('{{ size }}')"
-                   {% if forloop.first %}checked{% endif %}>
-            <span class="block px-5 py-3 border-2 border-[#333333] text-[#cccccc] text-sm font-mono
-                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
-                         hover:border-[#666666] transition-all duration-200 rounded">
-                {{ size }}"
-            </span>
-        </label>
-        {% endfor %}
-    </div>
-
-    <!-- Selected size measurements panel -->
-    <div id="size-measurements-panel"
-         class="hidden bg-[#111111] border border-[#333333] rounded-lg p-4 text-sm">
-        <p class="text-[#dc2626] font-bold mb-3 tracking-widest text-xs" id="selected-size-label">
-            SIZE — MEASUREMENTS
-        </p>
-        <div class="grid grid-cols-2 gap-3" id="selected-size-data"></div>
-    </div>
-
-    <!-- Full size chart (hidden by default) -->
-    {% if product.has_detailed_measurements %}
-    <div id="full-size-chart" class="hidden mt-4">
-        <div class="overflow-x-auto rounded-lg border border-[#333333]">
-            <table class="w-full text-sm">
-                <thead class="bg-[#111111]">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-[#dc2626] font-bold tracking-widest">SIZE</th>
-                        {% if product.waist_measurements %}
-                        <th class="px-4 py-3 text-left text-white font-semibold">Waist</th>
-                        {% endif %}
-                        {% if product.hip_measurements %}
-                        <th class="px-4 py-3 text-left text-white font-semibold">Hip</th>
-                        {% endif %}
-                        {% if product.length_measurements %}
-                        <th class="px-4 py-3 text-left text-white font-semibold">Length</th>
-                        {% endif %}
-                        {% if product.thigh_measurements %}
-                        <th class="px-4 py-3 text-left text-white font-semibold">Thigh</th>
-                        {% endif %}
-                        {% if product.rise_measurements %}
-                        <th class="px-4 py-3 text-left text-white font-semibold">Rise</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody id="size-chart-body" class="divide-y divide-[#333333]">
-                    <!-- filled by JS -->
-                </tbody>
-            </table>
-        </div>
-        <p class="text-xs text-[#666666] mt-2">All measurements in inches.</p>
-    </div>
-    {% endif %}
-</div>
-{% endif %}
-
-{% else %}
-<!-- Regular size selection for non-pants categories -->
-{% if product.get_available_sizes_list %}
-<div class="border-t border-[#333333] pt-6 mb-6">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-white text-sm font-bold tracking-widest">SIZE</h3>
-        <a href="{% url 'size_guide' %}" class="text-[#dc2626] text-xs hover:text-white transition-colors">
-            Size Guide →
-        </a>
-    </div>
-    <div class="flex flex-wrap gap-2">
-        {% for size in product.get_available_sizes_list %}
-        <label class="cursor-pointer">
-            <input type="radio" name="size" value="{{ size }}"
-                   class="hidden peer"
-                   {% if forloop.first %}checked{% endif %}>
-            <span class="block px-5 py-3 border-2 border-[#333333] text-[#cccccc] text-sm
-                         peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white
-                         hover:border-[#666666] transition-all duration-200 rounded">
-                {{ size }}
-            </span>
-        </label>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-{% endif %}
-
-            
-            {% if product.get_available_sizes_list %}
-            <div class="mb-6">
-                <label class="block text-white text-sm mb-3">
-                    {% if product.has_detailed_measurements %}
-                    WAIST SIZE
-                    {% else %}
-                    SIZE
-                    {% endif %}
-                </label>
-                <div class="flex flex-wrap gap-2">
-                    {% for size in product.get_available_sizes_list %}
-                    <label class="flex items-center">
-                        <input type="radio" name="size" value="{{ size }}" 
-                               class="hidden peer" {% if forloop.first %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
-                            {{ size }}
-                        </span>
-                    </label>
+        <!-- Gallery: one frame at half scale, set into the column as a
+             framed plate. Alternates fade in on hover (desktop) and on
+             tap/click or Enter (a real button, so keyboard users cycle). -->
+        <div class="lg:col-span-7 lg:v-hairline-r">
+            {% if product.image %}
+            <div class="c-gutter lg:px-10 py-10">
+                <button type="button" id="pdp-gallery" class="c-pdp-gallery w-full max-w-md" aria-label="Show next photo of {{ product.name }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                         class="aspect-[4/5] is-on" loading="eager" fetchpriority="high" data-g>
+                    {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}"
+                         loading="lazy" data-g>
                     {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            
-            {% if product.get_available_colors_list %}
-            <div class="mb-6">
-                <label class="block text-white text-sm mb-3">COLOR</label>
-                <div class="flex flex-wrap gap-2">
-                    {% for color in product.get_available_colors_list %}
-                    <label class="flex items-center">
-                        <input type="radio" name="color" value="{{ color }}" 
-                               class="hidden peer" {% if forloop.first %}checked{% endif %}>
-                        <span class="px-4 py-2 border border-[#333333] text-[#cccccc] text-sm cursor-pointer peer-checked:border-[#dc2626] peer-checked:bg-[#dc2626] peer-checked:text-white transition-all duration-300">
-                            {{ color }}
-                        </span>
-                    </label>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            
-            <div class="mb-6">
-                <label class="block text-white text-sm mb-3">QUANTITY</label>
-                <div class="flex items-center w-32">
-                    <button type="button" 
-                            class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
-                        −
-                    </button>
-                    <input type="number" name="quantity" value="1" min="1" 
-                           class="flex-1 h-10 border border-[#333333] text-center text-white bg-black quantity-input"
-                           readonly style="-moz-appearance: textfield;">
-                    <button type="button" 
-                            class="increase-quantity w-10 h-10 border border-l-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
-                        +
-                    </button>
-                </div>
-            </div>
-
-            
-            {% if user.is_authenticated %}
-            <form method="POST" action="{% url 'add_to_cart' product.id %}" class="mb-8" id="add-to-cart-form">
-                {% csrf_token %}
-                <input type="hidden" name="fit_type" value="{{ product.fit_type|default:'' }}" id="fit-input">
-                <input type="hidden" name="size" value="{{ product.get_available_sizes_list.0|default:'' }}" id="size-input">
-                <input type="hidden" name="color" value="{{ product.get_available_colors_list.0|default:'' }}" id="color-input">
-                <input type="hidden" name="quantity" value="1" id="quantity-input-hidden">
-                
-                <button type="submit" 
-                        class="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white text-base font-bold py-4 px-6 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-center add-to-cart-btn border border-[#dc2626]"
-                        {% if not product.is_in_stock %}disabled{% endif %}>
-                    {% if product.is_in_stock %}
-                        ADD TO CART
-                    {% else %}
-                        OUT OF STOCK
-                    {% endif %}
                 </button>
-            </form>
-            {% else %}
-            <div class="mb-8">
-                <a href="{% url 'login' %}" 
-                   class="block w-full border border-[#dc2626] text-[#dc2626] text-base font-bold py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 text-center">
-                    LOGIN TO PURCHASE
-                </a>
-            </div>
-            {% endif %}
-
-            
-            {% if product.description %}
-            <div class="mt-8 pt-8 border-t border-[#333333]">
-                <h3 class="text-white text-sm font-bold mb-4 tracking-widest">DESCRIPTION</h3>
-                <div class="text-[#cccccc] text-sm leading-relaxed">
-                    {{ product.description|linebreaks }}
-                </div>
-            </div>
-            {% endif %}
-
-            
-            {% if product.has_detailed_measurements %}
-            <div class="mt-8 pt-8 border-t border-[#333333]">
-                <h3 class="text-white text-sm font-bold mb-4 tracking-widest">SIZE & MEASUREMENTS</h3>
-                <div class="space-y-2">
-                    {% for measurement_name, measurement_value in product.get_measurements_dict.items %}
-                    <div class="flex justify-between items-center py-2 border-b border-[#333333]">
-                        <span class="text-[#cccccc] text-sm">{{ measurement_name }}:</span>
-                        <span class="text-white text-sm font-medium">{{ measurement_value }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                <p class="text-[#666666] text-xs mt-4">
-                    All measurements in inches. Refer to our <a href="{% url 'size_guide' %}" class="text-[#dc2626] hover:text-white transition-colors duration-300">size guide</a> for help.
-                </p>
-            </div>
-            {% endif %}
-
-            
-            <div class="mt-8 pt-8 border-t border-[#333333]">
-                <div class="grid grid-cols-3 gap-8">
-                    <div>
-                        <div class="text-white text-sm font-bold mb-1 tracking-widest">SHIPPING</div>
-                        <div class="text-[#cccccc] text-sm">Free over ₦50,000</div>
-                    </div>
-                    <div>
-                        <div class="text-white text-sm font-bold mb-1 tracking-widest">RETURNS</div>
-                        <div class="text-[#cccccc] text-sm">30 days</div>
-                    </div>
-                    <div>
-                        <div class="text-white text-sm font-bold mb-1 tracking-widest">PAYMENT</div>
-                        <div class="text-[#cccccc] text-sm">Secured by Paystack</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    
-    <div class="mt-16 pt-16 border-t border-[#333333]">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold text-white">REVIEWS</h2>
-            {%  if user.is_authenticated %}
-            <button id="write-review-toggle" 
-                    class="text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
-                WRITE A REVIEW
-            </button>
-            {% endif %}
-        </div>
-        
-        
-        <div id="review-form-container" class="hidden mb-8">
-            {%  if user.is_authenticated %}
-            <form method="POST" action="{% url 'add_product_review' product.id %}" class="space-y-4">
-                {% csrf_token %}
-                <div>
-                    <label class="block text-white text-sm mb-2">RATING</label>
-                    <div class="flex space-x-1">
-                        {% for i in "54321" %}
-                        <label class="cursor-pointer">
-                            <input type="radio" name="rating" value="{{ forloop.counter }}" class="hidden peer" required>
-                            <span class="text-2xl text-[#333333] peer-checked:text-[#dc2626] hover:text-[#dc2626] transition-all duration-300">★</span>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-white text-sm mb-2">YOUR REVIEW</label>
-                    <textarea name="comment" 
-                              rows="3" 
-                              class="w-full border border-[#333333] text-white px-4 py-3 text-sm bg-black focus:outline-none focus:border-[#dc2626] transition-all duration-300"
-                              placeholder="Share your thoughts about this product..."
-                              required></textarea>
-                </div>
-                
-                <div class="flex justify-end">
-                    <button type="button" 
-                            id="cancel-review"
-                            class="border border-[#333333] text-[#cccccc] px-4 py-2 text-sm hover:border-[#dc2626] hover:text-white transition-all duration-300 mr-2">
-                        CANCEL
-                    </button>
-                    <button type="submit" 
-                            class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-6 py-2 text-sm font-bold transition-all duration-300 border border-[#dc2626]">
-                        SUBMIT REVIEW
-                    </button>
-                </div>
-            </form>
-            {% else %}
-            <div class="text-center py-8">
-                <p class="text-[#cccccc] mb-4">Please <a href="{% url 'login' %}" class="text-[#dc2626] hover:text-white transition-colors duration-300">log in</a> to write a review.</p>
+                <p id="gallery-count" class="c-reg text-ink-3 max-w-md pt-3" aria-live="polite" hidden></p>
             </div>
             {% endif %}
         </div>
-        
-        {% if product.reviews.all %}
-        
-        <div class="space-y-6">
-            <div class="mb-6">
-                <div class="flex items-center space-x-4">
-                    <span class="text-3xl font-bold text-white">
-                        Reviews
-                    </span>
-                    <span class="text-[#cccccc] text-sm">{{ product.reviews.count }} review{{ product.reviews.count|pluralize }}</span>
+
+        <!-- Buy rail -->
+        <div class="lg:col-span-5">
+            <div id="buy-box" class="lg:sticky lg:top-16 c-gutter lg:px-10 py-10 scroll-mt-20">
+
+                <nav class="c-reg text-ink-3 mb-8" aria-label="Breadcrumb">
+                    <a href="{% url 'product_list' %}" class="hover:text-ink-1">Catalog</a>
+                    <span> / </span>
+                    <a href="{% url 'product_list' %}?category={{ product.category }}" class="hover:text-ink-1">{{ product.get_category_display }}</a>
+                </nav>
+
+                <p class="c-reg text-ink-3 mb-3">VU&ndash;{{ product.id|stringformat:"02d" }} — {{ product.get_category_display }}</p>
+                <h1 class="c-monolith text-5xl md:text-6xl mb-5">{{ product.name }}</h1>
+
+                <p class="v-price text-xl text-ink-1 mb-2">&#8358;&nbsp;{{ product.price|intcomma }}</p>
+                {% if product.compare_price and product.compare_price > product.price %}
+                <p class="v-spec text-ink-3 line-through mb-2">&#8358;&nbsp;{{ product.compare_price|intcomma }}</p>
+                {% endif %}
+
+                <div class="mb-8 mt-4">
+                    {% if not product.is_in_stock %}
+                    <span class="v-badge">Sold out</span>
+                    {% elif product.inventory_count <= 5 %}
+                    <span class="v-badge v-badge--signal">{{ product.inventory_count|stringformat:"02d" }} left</span>
+                    {% endif %}
                 </div>
-            </div>
-            
-            {% for review in product.reviews.all|slice:":3" %}
-            <div class="border-b border-[#333333] pb-6 last:border-0">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <div class="text-white font-bold">{{ review.user.get_full_name|default:review.user.username }}</div>
-                        <div class="flex">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= review.rating %}
-                                <span class="text-[#dc2626] text-sm">★</span>
-                                {% else %}
-                                <span class="text-[#333333] text-sm">★</span>
-                                {% endif %}
+
+                <form method="POST" action="{% url 'add_to_cart' product.id %}" id="add-form">
+                    {% csrf_token %}
+
+                    {% if sizes %}
+                    <fieldset class="mb-6">
+                        <div class="flex items-baseline justify-between mb-3">
+                            <legend class="v-field-label !mb-0">Size</legend>
+                            <a href="{% url 'size_guide' %}" class="c-reg-lg v-underline text-ink-3 hover:text-ink-1">Size guide</a>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            {% for size in sizes %}
+                            <label class="v-chip cursor-pointer" data-chip="size">
+                                <input type="radio" name="size" value="{{ size }}" class="sr-only" required>
+                                {{ size }}
+                            </label>
                             {% endfor %}
                         </div>
+                    </fieldset>
+                    {% endif %}
+
+                    {% if colors %}
+                    <fieldset class="mb-6">
+                        <legend class="v-field-label">Color</legend>
+                        <div class="flex flex-wrap gap-2">
+                            {% for color in colors %}
+                            <label class="v-chip cursor-pointer" data-chip="color">
+                                <input type="radio" name="color" value="{{ color }}" class="sr-only" {% if forloop.first %}checked{% endif %}>
+                                {{ color }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                    {% endif %}
+
+                    <div class="mb-8">
+                        <label for="quantity" class="v-field-label">Quantity</label>
+                        <div class="inline-flex items-stretch">
+                            <button type="button" id="qty-minus" class="v-btn v-btn--secondary !h-12 !px-4" aria-label="Decrease quantity">&minus;</button>
+                            <input id="quantity" type="number" name="quantity" value="1" min="1" max="100"
+                                   class="v-input !h-12 w-16 text-center border-l-0 border-r-0">
+                            <button type="button" id="qty-plus" class="v-btn v-btn--secondary !h-12 !px-4" aria-label="Increase quantity">+</button>
+                        </div>
                     </div>
-                    <div class="text-[#666666] text-sm">{{ review.created_at|date:"F j, Y" }}</div>
-                </div>
-                <p class="text-[#cccccc] text-sm leading-relaxed">{{ review.comment }}</p>
+
+                    <!-- The order line — composes as you configure (live region) -->
+                    <p id="order-line" class="v-spec text-ink-2 mb-3 v-hairline-t v-hairline-b py-3"
+                       aria-live="polite"
+                       data-sku="VU–{{ product.id|stringformat:'02d' }}"
+                       data-price-display="{{ product.price|intcomma }}">
+                        VU–{{ product.id|stringformat:"02d" }} / Size? / —
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        {% if product.is_in_stock %}
+                        <button type="submit" id="add-btn" class="v-btn v-btn--primary v-btn--lg w-full" disabled>
+                            Bills on you!!!!
+                        </button>
+                        {% else %}
+                        <button type="button" class="v-btn v-btn--secondary v-btn--lg w-full" disabled>Sold out</button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="v-btn v-btn--secondary v-btn--lg w-full">Sign in to order</a>
+                    {% endif %}
+                </form>
+
             </div>
-            {% endfor %}
         </div>
-        
-        {% if product.reviews.count > 3 %}
-        <div class="mt-6 text-center">
-            <a href="#" class="text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
-                LOAD MORE REVIEWS
-            </a>
-        </div>
-        {% endif %}
-        
-        {% else %}
-      
-        <div class="text-center py-8">
-        
-            <p class="text-[#cccccc] mb-4">NO REVIEWS YET. BE THE FIRST TO REVIEW THIS PRODUCT!</p>
-        </div>
-        {% endif %}
     </div>
+</section>
+
+<!-- Mobile buy bar: price + action never buried below the gallery -->
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-ground-900 v-hairline-t">
+    <a href="#buy-box" class="flex items-center justify-between h-16 px-4">
+        <span class="v-price text-ink-1">&#8358;&nbsp;{{ product.price|intcomma }}</span>
+        <span class="c-reg-lg c-charge-link is-active text-ink-1">
+            {% if product.is_in_stock %}{% if user.is_authenticated %}Choose size &rarr;{% else %}Sign in to order &rarr;{% endif %}{% else %}Sold out{% endif %}
+        </span>
+    </a>
 </div>
+<div class="lg:hidden h-16" aria-hidden="true"></div>
 
-<style>
-    
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-    
-    
-    .image-container:hover .hover-image {
-        opacity: 1;
-    }
-    
-    .image-container:hover .main-image {
-        opacity: 0;
-    }
-    
-    .main-image, .hover-image {
-        transition: opacity 0.5s ease;
-    }
-    
-    
-    .thumbnail-image.active {
-        border-color: #dc2626 !important;
-    }
-</style>
+<!-- ============ THE FACTS — paper inversion ============ -->
+<section class="v-paper">
+    <div class="c-gutter py-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        const imageContainer = document.querySelector('.image-container');
-        const mainImage = document.querySelector('.main-image');
-        const hoverImage = document.querySelector('.hover-image');
-        
-        if (imageContainer && hoverImage) {
-            
-            mainImage.style.opacity = '1';
-            hoverImage.style.opacity = '0';
-        }
-
-        
-        document.querySelectorAll('.thumbnail-image').forEach(thumb => {
-            thumb.addEventListener('click', function() {
-                const newImageSrc = this.dataset.fullImage;
-                const mainImg = document.querySelector('#main-product-image');
-                const hoverImg = document.querySelector('#hover-product-image');
-                
-                if (mainImg) {
-                    mainImg.src = newImageSrc;
-                }
-                if (hoverImg) {
-                    hoverImg.src = newImageSrc;
-                }
-                
-                
-                document.querySelectorAll('.thumbnail-image').forEach(t => {
-                    t.classList.remove('active');
-                    t.classList.remove('border-[#dc2626]');
-                    t.classList.add('border-[#333333]');
-                });
-                this.classList.add('active');
-                this.classList.remove('border-[#333333]');
-                this.classList.add('border-[#dc2626]');
-            });
-        });
-
-
-        const quantityInput = document.querySelector('.quantity-input');
-        const hiddenQuantityInput = document.querySelector('#quantity-input-hidden');
-        
-        if (quantityInput) {
-            document.querySelector('.increase-quantity').addEventListener('click', () => {
-                let currentValue = parseInt(quantityInput.value);
-                quantityInput.value = currentValue + 1;
-                if (hiddenQuantityInput) hiddenQuantityInput.value = quantityInput.value;
-            });
-
-            document.querySelector('.decrease-quantity').addEventListener('click', () => {
-                let currentValue = parseInt(quantityInput.value);
-                if (currentValue > 1) {
-                    quantityInput.value = currentValue - 1;
-                    if (hiddenQuantityInput) hiddenQuantityInput.value = quantityInput.value;
-                }
-            });
-        }
-
-        
-        document.querySelectorAll('input[name="size"]').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const sizeInput = document.querySelector('#size-input');
-                if (sizeInput) sizeInput.value = e.target.value;
-            });
-        });
-
-        document.querySelectorAll('input[name="color"]').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const colorInput = document.querySelector('#color-input');
-                if (colorInput) colorInput.value = e.target.value;
-            });
-        });
-
-        document.querySelectorAll('input[name="fit_type"]').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const fitInput = document.querySelector('#fit-input');
-                if (fitInput) fitInput.value = e.target.value;
-            });
-        });
-
-        
-        const reviewToggle = document.querySelector('#write-review-toggle');
-        const reviewFormContainer = document.querySelector('#review-form-container');
-        const cancelReviewBtn = document.querySelector('#cancel-review');
-        
-        if (reviewToggle && reviewFormContainer) {
-            reviewToggle.addEventListener('click', () => {
-                reviewFormContainer.classList.toggle('hidden');
-            });
-            
-            if (cancelReviewBtn) {
-                cancelReviewBtn.addEventListener('click', () => {
-                    reviewFormContainer.classList.add('hidden');
-                });
-            }
-        }
-
-        
-        const addToCartForm = document.querySelector('#add-to-cart-form');
-        const addToCartBtn = document.querySelector('.add-to-cart-btn');
-        
-        if (addToCartForm && addToCartBtn) {
-            addToCartForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (addToCartBtn.disabled) return;
-                
-                const originalText = addToCartBtn.textContent;
-                const originalBg = addToCartBtn.style.backgroundColor;
-                
-                
-                addToCartBtn.textContent = 'ADDING...';
-                addToCartBtn.disabled = true;
-                
-                
-                const formData = new FormData(this);
-                
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Network response was not ok.');
-                })
-                .then(data => {
-                    if (data.success) {
-                        
-                        addToCartBtn.textContent = 'ADDED ✓';
-                        addToCartBtn.style.backgroundColor = '#10B981';
-                        addToCartBtn.style.borderColor = '#10B981';
-                        
-                        
-                        const cartBadge = document.querySelector('nav .relative span.bg-\\[\\#dc2626\\]');
-                        if (cartBadge) {
-                            cartBadge.textContent = data.cart_total_items || 1;
-                            
-                            cartBadge.classList.add('animate-pulse');
-                            setTimeout(() => cartBadge.classList.remove('animate-pulse'), 1000);
-                        }
-                        
-                        
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
-                        messageDiv.textContent = 'Added to cart!';
-                        document.body.appendChild(messageDiv);
-                        
-                        
-                        setTimeout(() => messageDiv.remove(), 2000);
-                        
-                    
-                        setTimeout(() => {
-                            addToCartBtn.textContent = originalText;
-                            addToCartBtn.style.backgroundColor = '';
-                            addToCartBtn.style.borderColor = '';
-                            addToCartBtn.disabled = false;
-                        }, 1500);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    addToCartBtn.textContent = 'ADDING...';
-                    addToCartBtn.style.backgroundColor = '#EF4444';
-                    addToCartBtn.style.borderColor = '#EF4444';
-                    
-                    
-                    setTimeout(() => {
-                        addToCartBtn.textContent = originalText;
-                        addToCartBtn.style.backgroundColor = '';
-                        addToCartBtn.style.borderColor = '';
-                        addToCartBtn.disabled = false;
-                    }, 2000);
-                });
-            });
-        }
-    });
-</script>
-
-<script>
-// ── Measurement data from Django (JSON) ───────────────────────────────────────
-const MEASUREMENTS = {
-    waist:  parseMeasurementText("{{ product.waist_measurements|escapejs }}"),
-    hip:    parseMeasurementText("{{ product.hip_measurements|escapejs }}"),
-    length: parseMeasurementText("{{ product.length_measurements|escapejs }}"),
-    thigh:  parseMeasurementText("{{ product.thigh_measurements|escapejs }}"),
-    rise:   parseMeasurementText("{{ product.rise_measurements|escapejs }}"),
-};
-
-const MEASURE_LABELS = {
-    waist: 'Waist', hip: 'Hip', length: 'Length', thigh: 'Thigh', rise: 'Rise'
-};
-
-function parseMeasurementText(text) {
-    const result = {};
-    if (!text) return result;
-    text.replace(/,\s*/g, '\n').split('\n').forEach(line => {
-        const parts = line.split(':');
-        if (parts.length >= 2) {
-            const size = parts[0].trim();
-            const val  = parts.slice(1).join(':').trim();
-            if (size && val) result[size] = val;
-        }
-    });
-    return result;
-}
-
-function onSizeSelected(size) {
-    const panel     = document.getElementById('size-measurements-panel');
-    const label     = document.getElementById('selected-size-label');
-    const dataEl    = document.getElementById('selected-size-data');
-    const chartBody = document.getElementById('size-chart-body');
-
-    if (!panel || !dataEl) return;
-
-    // Check if there are any measurements at all
-    const hasMeasurements = Object.values(MEASUREMENTS).some(m => Object.keys(m).length > 0);
-    if (!hasMeasurements) return;
-
-    // Update the panel
-    label.textContent = `SIZE ${size}" — MEASUREMENTS`;
-
-    const cells = Object.entries(MEASUREMENTS)
-        .filter(([, data]) => data[size])
-        .map(([key, data]) => `
-            <div class="flex flex-col">
-                <span class="text-[#666666] text-xs uppercase tracking-widest mb-1">
-                    ${MEASURE_LABELS[key]}
-                </span>
-                <span class="text-white font-semibold">${data[size]}</span>
+        <div class="lg:col-span-5">
+            <span class="c-reg text-ink-on-paper-3 block mb-4">Details</span>
+            <div class="font-body text-[15px] leading-relaxed max-w-prose text-ink-on-paper-1">
+                {{ product.description|linebreaks }}
             </div>
-        `).join('');
+        </div>
 
-    if (cells) {
-        dataEl.innerHTML = cells;
-        panel.classList.remove('hidden');
-    }
+        <div class="lg:col-span-6 lg:col-start-7">
+            <span class="c-reg text-ink-on-paper-3 block mb-4">Specification</span>
+            <table class="v-table">
+                <tbody>
+                    <tr><td class="w-40 text-ink-on-paper-2">Reference</td><td>VU&ndash;{{ product.id|stringformat:"02d" }}</td></tr>
+                    <tr><td class="text-ink-on-paper-2">Category</td><td>{{ product.get_category_display }}</td></tr>
+                    {% if product.fit_type %}
+                    <tr><td class="text-ink-on-paper-2">Fit</td><td>{{ product.get_fit_type_display }}</td></tr>
+                    {% endif %}
+                    <tr><td class="text-ink-on-paper-2">Sizes</td><td>{{ product.available_sizes }}</td></tr>
+                    <tr><td class="text-ink-on-paper-2">Colors</td><td>{{ product.available_colors }}</td></tr>
+                </tbody>
+            </table>
 
-    // Highlight the selected row in the full chart
-    if (chartBody) {
-        chartBody.querySelectorAll('tr').forEach(row => {
-            const sizeCell = row.querySelector('td:first-child');
-            if (sizeCell) {
-                const isSelected = sizeCell.textContent.trim() === `${size}"`;
-                row.classList.toggle('bg-[#dc2626]/10', isSelected);
-                row.classList.toggle('border-l-2', isSelected);
-                row.classList.toggle('border-[#dc2626]', isSelected);
+            <span class="c-reg text-ink-on-paper-3 block mt-10 mb-4">Delivery</span>
+            <p class="v-spec text-ink-on-paper-2">
+                Zone-based delivery fee, shown at checkout before you commit. Payment by bank transfer.
+            </p>
+            <a href="{% url 'size_guide' %}" class="c-reg-lg v-underline inline-block mt-6 text-ink-on-paper-1">Measurements &amp; size guide &rarr;</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============ REVIEWS ============ -->
+<section class="v-hairline-t c-gutter py-20">
+    <div class="flex items-baseline justify-between mb-10">
+        <div>
+            <span class="c-reg text-ink-3 block mb-3">Reviews{% if avg_rating %} — {{ avg_rating }}/5{% endif %}</span>
+            <h2 class="c-monolith text-3xl">On <span class="c-serif-i normal-case">record.</span></h2>
+        </div>
+    </div>
+
+    {% if reviews %}
+    <ul class="max-w-3xl">
+        {% for review in reviews %}
+        <li class="v-hairline-t py-6">
+            <p class="c-reg text-ink-3 mb-3">
+                {{ review.user.first_name|default:review.user.email|slice:":1" }}. — {{ review.created_at|date:"d/m/Y" }} — {{ review.rating }}/5
+            </p>
+            <p class="v-spec text-ink-1">{{ review.comment }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="v-spec text-ink-2 mb-8">No reviews yet.</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <details class="mt-10 max-w-3xl">
+        <summary class="c-reg-lg v-underline text-ink-2 hover:text-ink-1 cursor-pointer inline-block h-11 leading-[44px]">Write a review</summary>
+        <form method="POST" action="{% url 'add_product_review' product.id %}" class="mt-8 space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="rating" class="v-field-label">Rating — 1 to 5</label>
+                <select id="rating" name="rating" class="v-select max-w-40" required>
+                    <option value="" selected disabled>Choose</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div>
+                <label for="comment" class="v-field-label">Review</label>
+                <textarea id="comment" name="comment" class="v-textarea" required></textarea>
+            </div>
+            <button type="submit" class="v-btn v-btn--secondary">Submit review</button>
+        </form>
+    </details>
+    {% else %}
+    <p class="v-spec text-ink-3 mt-8"><a href="{% url 'login' %}?next={{ request.path }}" class="v-underline text-ink-2">Sign in</a> to write a review.</p>
+    {% endif %}
+</section>
+
+<!-- ============ RELATED — same category ============ -->
+{% if related_products %}
+<section class="v-hairline-t">
+    <div class="c-gutter py-10">
+        <span class="c-reg text-ink-3">Related — same category</span>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 v-hairline-t v-hairline-b">
+        {% for p in related_products %}
+        <a href="{% url 'product_detail' p.slug %}" class="group v-hairline-r">
+            {% if p.image %}
+            <span class="v-media block">
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" class="w-full aspect-[4/5] object-cover" loading="lazy">
+            </span>
+            {% endif %}
+            <div class="p-3 lg:p-4 v-hairline-t group-hover:border-t-lime transition-colors">
+                <p class="c-reg text-ink-3 mb-2 truncate">VU&ndash;{{ p.id|stringformat:"02d" }} — {{ p.get_category_display }}</p>
+                <p class="v-spec text-ink-1 truncate group-hover:text-lime transition-colors">{{ p.name }}</p>
+                <p class="v-price v-spec mt-1">&#8358;&nbsp;{{ p.price|intcomma }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    // ---- Gallery: hover fades to the alternate; tap/click/Enter cycles. ----
+    var gallery = document.getElementById('pdp-gallery');
+    if (gallery) {
+        var frames = gallery.querySelectorAll('img[data-g]');
+        var count = document.getElementById('gallery-count');
+        var idx = 0;
+
+        function show(i) {
+            idx = (i + frames.length) % frames.length;
+            frames.forEach(function (img, n) { img.classList.toggle('is-on', n === idx); });
+            if (count) count.textContent = 'Photo ' + (idx + 1) + ' / ' + frames.length + ' — tap or hover for more';
+        }
+
+        if (frames.length > 1) {
+            count.hidden = false;
+            show(0);
+            // Desktop only (hover-capable pointers): hover fades slowly to
+            // the alternate shot; on leave it LINGERS for 3 seconds before
+            // fading back — unless the user has clicked into the gallery,
+            // which pins their position.
+            var canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+            var pinned = false;
+            var revertTimer = null;
+            if (canHover) {
+                gallery.addEventListener('mouseenter', function () {
+                    if (revertTimer) { clearTimeout(revertTimer); revertTimer = null; }
+                    if (!pinned) show(1);
+                });
+                gallery.addEventListener('mouseleave', function () {
+                    if (pinned) return;
+                    if (revertTimer) clearTimeout(revertTimer);
+                    revertTimer = setTimeout(function () { show(0); revertTimer = null; }, 3000);
+                });
             }
-        });
+            // Tap / click / Enter / Space: cycle through every frame.
+            gallery.addEventListener('click', function () {
+                pinned = true;
+                if (revertTimer) { clearTimeout(revertTimer); revertTimer = null; }
+                show(idx + 1);
+            });
+        }
     }
-}
 
-function toggleMeasurementsTable() {
-    const chart = document.getElementById('full-size-chart');
-    if (!chart) return;
-    chart.classList.toggle('hidden');
+    var form = document.getElementById('add-form');
+    if (!form) return;
+    var orderLine = document.getElementById('order-line');
+    var addBtn = document.getElementById('add-btn');
+    var qty = document.getElementById('quantity');
+    var sku = orderLine.dataset.sku;
+    var priceDisplay = orderLine.dataset.priceDisplay;
+    var hasSizes = !!form.querySelector('input[name="size"]');
 
-    // Build chart body if empty
-    const body = document.getElementById('size-chart-body');
-    if (body && body.children.length === 0) buildSizeChartTable(body);
-}
+    function selected(name) {
+        var el = form.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : null;
+    }
 
-function buildSizeChartTable(body) {
-    const sizes = Object.keys(MEASUREMENTS.waist);
-    if (sizes.length === 0) return;
+    function refresh() {
+        form.querySelectorAll('label[data-chip]').forEach(function (label) {
+            var input = label.querySelector('input');
+            label.classList.toggle('is-selected', input.checked);
+        });
 
-    body.innerHTML = sizes.map(size => {
-        const cells = Object.entries(MEASUREMENTS)
-            .filter(([, data]) => Object.keys(data).length > 0)
-            .map(([, data]) => `<td class="px-4 py-3 text-[#cccccc]">${data[size] || '—'}</td>`)
-            .join('');
+        var size = selected('size');
+        var color = selected('color');
+        var q = Math.max(1, parseInt(qty.value, 10) || 1);
 
-        return `<tr class="hover:bg-[#111111] transition-colors">
-                    <td class="px-4 py-3 font-bold text-white">${size}"</td>
-                    ${cells}
-                </tr>`;
-    }).join('');
-}
+        var parts = [sku];
+        if (hasSizes) parts.push(size || 'Size?');
+        if (color) parts.push(color);
+        parts.push('Qty ' + q);
 
-// Run once for initially selected size
-document.addEventListener('DOMContentLoaded', () => {
-    const checked = document.querySelector('input[name="size"]:checked');
-    if (checked) onSizeSelected(checked.value);
-});
+        var ready = !hasSizes || !!size;
+        orderLine.textContent = parts.join(' / ') + ' — ' + (ready ? '₦ ' + priceDisplay : '—');
+        // Micro-moment: the composed line arms in brand lime once complete.
+        orderLine.classList.toggle('text-lime', ready);
+        if (addBtn) addBtn.disabled = !ready;
+    }
+
+    form.addEventListener('change', refresh);
+    document.getElementById('qty-minus').addEventListener('click', function () {
+        qty.value = Math.max(1, (parseInt(qty.value, 10) || 1) - 1); refresh();
+    });
+    document.getElementById('qty-plus').addEventListener('click', function () {
+        qty.value = Math.min(100, (parseInt(qty.value, 10) || 1) + 1); refresh();
+    });
+    qty.addEventListener('input', refresh);
+
+    form.addEventListener('submit', function (e) {
+        if (!addBtn || addBtn.disabled) return;
+        addBtn.textContent = 'Adding…';
+        addBtn.setAttribute('aria-busy', 'true');
+
+        // Progressive enhancement: add via the JSON endpoint so the customer
+        // keeps browsing momentum (no redirect). Falls back to a normal POST.
+        if (!window.fetch) return;
+        e.preventDefault();
+        fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: new FormData(form)
+        }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+          .then(function (data) {
+              if (data.cart_total_items != null && window.updateCartBadge) {
+                  window.updateCartBadge(data.cart_total_items);
+              }
+              if (window.showToast) window.showToast('Added to cart.', 'success');
+              addBtn.textContent = 'Added';
+              window.setTimeout(function () {
+                  addBtn.textContent = 'Bills on you!!!!';
+                  addBtn.removeAttribute('aria-busy');
+              }, 1600);
+          }).catch(function () { form.submit(); });
+    });
+
+    refresh();
+})();
 </script>
 {% endblock %}
