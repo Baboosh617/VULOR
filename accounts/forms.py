@@ -3,7 +3,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from django.core.validators import RegexValidator
-from django_recaptcha.fields import ReCaptchaField
 from allauth.socialaccount.forms import SignupForm
 
 
@@ -31,8 +30,6 @@ class CustomUserCreationForm(UserCreationForm):
             'placeholder': 'Choose a username'
         })
     )
-
-    captcha = ReCaptchaField()
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser

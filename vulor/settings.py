@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     'payments',
     'dashboard',
     'services',
-    'django_recaptcha',
     'csp',
 ]
 
@@ -120,10 +119,10 @@ SECURE_CONTENT_TYPE_NOSNIFF =True
 
 # Content-Security-Policy — Report-Only for now: violations are logged by
 # the browser (visible in devtools) but nothing is blocked. This lets the
-# policy be verified against real traffic across every page (reCAPTCHA on
-# registration, Google Fonts, the Chart.js CDN script on the dashboard,
-# several un-nonced inline <script> blocks) before a future change switches
-# to CONTENT_SECURITY_POLICY (enforcing). Do not add an enforcing policy
+# policy be verified against real traffic across every page (Google Fonts,
+# the Chart.js CDN script on the dashboard, several un-nonced inline
+# <script> blocks) before a future change switches to
+# CONTENT_SECURITY_POLICY (enforcing). Do not add an enforcing policy
 # without first confirming Report-Only shows zero unexpected violations.
 CONTENT_SECURITY_POLICY_REPORT_ONLY = {
     'DIRECTIVES': {
@@ -135,12 +134,10 @@ CONTENT_SECURITY_POLICY_REPORT_ONLY = {
         'script-src': [
             "'self'", "'unsafe-inline'",
             'https://cdn.jsdelivr.net',  # Chart.js (dashboard sales chart)
-            'https://www.google.com', 'https://www.gstatic.com',  # reCAPTCHA
         ],
         'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com'],
-        'img-src': ["'self'", 'data:', 'https://www.gstatic.com'],
-        'frame-src': ['https://www.google.com'],  # reCAPTCHA challenge iframe
+        'img-src': ["'self'", 'data:'],
         'connect-src': ["'self'"],
     },
 }
@@ -232,6 +229,10 @@ ACCOUNT_UNIQUE_EMAIL = True
 # registration was closed when it never actually was; removed rather than
 # left as misleading dead config.
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[VULOR] '
+# Allauth emails (verification, password reset) are sent synchronously inside
+# the request; the resilient adapter logs SMTP failures instead of 500ing the
+# signup/reset flow after the user row is already committed.
+ACCOUNT_ADAPTER = 'accounts.adapter.ResilientAccountAdapter'
 
 #social account settings
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -410,6 +411,3 @@ CELERY_TASK_SERIALIZER = "json"
 # Customer emails are sent synchronously unless a Celery worker + broker
 # actually run in the environment (the Render web service has neither).
 EMAIL_ASYNC_ENABLED = os.getenv('EMAIL_ASYNC_ENABLED', 'False') == 'True'
-
-
-SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']

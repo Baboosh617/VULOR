@@ -46,11 +46,6 @@
                     {% if form.password2.errors %}<p class="v-field-error">{{ form.password2.errors.0 }}</p>{% endif %}
                 </div>
 
-                <div>
-                    {{ form.captcha }}
-                    {% for error in form.captcha.errors %}<p class="v-field-error">{{ error }}</p>{% endfor %}
-                </div>
-
                 <button type="submit" class="v-btn v-btn--primary v-btn--lg w-full">Create account</button>
             </form>
 

@@ -1,7 +1,9 @@
 from django.urls import reverse
 from vulor.testing import StoreTestCase, make_user
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.core import mail
 from django.core.exceptions import ValidationError
+from django.core.mail.backends.base import BaseEmailBackend
 from django.db import IntegrityError
 from accounts.models import CustomUser
 
@@ -72,3 +74,36 @@ class AccountDeactivationTests(StoreTestCase):
 
     def test_get_is_not_allowed(self):
         self.assertEqual(self.client.get(reverse("deactivate_account")).status_code, 405)
+
+
+class BrokenEmailBackend(BaseEmailBackend):
+    """Simulates an unreachable SMTP server (connection timeout)."""
+
+    def send_messages(self, email_messages):
+        raise TimeoutError(110, "Connection timed out")
+
+
+class RegistrationEmailTests(StoreTestCase):
+    SIGNUP_DATA = {
+        "username": "newbuyer",
+        "email": "newbuyer@example.com",
+        "password1": "strongpass123!",
+        "password2": "strongpass123!",
+    }
+
+    def test_register_sends_verification_email(self):
+        response = self.client.post(reverse("register"), self.SIGNUP_DATA)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(CustomUser.objects.filter(email="newbuyer@example.com").exists())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("newbuyer@example.com", mail.outbox[0].to)
+
+    @override_settings(EMAIL_BACKEND="accounts.tests.BrokenEmailBackend")
+    def test_register_survives_smtp_outage(self):
+        """An unreachable SMTP server must not 500 the signup after the user
+        row is committed — the resilient adapter logs and lets the flow finish;
+        allauth re-sends verification on the next login attempt."""
+        with self.assertLogs("accounts.adapter", level="ERROR"):
+            response = self.client.post(reverse("register"), self.SIGNUP_DATA)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(CustomUser.objects.filter(email="newbuyer@example.com").exists())
