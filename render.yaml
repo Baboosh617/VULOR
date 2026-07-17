@@ -4,6 +4,8 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements.txt &&
+      npm ci &&
+      npm run build:css &&
       python manage.py collectstatic --noinput --clear &&
       python manage.py migrate --noinput
     startCommand: gunicorn vulor.wsgi:application
@@ -13,11 +15,20 @@ services:
       - key: PORT
         value: "10000"
       - key: WEB_CONCURRENCY
-        value: "1"
+        value: "2"
       - key: GUNICORN_CMD_ARGS
-        value: "--timeout 120"
+        # gthread rather than more sync workers: cheaper on memory (threads
+        # share one process) and specifically helps here because the app's
+        # slowest requests are I/O-bound (synchronous SMTP calls in the
+        # order/payment signal chain), which release the GIL while waiting.
+        # NOTE: 2 workers x 2 threads is a conservative starting point, not
+        # a measured figure — confirm against the actual Render instance's
+        # memory/CPU plan before relying on it under real load.
+        value: "--timeout 120 --worker-class gthread --threads 2"
       - key: ON_RENDER
         value: "True"
+      - key: DEBUG
+        value: "False"
 databases:
   - name: vulor-db
     databaseName: vulor

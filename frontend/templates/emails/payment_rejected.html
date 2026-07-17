@@ -9,6 +9,12 @@
         <strong>{{ order.order_number }}</strong> but couldn't match it to a transfer.
       </p>
 
+      {% if rejection_reason %}
+      <p style="font-size:15px; color:#111827; background:#f3f4f6; border-left:3px solid #dc2626; padding:12px 14px; margin-top:16px;">
+        <strong>Note from our team:</strong> {{ rejection_reason }}
+      </p>
+      {% endif %}
+
       <h2 style="font-size:18px; font-weight:bold; margin-top:20px;">Please check that</h2>
       <ul style="font-size:14px; color:#374151;">
         <li style="margin-bottom:5px;">You transferred the exact total: <strong>₦{{ order.grand_total }}</strong></li>

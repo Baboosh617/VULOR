@@ -10,17 +10,19 @@ logger = logging.getLogger(__name__)
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 
-def _dispatch(subject, template, user, order):
+def _dispatch(subject, template, user, order, **extra_context):
     """Deliver a templated customer email. Queues via Celery only when
     EMAIL_ASYNC_ENABLED is set (worker + broker present); otherwise — or if
     the broker is unreachable — sends synchronously so emails are never
-    silently dropped."""
+    silently dropped. `extra_context` (JSON-serialisable) is merged onto the
+    shared order-email context for templates that need one-off values."""
     kwargs = dict(
         subject=subject,
         template=template,
         user_id=user.id,
         order_id=order.id,
         to_email=user.email,
+        extra_context=extra_context or None,
     )
     if getattr(settings, "EMAIL_ASYNC_ENABLED", False):
         try:
@@ -126,12 +128,13 @@ def send_payment_receipt(user, order):
     )
 
 
-def send_payment_rejected(user, order):
+def send_payment_rejected(user, order, reason=None):
     _dispatch(
         subject=f"Payment Not Confirmed – Order #{order.order_number}",
         template="emails/payment_rejected.html",
         user=user,
         order=order,
+        rejection_reason=(reason or "").strip(),
     )
 
 
@@ -169,6 +172,25 @@ def send_low_stock_alert(product):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[ADMIN_EMAIL],
     )
+
+
+def send_admin_contact_message(full_name, email, subject, message):
+    if not ADMIN_EMAIL:
+        logger.warning("ADMIN_EMAIL not set — skipping contact form notification")
+        return
+    # EmailMessage (not send_mail) so we can set reply_to — a staff member
+    # replying to this notification should land in the customer's inbox.
+    EmailMessage(
+        subject=f"[Contact] {subject} — {full_name}",
+        body=(
+            f"From: {full_name} <{email}>\n"
+            f"Subject: {subject}\n\n"
+            f"{message}"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[ADMIN_EMAIL],
+        reply_to=[email],
+    ).send()
 
 
 def send_admin_new_order(order):

@@ -3,8 +3,10 @@ from unittest.mock import patch
 
 from django.core import mail
 from django.core.management import call_command
+from django.db import connection
 from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -14,6 +16,7 @@ from orders.models import Order, OrderItem
 from orders.shipping import get_shipping_info
 from payments.models import PaymentTransaction
 from services.email_service import send_order_confirmation
+from services.inventory_service import reduce_inventory
 from services.tasks import build_order_email_context
 from vulor.testing import (
     StoreTestCase,
@@ -129,7 +132,7 @@ class CheckoutViewTests(StoreTestCase):
     def test_get_renders_checkout_page_without_errors(self):
         response = self.client.get(reverse("orders:checkout"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "DELIVERY INFORMATION")
+        self.assertContains(response, "Delivery")
         self.assertContains(response, "shipping-zones")  # json_script data block
         self.assertEqual(len(list(response.context["messages"])), 0)
 
@@ -166,6 +169,50 @@ class CheckoutViewTests(StoreTestCase):
         CartItem.objects.create(cart=self.user.cart, product=self.product, quantity=1)
         self._post_checkout()
         self.assertEqual(Order.objects.filter(user=self.user).count(), 1)
+
+    def test_checkout_rejects_cart_exceeding_available_stock(self):
+        # setUp gives the product inventory_count=5; bump the cart item's
+        # quantity above that.
+        cart_item = self.user.cart.items.get(product=self.product)
+        cart_item.quantity = 6
+        cart_item.save(update_fields=["quantity"])
+
+        response = self._post_checkout()
+
+        self.assertRedirects(response, reverse("view_cart"))
+        self.assertFalse(Order.objects.filter(user=self.user).exists())
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.inventory_count, 5)  # untouched
+
+
+class CheckoutPageQueryTests(StoreTestCase):
+    """Regression test for the checkout() prefetch: checkout.html reads
+    item.product.* per cart line, so query count must stay flat as the
+    number of distinct products in the cart grows, not scale with it."""
+
+    def setUp(self):
+        self.user = make_user("checkoutquery")
+        Cart.objects.create(user=self.user)
+        self.client.force_login(self.user)
+        self.products = [
+            make_product(name=f"Checkout Product {i}", inventory_count=20) for i in range(3)
+        ]
+
+    def test_checkout_page_query_count_flat_regardless_of_distinct_products(self):
+        CartItem.objects.create(cart=self.user.cart, product=self.products[0])
+        # Warm process-level caches first, matching the order_history/detail
+        # query-count tests above — otherwise the count is order-dependent
+        # across the full suite.
+        self.client.get(reverse("orders:checkout"))
+        with CaptureQueriesContext(connection) as queries_one_item:
+            self.client.get(reverse("orders:checkout"))
+
+        CartItem.objects.create(cart=self.user.cart, product=self.products[1])
+        CartItem.objects.create(cart=self.user.cart, product=self.products[2])
+        with CaptureQueriesContext(connection) as queries_three_items:
+            self.client.get(reverse("orders:checkout"))
+
+        self.assertEqual(len(queries_one_item), len(queries_three_items))
 
 
 class EmailTemplateTests(StoreTestCase):
@@ -284,6 +331,84 @@ class OrderPaymentTransitionTests(StoreTestCase):
         self.assertIsNotNone(txn.submitted_at)
 
 
+class OrderPaymentConcurrencyTests(StoreTestCase):
+    """Regression tests for the confirm_payment/reject_payment locking fix.
+    Two independently loaded Order instances (each representing what a
+    separate overlapping request would have fetched via get_object_or_404,
+    both read before either commits) must not both perform the state
+    transition — only one may reduce inventory / send the rejection email."""
+
+    def setUp(self):
+        self.user = make_user("concurrency_user")
+        self.product = make_product(name="Race Hoodie", inventory_count=10)
+        self.order = make_order(self.user, payment_status="pending_verification")
+        OrderItem.objects.create(
+            order=self.order, product=self.product, quantity=3, price=Decimal("1000.00")
+        )
+        self.txn = make_transaction(self.order, status="pending_verification")
+
+    def test_concurrent_confirm_payment_reduces_inventory_only_once(self):
+        order_view_a = Order.objects.get(pk=self.order.pk)
+        order_view_b = Order.objects.get(pk=self.order.pk)
+
+        order_view_a.confirm_payment()
+        order_view_b.confirm_payment()
+
+        self.product.refresh_from_db()
+        self.order.refresh_from_db()
+        self.assertEqual(self.product.inventory_count, 7)  # 10 - 3, not 10 - 6
+        self.assertTrue(self.order.inventory_adjusted)
+        self.assertEqual(self.order.payment_status, "success")
+
+    def test_concurrent_reject_payment_sends_email_only_once(self):
+        order_view_a = Order.objects.get(pk=self.order.pk)
+        order_view_b = Order.objects.get(pk=self.order.pk)
+
+        mail.outbox.clear()
+        order_view_a.reject_payment()
+        order_view_b.reject_payment()
+
+        rejected = [m for m in mail.outbox if "Payment Not Confirmed" in m.subject]
+        self.assertEqual(len(rejected), 1)
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "failed")
+
+
+class InventoryFloorTests(StoreTestCase):
+    """Regression tests for the reduce_inventory floor check: stock must
+    never be driven negative, whether reduced directly or via the
+    payment_success signal after a payment has already been confirmed."""
+
+    def setUp(self):
+        self.user = make_user("stockuser")
+        self.product = make_product(name="Scarce Hoodie", inventory_count=2)
+        self.order = make_order(self.user, payment_status="pending_verification")
+        OrderItem.objects.create(
+            order=self.order, product=self.product, quantity=5, price=Decimal("1000.00")
+        )
+        self.txn = make_transaction(self.order, status="pending_verification")
+
+    def test_reduce_inventory_raises_instead_of_going_negative(self):
+        with self.assertRaises(ValueError):
+            reduce_inventory(self.order)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.inventory_count, 2)  # untouched
+
+    def test_confirm_payment_does_not_crash_on_insufficient_stock(self):
+        # Payment confirmation must still succeed even though this order's
+        # quantity (5) exceeds available stock (2) — the order needs manual
+        # stock review, but the payment-confirmation flow itself must not
+        # raise up through the view.
+        self.order.confirm_payment()
+        self.order.refresh_from_db()
+        self.product.refresh_from_db()
+
+        self.assertEqual(self.order.payment_status, "success")
+        self.assertFalse(self.order.inventory_adjusted)  # left False as the review signal
+        self.assertEqual(self.product.inventory_count, 2)  # never went negative
+
+
 class OrderAdminActionTests(StoreTestCase):
     def setUp(self):
         self.admin = make_user("root", is_staff=True, is_superuser=True)
@@ -368,13 +493,18 @@ class OrderSuccessViewTests(StoreTestCase):
         self.order = make_order(self.user, payment_status="success")
         self.client.force_login(self.user)
 
-    def test_paid_order_renders_success_page(self):
+    def test_paid_order_redirects_to_tracking(self):
+        # The legacy success URL now redirects to the single canonical result
+        # screen (order_detail), which owns the confirmed celebration.
         response = self.client.get(
             reverse("orders:order_success", args=[self.order.order_number])
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.order.order_number)
-        self.assertContains(response, "Payment Successful")
+        self.assertRedirects(
+            response,
+            reverse("orders:order_detail", args=[self.order.order_number]),
+        )
+        # The celebration itself lives on the tracking page.
+        self.assertContains(response.client.get(response.url), "Confirmed.")
 
     def test_unpaid_order_redirects_to_detail(self):
         self.order.payment_status = "pending"
@@ -412,10 +542,71 @@ class ShippingZoneTests(TestCase):
         self.assertIn("state", form.errors)
 
     def test_all_template_states_are_deliverable(self):
-        import re
+        # The checkout template now renders state options by iterating the
+        # shipping_zones context (built from orders/shipping.py), so options
+        # can no longer drift from the table by construction. Assert the
+        # dynamic loop is present rather than scanning hardcoded options.
         with open("orders/templates/orders/checkout.html") as f:
             html = f.read()
-        option_states = re.findall(r'<option value="([^"]+)" class="bg-black', html)
-        self.assertTrue(option_states)
-        for state in option_states:
-            self.assertIsNotNone(get_shipping_info(state), f"{state} missing from shipping table")
+        self.assertIn("{% for state, info in shipping_zones.items %}", html)
+        self.assertIn('<option value="{{ state }}">', html)
+
+
+class OrderHistoryAndDetailQueryTests(StoreTestCase):
+    """Regression tests for the prefetch_related additions to order_history
+    and order_detail: query count must stay flat as orders/items grow,
+    not scale linearly with them (the N+1 these fixes eliminate)."""
+
+    def setUp(self):
+        self.user = make_user("historyuser")
+        self.client.force_login(self.user)
+        # Pre-create the cart so the cart_context processor (which runs on
+        # every page, including this one) doesn't lazily create it on the
+        # first of the two measured requests below — that would add a
+        # one-time INSERT unrelated to what this test is isolating.
+        Cart.objects.create(user=self.user)
+        self.products = [
+            make_product(name=f"History Product {i}", inventory_count=20) for i in range(3)
+        ]
+
+    def _make_order_with_items(self, item_count):
+        order = make_order(self.user)
+        for product in self.products[:item_count]:
+            OrderItem.objects.create(
+                order=order, product=product, quantity=1, price=Decimal("1000.00")
+            )
+        return order
+
+    def test_order_history_query_count_flat_regardless_of_order_count(self):
+        self._make_order_with_items(2)
+        # Warm process-level caches (ContentType, permissions, session) so both
+        # measured requests below run against the same warm state — otherwise
+        # the count is order-dependent across the full suite.
+        self.client.get(reverse("orders:order_history"))
+        with CaptureQueriesContext(connection) as queries_one:
+            self.client.get(reverse("orders:order_history"))
+
+        self._make_order_with_items(2)
+        self._make_order_with_items(2)
+        with CaptureQueriesContext(connection) as queries_three:
+            self.client.get(reverse("orders:order_history"))
+
+        self.assertEqual(len(queries_one), len(queries_three))
+
+    def test_order_detail_query_count_flat_regardless_of_item_count(self):
+        order_small = self._make_order_with_items(1)
+        # Warm process-level caches so both measured requests below run against
+        # the same warm state (see history test above).
+        self.client.get(reverse("orders:order_detail", args=[order_small.order_number]))
+        with CaptureQueriesContext(connection) as queries_one_item:
+            self.client.get(
+                reverse("orders:order_detail", args=[order_small.order_number])
+            )
+
+        order_large = self._make_order_with_items(3)
+        with CaptureQueriesContext(connection) as queries_three_items:
+            self.client.get(
+                reverse("orders:order_detail", args=[order_large.order_number])
+            )
+
+        self.assertEqual(len(queries_one_item), len(queries_three_items))

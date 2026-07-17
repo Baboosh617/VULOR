@@ -1,10 +1,12 @@
 import os
 
 from django import forms
+from PIL import Image
 
 from .models import PaymentTransaction
 
 RECEIPT_ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.pdf'}
+RECEIPT_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp'}
 RECEIPT_MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 
 
@@ -32,5 +34,23 @@ class ReceiptUploadForm(forms.ModelForm):
 
         if receipt.size > RECEIPT_MAX_SIZE:
             raise forms.ValidationError('Receipt file must be 5 MB or smaller.')
+
+        # Extension/content-type are client-supplied and easy to spoof —
+        # actually decode the image structure so a renamed non-image file
+        # can't pass as a receipt. PDFs are left to the extension+size check
+        # above (no content-sniffing dependency added for those here).
+        if ext in RECEIPT_IMAGE_EXTENSIONS:
+            receipt.seek(0)
+            try:
+                Image.open(receipt).verify()
+            except Exception:
+                raise forms.ValidationError(
+                    'This file is not a valid image. Please upload a photo '
+                    'or screenshot of your receipt.'
+                )
+            finally:
+                # verify() consumes the stream; reset it or Django saves a
+                # truncated file.
+                receipt.seek(0)
 
         return receipt

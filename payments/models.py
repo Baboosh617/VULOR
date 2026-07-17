@@ -59,6 +59,11 @@ class PaymentTransaction(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Payment Transaction'
         verbose_name_plural = 'Payment Transactions'
+        indexes = [
+            # status is filtered on every latest_for() call — the single
+            # most frequently used payments lookup in the app.
+            models.Index(fields=['status']),
+        ]
 
     @staticmethod
     def generate_reference():

@@ -18,7 +18,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 ON_RENDER = os.environ.get('ON_RENDER', 'False') == 'True'
 
-DEBUG = not ON_RENDER
+# DEBUG must be its own explicit, default-closed flag — it must never be
+# inferred from ON_RENDER, or any deployment target other than this specific
+# Render service (self-hosted Docker, another PaaS) runs wide open by default.
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 if ON_RENDER:
     
@@ -82,10 +85,12 @@ INSTALLED_APPS = [
     'payments',
     'dashboard',
     'django_recaptcha',
+    'csp',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -111,6 +116,33 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF =True
+
+# Content-Security-Policy — Report-Only for now: violations are logged by
+# the browser (visible in devtools) but nothing is blocked. This lets the
+# policy be verified against real traffic across every page (reCAPTCHA on
+# registration, Google Fonts, the Chart.js CDN script on the dashboard,
+# several un-nonced inline <script> blocks) before a future change switches
+# to CONTENT_SECURITY_POLICY (enforcing). Do not add an enforcing policy
+# without first confirming Report-Only shows zero unexpected violations.
+CONTENT_SECURITY_POLICY_REPORT_ONLY = {
+    'DIRECTIVES': {
+        'default-src': ["'self'"],
+        # 'unsafe-inline' reflects current reality (the mobile-menu toggle,
+        # dashboard polling, and Chart.js setup are all inline, un-nonced
+        # scripts today) — tightening this to nonces is follow-up work, not
+        # part of standing this policy up in Report-Only mode.
+        'script-src': [
+            "'self'", "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',  # Chart.js (dashboard sales chart)
+            'https://www.google.com', 'https://www.gstatic.com',  # reCAPTCHA
+        ],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'img-src': ["'self'", 'data:', 'https://www.gstatic.com'],
+        'frame-src': ['https://www.google.com'],  # reCAPTCHA challenge iframe
+        'connect-src': ["'self'"],
+    },
+}
 
 
 ROOT_URLCONF = 'vulor.urls'
@@ -189,7 +221,11 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_ALLOW_REGISTRATION = False
+# Registration is intentionally open — /accounts/register/ is a custom view
+# (accounts.views.register), not allauth's own signup view, and it never
+# reads ACCOUNT_ALLOW_REGISTRATION. That setting used to sit here implying
+# registration was closed when it never actually was; removed rather than
+# left as misleading dead config.
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[VULOR] '
 
 #social account settings
@@ -243,7 +279,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID', default=''),
-            'secret': os.getenv('GOOGLE_SECRET_KEY', default=''),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET', default=''),
             'key': ''
         }
     }
@@ -320,16 +356,19 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        # stdout, not a local file: Render's filesystem is ephemeral, so a
+        # FileHandler here silently lost every login-event record on each
+        # restart/redeploy. Container-native platforms capture stdout for
+        # log aggregation; a local file does not survive to be aggregated.
+        'auth_console': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'auth.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django.security.login': {
-            'handlers': ['file'],
+            'handlers': ['auth_console'],
             'level': 'INFO',
             'propagate': False,
         },

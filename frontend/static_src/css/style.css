@@ -1,0 +1,100 @@
+/* ==========================================================================
+   VULOR — Tailwind v4 entry point (CSS-first). v3 "Campaign" identity.
+
+   This file lives in frontend/static_src/ — deliberately OUTSIDE
+   STATICFILES_DIRS — because it's a build SOURCE, not a servable asset:
+   Django/WhiteNoise would otherwise try to collect it and choke trying to
+   resolve "@import "tailwindcss"" as a real file reference. Only the
+   compiled output (frontend/static/css/dist/style.css, gitignored, built
+   fresh every deploy) lives inside the static tree; base.html links that.
+
+   v3 (2026-07-16): black is the page, slate is the surface, lime and
+   violet are spot colors (fields + functions, never spray). Three type
+   voices: Archivo Black (the Monolith), Instrument Serif italic (the
+   Editorial), Archivo (the Registrar / text). All faces self-hosted from
+   /static/fonts — no runtime font CDN. The monospace voice is retired.
+
+   No JS config remains — @theme below is the only token source for
+   Tailwind utilities. Values are also duplicated (documented, not
+   accidental) as plain CSS custom properties in vulor.css for the
+   hand-written component layer. Keep the two in sync.
+   ========================================================================== */
+
+@import "tailwindcss";
+
+/* Template scan roots — Django spreads templates across multiple app
+   dirs, so list them explicitly rather than rely on v4's heuristic
+   auto-detection missing one. Paths are relative to this file. */
+@source "../../templates/**/*.html";
+@source "../../static/js/**/*.js";
+@source "../../../dashboard/templates/**/*.html";
+@source "../../../orders/templates/**/*.html";
+@source "../../../payments/templates/**/*.html";
+
+@theme {
+  /* ---- Brand palette (owner's brand boards, 2026-07-16) ---- */
+  --color-black: #000000;   /* the page — main background everywhere */
+  --color-slate: #242834;   /* the surface — panels, raised blocks */
+  --color-lime: #b6ff00;    /* the charge — action, active state, one field */
+  --color-violet: #7d53ff;  /* the feature — editorial fields, display moments */
+  --color-white: #ffffff;   /* ink on dark; the inverted paper page */
+
+  /* ---- Ground ladder: deep-purple main background (owner decision
+     2026-07-17, replacing true black), dark-violet accent surfaces for
+     everything raised. True black stays in the palette for photo
+     caption chips and text-on-lime. ---- */
+  --color-ground-950: #1a1233; /* page background */
+  --color-ground-900: #383161; /* raised: panels, dropdowns, headers, hovers */
+  --color-ground-800: #3f3571; /* second step: modals, drawers */
+  --color-ground-700: #4c3b8f; /* pressed states */
+
+  --color-paper-50: #ffffff;
+  --color-paper-100: #f2f2f4;
+  --color-paper-200: #e5e6ea;
+
+  --color-line-dark: rgba(255, 255, 255, 0.14);
+  --color-line-dark-strong: rgba(255, 255, 255, 0.28);
+  --color-line-paper: rgba(0, 0, 0, 0.14);
+  --color-line-paper-strong: rgba(0, 0, 0, 0.32);
+
+  /* ---- Ink. Body text uses ink-body (halation management on true
+     black); display + captions stay pure white. ---- */
+  --color-ink-1: #ffffff;
+  --color-ink-body: #eceef4;
+  --color-ink-2: #c3c6d1;
+  --color-ink-3: #979cb0;
+  --color-ink-on-paper-1: #000000;
+  --color-ink-on-paper-2: #43485a;
+  --color-ink-on-paper-3: #6a6f80;
+
+  /* ---- Spot colors in function ---- */
+  --color-signal: #b6ff00;        /* legacy alias for lime */
+  --color-signal-press: #93cc00;
+  --color-ink-on-signal: #000000; /* black type on lime */
+  --color-ink-on-violet: #ffffff; /* display scale only on raw violet */
+
+  /* ---- Functional red ---- */
+  --color-error: #ff5470;
+  --color-error-on-paper: #c42a50;
+
+  /* ---- Type voices (self-hosted, /static/fonts) ---- */
+  --font-display: 'Archivo Black', 'Arial Black', sans-serif;   /* the Monolith */
+  --font-editorial: 'Instrument Serif', Georgia, serif;          /* the Editorial */
+  --font-sans: 'Archivo', system-ui, sans-serif;                 /* the Registrar / text */
+  --font-body: 'Archivo', system-ui, sans-serif;
+  /* Legacy token: the mono voice is retired; anything still asking for
+     it gets the text voice, so no template renders in code font. */
+  --font-mono: 'Archivo', system-ui, sans-serif;
+
+  /* ---- Motion: one easing, three durations. Cinematic decelerate.
+     Slowed globally (owner, 2026-07-16): every Tailwind transition-*
+     utility inherits the unhurried default below. ---- */
+  --default-transition-duration: 400ms;
+  --default-transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-mech: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-duration-fast: 400ms;
+  --transition-duration-base: 550ms;
+  --transition-duration-slow: 700ms;
+}
+
+@import "./vulor.css";

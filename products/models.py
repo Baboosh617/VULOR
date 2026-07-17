@@ -77,7 +77,18 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-    
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(inventory_count__gte=0),
+                name='product_inventory_count_non_negative',
+            ),
+        ]
+        indexes = [
+            # category+is_active is the filter on every catalog page load
+            # (home, product_list) — composite index matches that shape.
+            models.Index(fields=['category', 'is_active']),
+        ]
+
     def __str__(self):
         return self.name
     
@@ -119,7 +130,9 @@ class Product(models.Model):
 
     @property
     def total_reviews(self):
-        return self.reviews.count()
+        # Approved-only, consistent with average_rating and the product view's
+        # own count — only approved reviews are ever shown.
+        return self.reviews.filter(approved=True).count()
 
     
     def get_formatted_sizes(self):

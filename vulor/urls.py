@@ -4,9 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from products import views as product_views
-from accounts.views import register  
-from services.admin_report_service import send_weekly_sales_report
-from django.http import HttpResponse
+from accounts.views import register
 
 import os
 

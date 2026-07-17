@@ -1,184 +1,66 @@
 {% extends "base.html" %}
+{% load humanize %}
 
-{% block title %}Order History - VULOR{% endblock %}
+{% block title %}Orders — VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12 bg-black">
-    
-    <div class="mb-12 border-b border-[#333333] pb-6">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 tracking-wide">ORDER HISTORY</h1>
-        <p class="text-[#dc2626] text-sm tracking-wider font-bold">TRACK AND REVIEW YOUR PAST ORDERS</p>
-    </div>
+<div class="c-gutter py-12 max-w-5xl mx-auto">
+
+    <span class="c-reg text-ink-3 block mb-4">Account / Orders — {{ orders|length|stringformat:"02d" }} on file</span>
 
     {% if orders %}
-    
-    <div class="space-y-4">
-        {% for order in orders %}
-        
-        <div class="border border-[#333333] bg-[#111111] py-6 px-6 hover:border-[#dc2626] transition-all duration-300 hover:bg-[#0a0a0a] group">
-            <div class="flex flex-col md:flex-row md:items-center gap-6">
-                
-                <div class="md:w-1/4">
-                    <div class="text-white text-base font-bold mb-1 tracking-wider">
-                        #{{ order.order_number|slice:":8" }}
-                    </div>
-                    <div class="text-[#666666] text-sm tracking-wider">
-                        {{ order.created_at|date:"M j, Y" }}
-                    </div>
-                </div>
+    <h1 class="c-monolith text-4xl md:text-6xl mb-12">Your orders.</h1>
 
-                
-                <div class="md:w-2/4 flex items-center">
-                    <div class="flex -space-x-2">
-                        {% for item in order.items.all|slice:":3" %}
-                        <div class="w-12 h-12 bg-black overflow-hidden rounded border border-[#333333] group-hover:border-[#dc2626] transition-all duration-300">
-                            <img src="{{ item.product.image.url }}" 
-                                 alt="{{ item.product.name }}"
-                                 class="w-full h-full object-cover">
-                        </div>
-                        {% endfor %}
-                        
-                        {% if order.items.count > 3 %}
-                        <div class="w-12 h-12 bg-black rounded border border-[#333333] flex items-center justify-center group-hover:border-[#dc2626] transition-all duration-300">
-                            <span class="text-[#dc2626] text-xs font-bold">+{{ order.items.count|add:"-3" }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    {% if order.items.count == 0 %}
-                    <div class="text-[#666666] text-sm italic tracking-wider">NO ITEMS</div>
-                    {% endif %}
-                </div>
-
-                
-                <div class="md:w-1/4">
-                    <div class="text-[#dc2626] text-lg font-bold mb-2 tracking-wider">
-                        ₦{{ order.total_amount }}
-                    </div>
-                    
-                    
-                    {% if order.status == 'delivered' %}
-                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
-                        DELIVERED
-                    </span>
-                    {% elif order.status == 'shipped' %}
-                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
-                        SHIPPED
-                    </span>
-                    {% elif order.status == 'processing' %}
-                    <span class="inline-block bg-[#333333] text-[#666666] text-xs px-3 py-1 rounded-full border border-[#333333] tracking-wider font-bold">
-                        PROCESSING
-                    </span>
-                    {% elif order.status == 'cancelled' %}
-                    <span class="inline-block bg-[#dc2626]/10 text-[#dc2626] text-xs px-3 py-1 rounded-full border border-[#dc2626]/30 tracking-wider font-bold">
-                        CANCELLED
-                    </span>
-                    {% else %}
-                    <span class="inline-block bg-[#333333] text-[#666666] text-xs px-3 py-1 rounded-full border border-[#333333] tracking-wider font-bold">
-                        {{ order.get_status_display|upper }}
-                    </span>
-                    {% endif %}
-                </div>
-
-                
-                <div class="md:w-1/4 text-right">
-                    <a href="{% url 'orders:order_detail' order.order_number %}" 
-                       class="inline-flex items-center text-[#dc2626] hover:text-white transition-all duration-300 text-sm tracking-wider group">
-                        VIEW ORDER
-                        <span class="ml-2 transform group-hover:translate-x-1 transition-transform duration-300 text-[#dc2626] group-hover:text-white">→</span>
-                    </a>
-                </div>
-            </div>
-            
-            
-            <div class="h-0.5 bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-4"></div>
-        </div>
-        {% endfor %}
+    <!-- Transactional list: ruled rows on desktop, stacked entries on
+         phones — never a squeezed sideways-scrolling table. -->
+    <div class="v-hairline-b hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-6 pb-3">
+        <span class="c-reg text-ink-2">Order</span>
+        <span class="c-reg text-ink-2">Date</span>
+        <span class="c-reg text-ink-2">Items</span>
+        <span class="c-reg text-ink-2 text-right">Total</span>
+        <span class="c-reg text-ink-2">Payment</span>
+        <span class="w-16"></span>
     </div>
+
+    {% for order in orders %}
+    <div class="v-hairline-b py-5 md:py-4 grid grid-cols-2 md:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-6 gap-y-2 items-center hover:bg-ground-900 transition-colors {% if order.payment_status == 'pending' %}v-current--signal pl-3{% endif %}">
+        <a href="{% url 'orders:order_detail' order.order_number %}" class="v-spec text-ink-1 v-underline justify-self-start">{{ order.order_number }}</a>
+
+        <span class="v-spec text-ink-2 text-right md:text-left">{{ order.created_at|date:"d/m/Y" }}</span>
+
+        <span class="v-spec text-ink-2"><span class="md:hidden c-reg text-ink-3">Items — </span>{{ order.get_total_items|stringformat:"02d" }}</span>
+
+        <span class="v-spec v-price text-ink-1 text-right">&#8358;&nbsp;{{ order.grand_total|intcomma }}</span>
+
+        <span class="col-span-2 md:col-span-1">
+            {% if order.payment_status == 'pending' %}
+            <span class="v-badge v-badge--signal">Awaiting payment</span>
+            {% elif order.payment_status == 'pending_verification' %}
+            <span class="v-badge">In review</span>
+            {% elif order.payment_status == 'success' %}
+            <span class="v-badge">Paid — {{ order.get_status_display }}</span>
+            {% elif order.payment_status == 'failed' %}
+            <span class="v-badge v-badge--error">Rejected</span>
+            {% else %}
+            <span class="v-badge">{{ order.get_payment_status_display }}</span>
+            {% endif %}
+        </span>
+
+        <span class="col-span-2 md:col-span-1 md:text-right">
+            {% if order.payment_status == 'pending' %}
+            <a href="{% url 'payments:transfer_instructions' order.id %}" class="c-reg-lg v-underline text-ink-1 h-11 inline-flex items-center">Pay &rarr;</a>
+            {% elif order.payment_status == 'failed' %}
+            <a href="{% url 'payments:transfer_instructions' order.id %}" class="c-reg-lg v-underline text-ink-1 h-11 inline-flex items-center">Retry &rarr;</a>
+            {% endif %}
+        </span>
+    </div>
+    {% endfor %}
+
     {% else %}
-    
-    <div class="text-center py-20 border border-[#333333] bg-[#111111] rounded-lg">
-        <div class="mb-6">
-            <div class="w-20 h-20 border-2 border-[#333333] rounded-full flex items-center justify-center mx-auto">
-                <span class="text-[#dc2626] text-3xl font-bold">0</span>
-            </div>
-        </div>
-        <h2 class="text-white text-2xl font-bold mb-4 tracking-wider">NO ORDERS YET</h2>
-        <p class="text-[#cccccc] mb-8 max-w-md mx-auto tracking-wider">
-            WHEN YOU PLACE AN ORDER, IT'LL SHOW UP HERE.
-        </p>
-        <a href="{% url 'product_list' %}" 
-           class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-wider font-bold">
-            START SHOPPING
-        </a>
+    <div class="py-20">
+        <h1 class="c-monolith text-4xl md:text-6xl mb-6">No orders <span class="c-serif-i normal-case">yet.</span></h1>
+        <a href="{% url 'product_list' %}" class="v-btn v-btn--secondary mt-4">View catalog</a>
     </div>
     {% endif %}
 </div>
-
-<style>
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    
-    .order-card {
-        animation: slideIn 0.5s ease-out forwards;
-        opacity: 0;
-    }
-
-    .order-card:nth-child(1) { animation-delay: 0.1s; }
-    .order-card:nth-child(2) { animation-delay: 0.2s; }
-    .order-card:nth-child(3) { animation-delay: 0.3s; }
-    .order-card:nth-child(4) { animation-delay: 0.4s; }
-    .order-card:nth-child(5) { animation-delay: 0.5s; }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        const orderCards = document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]');
-        orderCards.forEach((card, index) => {
-            card.classList.add('order-card');
-            card.style.animationDelay = `${0.1 + (index * 0.1)}s`;
-        });
-
-        
-        document.querySelectorAll('a[href*="order_detail"]').forEach(link => {
-            link.addEventListener('mouseenter', function() {
-                const arrow = this.querySelector('span');
-                if (arrow) {
-                    arrow.style.transform = 'translateX(4px)';
-                }
-            });
-            
-            link.addEventListener('mouseleave', function() {
-                const arrow = this.querySelector('span');
-                if (arrow) {
-                    arrow.style.transform = 'translateX(0)';
-                }
-            });
-        });
-
-        
-        document.querySelectorAll('.border-\[\#333333\]\.bg-\[\#111111\]').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 10px 25px rgba(220, 38, 38, 0.1)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = 'none';
-            });
-        });
-    });
-</script>
 {% endblock %}

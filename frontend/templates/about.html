@@ -1,261 +1,71 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}About - VULOR{% endblock %}
+{% block title %}About — VULOR{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-16 bg-black">
-    
-    <div class="text-center mb-20">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">BUILT FOR EVERYDAY CONFIDENCE.</h1>
-        <p class="text-[#dc2626] text-lg max-w-2xl mx-auto leading-relaxed tracking-wider">
-            VULOR creates minimal streetwear designed to feel good, look sharp, and last.
-        </p>
-    </div>
 
-    
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
-        
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-white tracking-wide">WHY VULOR EXISTS</h2>
-            <div class="space-y-4 text-[#cccccc] leading-relaxed border-l-2 border-[#dc2626] pl-6 py-2">
-                <p class="leading-relaxed">
-                    Welcome to VULOR - where confidence meets comfort.
-                </p>
-                <p class="leading-relaxed">
-                    We believe good clothing doesn't need to shout. VULOR is about clean design, quality materials, and pieces you can wear anywhere — every day.
-                </p>
-                <p class="leading-relaxed">
-                    No trends chasing. No overdesign. Just solid fits that work.
-                </p>
-                <p class="leading-relaxed">
-                    Born from the streets and driven by purpose, Vulor represents the grind, the vision, and the courage to build something from the ground up. We keep our designs original, our prices fair, and our mission simple — to bring quality streetwear that anyone can own, wear, and be proud of.
-                </p>
+<!-- ============ STATEMENT ============ -->
+<section class="c-gutter py-24 md:py-32 max-w-5xl">
+    <span class="c-reg text-ink-3 block mb-6">The label</span>
+    <h1 class="c-monolith text-5xl md:text-7xl">
+        Built for everyday <span class="c-serif-i normal-case">confidence.</span>
+    </h1>
+</section>
+
+<!-- ============ THE STORY ============ -->
+<section class="v-hairline-t">
+    <div class="c-gutter py-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div class="lg:col-span-6">
+            <span class="c-reg text-ink-3 block mb-6">Why VULOR exists</span>
+            <div class="font-body text-[15px] text-ink-body space-y-4 max-w-prose leading-relaxed">
+                <p>Good clothing doesn't need to shout.</p>
+                <p>VULOR is clean design, heavyweight materials, and pieces you can wear anywhere — every day. No trend chasing. No overdesign. Solid fits that work.</p>
+                <p>Born from the streets and driven by purpose: original designs, fair prices, and the nerve to build something from the ground up.</p>
             </div>
         </div>
-
-
-        <div class="bg-transparent">
-            <div class="slideshow-container relative overflow-hidden border border-[#333333] hover:border-[#dc2626] transition-all duration-300">
-
-                <div class="slide fade">
-                    <img src="{% static 'images/logo-1.jpg' %}" 
-                         alt="VULOR Studio" class="w-full h-96 object-cover">
-                </div>
-                
-                <div class="slide fade">
-                    <img src="{% static 'images/logo-2.jpg' %}" 
-                         alt="VULOR Design Process" class="w-full h-96 object-cover">
-                </div>
-                
-                <div class="slide fade">
-                    <img src="{% static 'images/logo-3.jpg' %}" 
-                         alt="VULOR Collection" class="w-full h-96 object-cover">
-                </div>
-
-                <div class="slide fade">
-                    <img src="{% static 'images/logo-4.jpg' %}" 
-                         alt="VULOR Quality" class="w-full h-96 object-cover">
-                </div>
-
-                <div class="slide fade">
-                    <img src="{% static 'images/logo-5.jpg' %}" 
-                         alt="VULOR Community" class="w-full h-96 object-cover">
-                </div>
-
-
-                <button class="slideshow-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-                <button class="slideshow-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full hover:bg-[#dc2626] transition-all duration-300 border border-[#333333] hover:border-[#dc2626]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-
-
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
-                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
-                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
-                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
-                    <span class="dot w-2 h-2 bg-[#333333] rounded-full cursor-pointer opacity-50 hover:opacity-100 hover:bg-[#dc2626] transition-all duration-300"></span>
-                </div>
+        <div class="lg:col-span-6">
+            <div class="v-plate group">
+                <span class="c-bw block">
+                    <img src="{% static 'images/logo-1.jpg' %}" alt="VULOR studio" class="w-full aspect-[4/5] object-cover">
+                </span>
             </div>
         </div>
     </div>
+</section>
 
-
-    <div class="mb-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
-                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
-                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MINIMAL BY DESIGN</h3>
-                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
-                    Clean silhouettes. Thoughtful details. Nothing extra.
-                </p>
-                <p class="text-[#666666] text-sm leading-relaxed">
-                    Premium materials and meticulous craftsmanship in every piece we create.
-                </p>
+<!-- ============ PRINCIPLES ============ -->
+<section class="v-hairline-t">
+    <div class="c-gutter py-20">
+        <span class="c-reg text-ink-3 block mb-10">How we work</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 v-hairline-t v-hairline-b">
+            <div class="p-8 md:v-hairline-r">
+                <p class="c-reg text-signal mb-4">01</p>
+                <h3 class="c-reg-lg text-ink-1 mb-4">Minimal by design</h3>
+                <p class="v-spec text-ink-2">Clean silhouettes. Thoughtful details. Nothing extra.</p>
             </div>
-
-
-            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
-                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
-                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">MADE TO LAST</h3>
-                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
-                    Quality fabrics and construction you can trust.
-                </p>
-                <p class="text-[#666666] text-sm leading-relaxed">
-                    Exclusive designs with limited runs to ensure uniqueness and collectibility.
-                </p>
+            <div class="p-8 md:v-hairline-r v-hairline-t md:border-t-0">
+                <p class="c-reg text-signal mb-4">02</p>
+                <h3 class="c-reg-lg text-ink-1 mb-4">Made to last</h3>
+                <p class="v-spec text-ink-2">Heavyweight fabrics and construction you can trust.</p>
             </div>
-
-
-            <div class="text-center border border-[#333333] p-8 hover:border-[#dc2626] transition-all duration-300 bg-[#111111]">
-                <div class="w-16 h-1 bg-[#dc2626] mx-auto mb-4"></div>
-                <h3 class="text-white text-lg font-bold mb-4 tracking-wider">EVERYDAY WEAR</h3>
-                <p class="text-[#cccccc] text-sm leading-relaxed mb-2">
-                    Pieces that fit real life, not just photos.
-                </p>
-                <p class="text-[#666666] text-sm leading-relaxed">
-                    Building a global community of streetwear enthusiasts who share our passion.
-                </p>
+            <div class="p-8 v-hairline-t md:border-t-0">
+                <p class="c-reg text-signal mb-4">03</p>
+                <h3 class="c-reg-lg text-ink-1 mb-4">Numbered, not mass-made</h3>
+                <p class="v-spec text-ink-2">Limited runs. Every piece numbered. Nothing reissued.</p>
             </div>
         </div>
     </div>
+</section>
 
-
-    <div class="text-center mb-20 max-w-2xl mx-auto border-t border-[#333333] pt-12">
-        <h2 class="text-2xl font-bold text-white mb-6 tracking-wider">DESIGNED WITH REAL LIFE IN MIND</h2>
-        <p class="text-[#cccccc] leading-relaxed">
-            From daily movement to long days out, our pieces are made to handle everyday wear — wherever you are.
-        </p>
+<!-- ============ CLOSING ============ -->
+<section class="v-paper v-hairline-t">
+    <div class="c-gutter py-24 text-center">
+        <h2 class="c-monolith text-4xl md:text-5xl mb-10 text-ink-on-paper-1">
+            Wear it <span class="c-serif-i normal-case">first.</span>
+        </h2>
+        <a href="{% url 'product_list' %}" class="v-btn v-btn--primary v-btn--lg">View the catalog</a>
     </div>
+</section>
 
-
-    <div class="text-center border-t border-[#333333] pt-12">
-        <h2 class="text-2xl font-bold text-white mb-8 tracking-wider">WEAR IT YOUR WAY.</h2>
-        <a href="{% url 'product_list' %}" 
-           class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white text-sm font-bold tracking-wider py-3 px-8 transition-all duration-300 border border-[#dc2626]">
-            SHOP VULOR
-        </a>
-    </div>
-
-
-    <div class="mt-24 pt-12 border-t border-[#333333]">
-        <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-white text-lg font-bold mb-6 tracking-wider">OUR MISSION</h2>
-            <p class="text-[#dc2626] text-xl leading-relaxed tracking-wider font-bold">
-                JOIN THE MOVEMENT. OWN YOUR STYLE. OWN VULOR.
-            </p>
-        </div>
-    </div>
-</div>
-
-<style>
-.slideshow-container {
-    max-width: 100%;
-    position: relative;
-}
-
-.slide {
-    display: none;
-    animation: fade 1.5s ease-in-out;
-}
-
-@keyframes fade {
-    from { opacity: 0.4; }
-    to { opacity: 1; }
-}
-
-.fade {
-    animation-name: fade;
-    animation-duration: 1.5s;
-}
-
-
-.dot.active {
-    opacity: 1 !important;
-    background-color: #dc2626 !important;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let slideIndex = 0;
-    const slides = document.getElementsByClassName("slide");
-    const dots = document.getElementsByClassName("dot");
-    const prevButton = document.querySelector('.slideshow-prev');
-    const nextButton = document.querySelector('.slideshow-next');
-
-    function showSlides(n) {
-        // Wrap around if at end
-        if (n >= slides.length) { slideIndex = 0; }
-        if (n < 0) { slideIndex = slides.length - 1; }
-        
-
-        for (let i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
-            dots[i].classList.remove('active');
-            dots[i].classList.remove('bg-[#dc2626]');
-            dots[i].classList.add('bg-[#333333]');
-        }
-        
-
-        slides[slideIndex].style.display = "block";
-        dots[slideIndex].classList.add('active');
-        dots[slideIndex].classList.remove('bg-[#333333]');
-        dots[slideIndex].classList.add('bg-[#dc2626]');
-    }
-
-    function nextSlide() {
-        slideIndex++;
-        showSlides(slideIndex);
-    }
-
-    function prevSlide() {
-        slideIndex--;
-        showSlides(slideIndex);
-    }
-
-
-    showSlides(slideIndex);
-
-    
-    let slideshowInterval = setInterval(nextSlide, 5000);
-
-    
-    const slideshowContainer = document.querySelector('.slideshow-container');
-    slideshowContainer.addEventListener('mouseenter', () => clearInterval(slideshowInterval));
-    slideshowContainer.addEventListener('mouseleave', () => {
-        slideshowInterval = setInterval(nextSlide, 5000);
-    });
-
-    
-    if (nextButton) nextButton.addEventListener('click', () => {
-        nextSlide();
-        clearInterval(slideshowInterval);
-        slideshowInterval = setInterval(nextSlide, 5000);
-    });
-    if (prevButton) prevButton.addEventListener('click', () => {
-        prevSlide();
-        clearInterval(slideshowInterval);
-        slideshowInterval = setInterval(nextSlide, 5000);
-    });
-
-    
-    for (let i = 0; i < dots.length; i++) {
-        dots[i].addEventListener('click', function() {
-            slideIndex = i;
-            showSlides(slideIndex);
-            clearInterval(slideshowInterval);
-            slideshowInterval = setInterval(nextSlide, 5000);
-        });
-    }
-});
-</script>
 {% endblock %}

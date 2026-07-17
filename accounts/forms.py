@@ -54,6 +54,43 @@ class CustomUserCreationForm(UserCreationForm):
             return None, str(e)
 
 
+class ContactForm(forms.Form):
+    """Fields match the contact.html template inputs (frontend/templates/contact.html)."""
+
+    SUBJECT_CHOICES = [
+        ('order_issue', 'Order issue'),
+        ('delivery', 'Delivery'),
+        ('product_question', 'Product question'),
+        ('other', 'Other'),
+    ]
+
+    full_name = forms.CharField(max_length=200)
+    email = forms.EmailField()
+    subject = forms.ChoiceField(choices=SUBJECT_CHOICES)
+    message = forms.CharField(widget=forms.Textarea)
+
+
+class ProfileForm(forms.ModelForm):
+    """Editable account details on /accounts/profile/. Widget classes match the
+    design system's form components so the fields render on-system."""
+
+    class Meta:
+        model = CustomUser
+        fields = ["first_name", "last_name", "phone", "address"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "v-input", "autocomplete": "given-name"}),
+            "last_name": forms.TextInput(attrs={"class": "v-input", "autocomplete": "family-name"}),
+            "phone": forms.TextInput(attrs={
+                "class": "v-input", "inputmode": "tel", "autocomplete": "tel",
+                "placeholder": "+234 800 000 0000",
+            }),
+            "address": forms.Textarea(attrs={
+                "class": "v-textarea", "rows": 3, "autocomplete": "street-address",
+                "placeholder": "STREET, CITY, STATE",
+            }),
+        }
+
+
 class CustomSocialSignupForm(SignupForm):
     """
     Displayed when a user signs up via Google OAuth for the first time.

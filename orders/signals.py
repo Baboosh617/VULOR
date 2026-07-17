@@ -33,9 +33,23 @@ def payment_success(sender, instance, created, **kwargs):
     if created:
         return
     if instance.payment_status == "success" and not instance.inventory_adjusted:
-        reduce_inventory(instance)
-        instance.inventory_adjusted = True
-        instance.save(update_fields=["inventory_adjusted"])
+        try:
+            reduce_inventory(instance)
+        except ValueError:
+            # Payment is already confirmed at this point, so we can't just
+            # reject the order — leave inventory_adjusted False (a visible,
+            # queryable signal that this paid order still needs manual
+            # stock reconciliation) and alert loudly instead of failing
+            # silently or corrupting inventory_count.
+            logger.error(
+                f"Inventory reduction failed for order {instance.id} — "
+                f"insufficient stock for one or more items. Payment is "
+                f"already confirmed; this order needs manual stock review.",
+                exc_info=True,
+            )
+        else:
+            instance.inventory_adjusted = True
+            instance.save(update_fields=["inventory_adjusted"])
     if instance.payment_status == "success" and not instance.payment_email_sent:
         try:
             send_payment_receipt(instance.user, instance)

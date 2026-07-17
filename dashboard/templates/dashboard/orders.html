@@ -1,98 +1,158 @@
 {% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block title %}Orders — Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">Orders</h1>
+<span class="v-label text-ink-3 block mb-4">02 / ORDERS</span>
+<h1 class="v-display text-3xl md:text-4xl text-ink-1 mb-8">THE QUEUE.</h1>
 
-<div class="overflow-auto bg-white shadow rounded">
+<!-- Filters -->
+<form method="get" class="flex flex-wrap items-center gap-3 mb-8">
+    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="SEARCH BY USERNAME"
+           class="v-input !h-11 w-48 !text-[12px] uppercase">
 
-    <form method="get" class="mb-4 flex gap-2">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search by user..." class="px-3 py-1 border rounded">
-    
-    <select name="status" class="px-3 py-1 border rounded">
-        <option value="">All Status</option>
-        <option value="pending" {% if status_filter|default:'' == "pending" %}selected{% endif %}>Pending</option>
-        <option value="completed" {% if status_filter|default:'' == "completed" %}selected{% endif %}>Completed</option>
+    <select name="payment" onchange="this.form.submit()" class="v-select v-btn-label !h-11 !w-auto pr-8">
+        <option value="">ALL PAYMENTS</option>
+        <option value="pending" {% if payment_filter == "pending" %}selected{% endif %}>AWAITING TRANSFER</option>
+        <option value="pending_verification" {% if payment_filter == "pending_verification" %}selected{% endif %}>PENDING VERIFICATION</option>
+        <option value="success" {% if payment_filter == "success" %}selected{% endif %}>PAID</option>
+        <option value="failed" {% if payment_filter == "failed" %}selected{% endif %}>FAILED</option>
     </select>
 
-    <select name="payment" class="px-3 py-1 border rounded">
-        <option value="">All Payments</option>
-        <option value="pending" {% if payment_filter|default:'' == "pending" %}selected{% endif %}>Awaiting Transfer</option>
-        <option value="pending_verification" {% if payment_filter|default:'' == "pending_verification" %}selected{% endif %}>Pending Verification</option>
-        <option value="success" {% if payment_filter|default:'' == "success" %}selected{% endif %}>Paid</option>
-        <option value="failed" {% if payment_filter|default:'' == "failed" %}selected{% endif %}>Failed</option>
+    <select name="status" onchange="this.form.submit()" class="v-select v-btn-label !h-11 !w-auto pr-8">
+        <option value="">ALL STATUS</option>
+        <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>PENDING</option>
+        <option value="processing" {% if status_filter == "processing" %}selected{% endif %}>PROCESSING</option>
+        <option value="shipped" {% if status_filter == "shipped" %}selected{% endif %}>SHIPPED</option>
+        <option value="completed" {% if status_filter == "completed" %}selected{% endif %}>COMPLETED</option>
+        <option value="cancelled" {% if status_filter == "cancelled" %}selected{% endif %}>CANCELLED</option>
     </select>
 
-    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Filter</button>
+    <button type="submit" class="v-btn v-btn--secondary v-btn--sm">FILTER</button>
+    {% if query or status_filter or payment_filter %}
+    <a href="{% url 'dashboard:order_list' %}" class="v-label v-underline text-ink-3 hover:text-ink-1">CLEAR</a>
+    {% endif %}
 </form>
 
+{% if orders %}
 
-    <table class="min-w-full">
-        <thead class="bg-gray-200">
+<!-- Desktop table -->
+<div class="hidden md:block overflow-x-auto">
+    <table class="v-table min-w-[900px]">
+        <thead>
             <tr>
-                <th class="px-4 py-2 text-left">ID</th>
-                <th class="px-4 py-2 text-left">User</th>
-                <th class="px-4 py-2 text-left">Total</th>
-                <th class="px-4 py-2 text-left">Status</th>
-                <th class="px-4 py-2 text-left">Payment</th>
-                <th class="px-4 py-2 text-left">Date</th>
-                <th class="px-4 py-2 text-left">Actions</th>
+                <th>ORDER</th><th>CUSTOMER</th><th class="is-num">TOTAL</th>
+                <th>STATUS</th><th>PAYMENT</th><th>DATE</th><th></th>
             </tr>
         </thead>
         <tbody>
             {% for order in orders %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-2">{{ order.id }}</td>
-                <td class="px-4 py-2">{{ order.user.username }}</td>
-                <td class="px-4 py-2">₦{{ order.total_amount }}</td>
-                <td class="px-4 py-2">
-                    {% if order.status == "pending" %}
-                        <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded">{{ order.status }}</span>
-                    {% else %}
-                        <span class="bg-green-200 text-green-800 px-2 py-1 rounded">{{ order.status }}</span>
-                    {% endif %}
+            <tr class="{% if order.payment_status == 'pending_verification' %}v-current--signal{% endif %} hover:bg-ground-900 transition-colors duration-fast">
+                <td class="{% if order.payment_status == 'pending_verification' %}pl-3{% endif %} text-ink-1">{{ order.order_number }}</td>
+                <td class="text-ink-2">{{ order.user.username }}</td>
+                <td class="is-num v-price text-ink-1">&#8358;&nbsp;{{ order.grand_total|intcomma }}</td>
+                <td>
+                    <span class="v-badge">{{ order.get_status_display|upper }}</span>
+                    <form method="post" action="{% url 'dashboard:update_order_status' order.id %}" class="mt-1">
+                        {% csrf_token %}
+                        <button type="submit" class="v-label v-underline text-ink-3 hover:text-ink-1"
+                                title="Advance to next status" aria-label="Advance status for order {{ order.order_number }}">ADVANCE &rarr;</button>
+                    </form>
                 </td>
-                <td class="px-4 py-2">
+                <td>
                     {% if order.payment_status == "success" %}
-                        <span class="bg-green-200 text-green-800 px-2 py-1 rounded">Paid</span>
+                        <span class="v-badge">PAID</span>
                     {% elif order.payment_status == "pending_verification" %}
-                        <span class="bg-orange-200 text-orange-800 px-2 py-1 rounded">Verify</span>
+                        <span class="v-badge v-badge--signal">VERIFY</span>
                     {% elif order.payment_status == "failed" %}
-                        <span class="bg-red-200 text-red-800 px-2 py-1 rounded">Failed</span>
+                        <span class="v-badge v-badge--error">FAILED</span>
                     {% else %}
-                        <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded">{{ order.get_payment_status_display }}</span>
+                        <span class="v-badge">{{ order.get_payment_status_display|upper }}</span>
                     {% endif %}
                     {% with txn=order.paymenttransaction_set.all|first %}
                     {% if txn and txn.receipt %}
-                        <a href="{% url 'payments:receipt_download' txn.id %}" target="_blank" class="block text-blue-500 hover:underline text-sm mt-1">View receipt</a>
-                        {% if txn.transaction_reference %}
-                        <span class="block text-gray-500 text-xs">Ref: {{ txn.transaction_reference }}</span>
-                        {% endif %}
+                        <a href="{% url 'payments:receipt_download' txn.id %}" target="_blank" class="v-label v-underline text-ink-2 hover:text-ink-1 block mt-2">VIEW RECEIPT</a>
+                        {% if txn.transaction_reference %}<span class="v-label text-ink-3 block mt-1">REF {{ txn.transaction_reference }}</span>{% endif %}
                     {% endif %}
                     {% endwith %}
                 </td>
-                <td class="px-4 py-2">{{ order.created_at }}</td>
-                <td class="px-4 py-2">
-                    <a href="{% url 'dashboard:update_order_status' order.id %}" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Toggle Status</a>
+                <td class="text-ink-3">{{ order.created_at|date:"d/m/y H:i" }}</td>
+                <td class="is-num">
                     {% if order.payment_status == "pending_verification" %}
-                    <div class="flex gap-2 mt-2">
+                    <div class="flex gap-2 justify-end items-start">
                         <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Confirm Payment</button>
+                            <button type="submit" class="v-btn v-btn--primary v-btn--sm">CONFIRM</button>
                         </form>
-                        <form method="post" action="{% url 'dashboard:reject_payment' order.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
-                        </form>
+                        <details class="v-disclose">
+                            <summary class="v-btn v-btn--destructive v-btn--sm">REJECT</summary>
+                            <form method="post" action="{% url 'dashboard:reject_payment' order.id %}" class="mt-2 w-56 space-y-2 text-left">
+                                {% csrf_token %}
+                                <label class="sr-only" for="reason-{{ order.id }}">Rejection reason (optional)</label>
+                                <textarea id="reason-{{ order.id }}" name="rejection_reason" rows="2"
+                                          class="v-textarea !min-h-0 !text-[12px]" placeholder="REASON — OPTIONAL, EMAILED TO CUSTOMER"></textarea>
+                                <button type="submit" class="v-btn v-btn--destructive-solid v-btn--sm w-full">CONFIRM REJECTION</button>
+                            </form>
+                        </details>
                     </div>
                     {% endif %}
                 </td>
             </tr>
-            {% empty %}
-            <tr><td colspan="7" class="px-4 py-2 text-center text-gray-500">No orders yet.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<a href="{% url 'dashboard:dashboard_home' %}" class="text-blue-500 hover:underline mt-4 inline-block">← Back to Dashboard</a>
+<!-- Mobile stacked plates -->
+<div class="md:hidden space-y-4">
+    {% for order in orders %}
+    <div class="v-plate p-4 {% if order.payment_status == 'pending_verification' %}v-current--signal{% endif %}">
+        <div class="flex items-baseline justify-between mb-2">
+            <span class="v-spec text-ink-1">{{ order.order_number }}</span>
+            <span class="v-price v-spec text-ink-1">&#8358;&nbsp;{{ order.grand_total|intcomma }}</span>
+        </div>
+        <p class="v-label text-ink-3 mb-3">{{ order.user.username|upper }} — {{ order.created_at|date:"d/m/y H:i" }}</p>
+        <div class="flex items-center gap-2 mb-3">
+            {% if order.payment_status == "success" %}<span class="v-badge">PAID</span>
+            {% elif order.payment_status == "pending_verification" %}<span class="v-badge v-badge--signal">VERIFY</span>
+            {% elif order.payment_status == "failed" %}<span class="v-badge v-badge--error">FAILED</span>
+            {% else %}<span class="v-badge">{{ order.get_payment_status_display|upper }}</span>{% endif %}
+            <span class="v-badge">{{ order.get_status_display|upper }}</span>
+            <form method="post" action="{% url 'dashboard:update_order_status' order.id %}">
+                {% csrf_token %}
+                <button type="submit" class="v-label v-underline text-ink-3 hover:text-ink-1"
+                        aria-label="Advance status for order {{ order.order_number }}">ADVANCE &rarr;</button>
+            </form>
+        </div>
+        {% with txn=order.paymenttransaction_set.all|first %}
+        {% if txn and txn.receipt %}
+        <a href="{% url 'payments:receipt_download' txn.id %}" target="_blank" class="v-btn v-btn--secondary w-full mb-3">VIEW RECEIPT</a>
+        {% endif %}
+        {% if order.payment_status == "pending_verification" %}
+        <div class="space-y-2">
+            <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}">
+                {% csrf_token %}
+                <button type="submit" class="v-btn v-btn--primary w-full">CONFIRM</button>
+            </form>
+            <details class="v-disclose">
+                <summary class="v-btn v-btn--destructive w-full">REJECT</summary>
+                <form method="post" action="{% url 'dashboard:reject_payment' order.id %}" class="mt-2 space-y-2">
+                    {% csrf_token %}
+                    <label class="sr-only" for="mreason-{{ order.id }}">Rejection reason (optional)</label>
+                    <textarea id="mreason-{{ order.id }}" name="rejection_reason" rows="2"
+                              class="v-textarea !min-h-0 !text-[12px]" placeholder="REASON — OPTIONAL, EMAILED TO CUSTOMER"></textarea>
+                    <button type="submit" class="v-btn v-btn--destructive-solid w-full">CONFIRM REJECTION</button>
+                </form>
+            </details>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<p class="v-spec text-ink-3">NO ORDERS ON FILE.</p>
+{% endif %}
 {% endblock %}

@@ -1,9 +1,12 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from products.models import Product
 from products.models import ProductImage
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from django.core.files.uploadedfile import UploadedFile
+
+User = get_user_model()
 
 class ProductForm(forms.ModelForm):
     
@@ -153,11 +156,19 @@ class ProductForm(forms.ModelForm):
 
         image = self.cleaned_data.get('image')
         if image and isinstance(image, UploadedFile):
+            # No manual Pillow verification needed here: Product.image is a
+            # models.ImageField, and Django's own forms.ImageField already
+            # opens and verify()s the file with Pillow before it ever
+            # reaches cleaned_data -- a non-image file is rejected at the
+            # field level (error on 'image') before this method even runs.
+            # Contrast payments.forms.ReceiptUploadForm.receipt, which is a
+            # plain FileField (it must also accept PDFs) and so has no such
+            # built-in check -- that one verifies explicitly instead.
             if not image.content_type.startswith('image/'):
                 raise ValidationError('Uploaded file is not a valid image.')
             if image.size > 10485760: #10 MB
-                raise ValidationError('Image size should not exceed 10 MB.')    
-        
+                raise ValidationError('Image size should not exceed 10 MB.')
+
         # Size validation
         sizes = cleaned.get('available_sizes', '')
         if not sizes or sizes.strip() == '':
@@ -224,3 +235,20 @@ class ProductImageForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['alt_text'].required = False
         self.fields['is_main'].required = False
+
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = User
+        # is_staff is intentionally excluded: it was mass-assignable through
+        # this form, letting any dashboard staff account (the lowest
+        # privilege tier with dashboard access) grant itself or anyone else
+        # staff access. Promoting a user to staff must go through a
+        # superuser-only path, not this general customer-edit form.
+        fields = ['username', 'email', 'first_name', 'last_name', 'is_active']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'border rounded p-2 w-full'}),
+            'email': forms.EmailInput(attrs={'class': 'border rounded p-2 w-full'}),
+            'first_name': forms.TextInput(attrs={'class': 'border rounded p-2 w-full'}),
+            'last_name': forms.TextInput(attrs={'class': 'border rounded p-2 w-full'}),
+        }

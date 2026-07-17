@@ -5,6 +5,7 @@ from .models import Order, OrderItem
 from .forms import CheckoutForm
 from .shipping import get_shipping_info, client_table
 from cart.models import Cart
+from products.models import Product
 from django_ratelimit.decorators import ratelimit
 from django.db import transaction
 from django.contrib.auth import get_user_model
@@ -25,7 +26,10 @@ def _render_checkout(request, cart):
 @ratelimit(key='user_or_ip', rate='10/m', block=True)
 @login_required
 def checkout(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
+    # checkout.html reads item.product.* per cart line, and the OrderItem
+    # creation loop below reads cart_item.product.price per item too —
+    # prefetching once covers both the GET-rendered page and the POST path.
+    cart, _ = Cart.objects.prefetch_related('items__product').get_or_create(user=request.user)
 
     if not cart.items.exists():
         messages.error(request, "Your cart is empty.")
@@ -67,6 +71,18 @@ def checkout(request):
                 messages.error(request, "You already have a pending order.")
                 return redirect('view_cart')
 
+            # Stock check, row-locked so it can't race with another
+            # checkout reducing the same product's inventory concurrently.
+            for cart_item in cart.items.all():
+                product = Product.objects.select_for_update().get(id=cart_item.product_id)
+                if product.inventory_count < cart_item.quantity:
+                    messages.error(
+                        request,
+                        f"Only {product.inventory_count} of {product.name} left in stock. "
+                        f"Please update your cart quantity."
+                    )
+                    return redirect('view_cart')
+
             order = Order.objects.create(
                 user=request.user,
                 total_amount=cart.total_price,
@@ -102,22 +118,31 @@ def checkout(request):
 def order_success(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
 
+    # order_detail is the single canonical result screen (it owns the confirmed
+    # celebration and every other state), so this legacy success URL now always
+    # redirects there instead of rendering a duplicate celebration template.
     if order.payment_status != 'success':
         messages.warning(request, "Payment not completed yet.")
-        return redirect('orders:order_detail', order_number=order.order_number)
-
-    return render(request, 'payments/success.html', {'order': order})
+    return redirect('orders:order_detail', order_number=order.order_number)
 
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    # history.html calls order.get_total_items() per row, which touches
+    # order.items.all() — prefetching once avoids one query per order.
+    orders = Order.objects.filter(user=request.user).order_by('-created_at').prefetch_related('items')
     return render(request, 'orders/history.html', {'orders': orders})
 
 
 @ratelimit(key='user_or_ip', rate='5/m', block=True)
 @login_required
 def order_detail(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    # detail.html iterates order.items.all() and reads item.product.* per
+    # line item — prefetching items with their products avoids a query per
+    # line item.
+    order = get_object_or_404(
+        Order.objects.prefetch_related('items__product'),
+        order_number=order_number, user=request.user,
+    )
     return render(request, 'orders/detail.html', {'order': order})

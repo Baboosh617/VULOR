@@ -1,314 +1,109 @@
 {% extends "base.html" %}
+{% load humanize %}
 
-{% block title %}Cart - VULOR{% endblock %}
+{% block title %}Cart — VULOR{% endblock %}
+
+{% block header_nav %}{% include "includes/spine_steps.html" with step=1 %}{% endblock %}
+{% block footer %}{% include "includes/spine_footer.html" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <h1 class="text-4xl md:text-5xl font-bold text-white mb-12 text-center">CART</h1>
-    
+<div class="c-gutter py-12 max-w-5xl mx-auto">
+
+    <span class="c-reg text-ink-3 block mb-4">Cart{% if cart.items.all %} — {{ cart.total_items|stringformat:"02d" }} item{{ cart.total_items|pluralize }}{% else %} — 00 items{% endif %}</span>
+
     {% if cart.items.all %}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div class="lg:col-span-2">
-            {% for item in cart.items.all %}
-            <div class="border-b border-[#333333] py-8 flex flex-col md:flex-row items-start gap-6">
-                
-                <div class="w-32 h-32 bg-black border border-[#333333] overflow-hidden flex-shrink-0">
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                         class="w-full h-full object-cover">
-                </div>
-                
-                
-                <div class="flex-1 min-w-0">
-                    
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-white text-lg font-bold">{{ item.product.name }}</h3>
-                        
-                        <form method="POST" action="{% url 'remove_from_cart' item.id %}">
-                            {% csrf_token %}
-                            <button type="submit" 
-                                    class="text-[#666666] text-sm hover:text-[#dc2626] transition-all duration-300">
-                                REMOVE
-                            </button>
-                        </form>
-                    </div>
-                    
-                    
-                    {% if item.size %}
-                    <div class="text-[#cccccc] text-sm mb-2">Size: {{ item.size }}</div>
-                    {% endif %}
-                    
-                    
-                    <div class="text-[#dc2626] text-lg font-bold mb-4">₦{{ item.product.price }}</div>
-                    
-                    
-                    <div class="flex items-center">
-                        <label class="text-white text-sm mr-4">QUANTITY</label>
-                        <div class="flex items-center w-32">
-                            <form method="POST" action="{% url 'update_cart_item' item.id %}" class="flex items-center">
-                                {% csrf_token %}
-                                <button type="button" 
-                                        class="decrease-quantity w-10 h-10 border border-r-0 border-[#333333] flex 
-                                        items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
-                                    −
-                                </button>
-                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
-                                       class="flex-1 h-10 border border-[#333333] text-center text-white bg-black quantity-display"
-                                       readonly style="-moz-appearance: textfield;">
-                                <button type="button" 
-                                        class="increase-quantity w-10 h-10 border border-l-0 border-[#333333] flex items-center justify-center text-white hover:bg-[#1a1a1a] transition-all duration-300">
-                                    +
-                                </button>
-                                
-                                <button type="submit" 
-                                        class="hidden update-btn ml-4 text-[#dc2626] text-sm font-bold hover:text-white transition-all duration-300">
-                                    UPDATE
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                
-                <div class="md:text-right mt-4 md:mt-0">
-                    <div class="text-[#dc2626] text-lg font-bold">₦{{ item.total_price }}</div>
-                </div>
-            </div>
-            {% endfor %}
+    <h1 class="c-monolith text-4xl md:text-6xl mb-12">Your order, <span class="c-serif-i normal-case">so far.</span></h1>
+
+    <!-- ============ THE INVOICE ============
+         One document, one direction. Desktop: ruled line rows.
+         Mobile: each line becomes a stacked entry — the invoice never
+         renders as a squeezed table and never scrolls sideways. -->
+    <div data-cart>
+        <div class="v-hairline-b hidden sm:grid grid-cols-[64px_1fr_auto_auto_auto] gap-x-6 pb-3">
+            <span class="c-reg text-ink-2 col-span-2">Item</span>
+            <span class="c-reg text-ink-2">Qty</span>
+            <span class="c-reg text-ink-2 text-right">Line total</span>
+            <span class="w-16"></span>
         </div>
-        
-        
-        <div class="bg-black border border-[#333333] p-6 h-fit lg:sticky lg:top-8">
-            <h2 class="text-white text-lg font-bold mb-6 tracking-widest">ORDER SUMMARY</h2>
-            
-            
-            <div class="space-y-4 mb-8">
-                <div class="flex justify-between text-[#cccccc] text-sm">
-                    <span>SUBTOTAL</span>
-                    <span class="text-white">₦{{ cart.total_price }}</span>
-                </div>
-                
-                
-                <div class="flex justify-between text-[#666666] text-sm border-b border-[#333333] pb-4">
-                    <span>SHIPPING CALCULATED AT CHECKOUT</span>
-                </div>
-                
-                
-                <div class="flex justify-between text-white text-lg font-bold pt-4">
-                    <span>TOTAL</span>
-                    <span class="text-[#dc2626]">₦{{ cart.total_price }}</span>
-                </div>
-            </div>
-            
-            
-             <a href="{% url 'orders:checkout' %}"
-                class="block w-full border border-[#dc2626] text-[#dc2626] text-center my-6 py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">PROCEED TO PAYMENT</a>
-            
-            
-            <a href="{% url 'product_list' %}" 
-               class="block w-full border border-[#dc2626] text-[#dc2626] text-center py-4 px-6 hover:bg-[#dc2626] hover:text-white transition-all duration-300 font-bold">
-                CONTINUE SHOPPING
+
+        {% for item in cart.items.all %}
+        <div data-item data-unit-price="{{ item.product.price }}"
+             class="v-hairline-b py-5 grid grid-cols-[64px_1fr] sm:grid-cols-[64px_1fr_auto_auto_auto] gap-x-4 sm:gap-x-6 gap-y-3 items-center">
+
+            <a href="{% url 'product_detail' item.product.slug %}" class="block v-plate w-16 h-16 overflow-hidden row-span-2 sm:row-span-1">
+                {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                {% endif %}
             </a>
-            
-            
-            <div class="mt-6 pt-6 border-t border-[#333333]">
-                <p class="text-[#666666] text-xs text-center">
-                    PAY SECURELY BY BANK TRANSFER
-                </p>
+
+            <div class="min-w-0">
+                <a href="{% url 'product_detail' item.product.slug %}" class="v-spec text-ink-1 hover:underline underline-offset-4 block truncate">
+                    {{ item.product.name }}
+                </a>
+                <span class="c-reg text-ink-3 block mt-1">
+                    VU&ndash;{{ item.product.id|stringformat:"02d" }}{% if item.size %} / {{ item.size }}{% endif %}{% if item.color %} / {{ item.color }}{% endif %}
+                </span>
             </div>
+
+            <form method="POST" action="{% url 'update_cart_item' item.id %}" class="inline-flex items-center gap-2 col-start-2 sm:col-start-3" data-qty-form>
+                {% csrf_token %}
+                <label class="sr-only" for="qty-{{ item.id }}">Quantity for {{ item.product.name }}</label>
+                <input id="qty-{{ item.id }}" type="number" name="quantity" value="{{ item.quantity }}" min="1" max="100"
+                       class="v-input !h-10 w-16 text-center !text-[13px]">
+                <button type="submit" class="v-btn v-btn--secondary !h-10 !px-3 js-hide">Update</button>
+            </form>
+
+            <div class="col-start-2 sm:col-start-4 flex sm:block items-baseline justify-between">
+                <span class="c-reg text-ink-3 sm:hidden">Line total</span>
+                <span class="v-spec v-price text-ink-1 sm:text-right block" data-line-total="{{ item.total_price }}">&#8358;&nbsp;{{ item.total_price|intcomma }}</span>
+            </div>
+
+            <form method="POST" action="{% url 'remove_from_cart' item.id %}" data-remove-form
+                  class="col-start-2 sm:col-start-5 text-right">
+                {% csrf_token %}
+                <button type="submit" class="c-reg-lg v-underline text-ink-3 hover:text-ink-1 h-11">Remove</button>
+            </form>
+        </div>
+        {% endfor %}
+
+        <!-- Invoice foot: totals as the document's final rows -->
+        <div class="v-hairline-b py-4 flex items-baseline justify-between gap-6">
+            <span class="v-spec text-ink-2">Subtotal</span>
+            <span class="v-spec v-price text-ink-1" data-cart-subtotal>&#8358;&nbsp;{{ cart.total_price|intcomma }}</span>
+        </div>
+        <div class="v-hairline-b py-4 flex items-baseline justify-between gap-6">
+            <span class="v-spec text-ink-2">Delivery</span>
+            <span class="c-reg text-ink-3">At checkout</span>
+        </div>
+        <div class="py-5 flex items-baseline justify-between gap-6 border-b-2 border-line-dark-strong">
+            <span class="v-spec text-ink-1 !text-[15px]">Total — excl. delivery</span>
+            <span class="v-price text-ink-1 text-lg" data-cart-total>&#8358;&nbsp;{{ cart.total_price|intcomma }}</span>
         </div>
     </div>
+
+    <!-- Document foot: the signature line -->
+    <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-6 mt-10">
+        <a href="{% url 'product_list' %}" class="c-reg-lg v-underline text-ink-2 hover:text-ink-1 h-11 inline-flex items-center">&larr; Continue shopping</a>
+        <a href="{% url 'orders:checkout' %}" class="v-btn v-btn--primary v-btn--lg">Checkout &rarr;</a>
+    </div>
+
     {% else %}
-    
-    <div class="text-center py-20">
-        <div class="w-20 h-20 border border-[#333333] rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="material-symbols-outlined text-[#666666] text-3xl">
-                !
-            </span>
-        </div>
-        <h2 class="text-white text-2xl font-bold mb-4">YOUR CART IS EMPTY</h2>
-        <p class="text-[#cccccc] mb-8">START SHOPPING TO ADD ITEMS TO YOUR CART</p>
-        <a href="{% url 'product_list' %}" 
-           class="inline-block border border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626] hover:text-white px-8 py-3 transition-all duration-300 text-sm tracking-widest font-bold">
-            SHOP NOW
-        </a>
+    <!-- ============ EMPTY STATE ============ -->
+    <div class="py-20">
+        <h1 class="c-monolith text-4xl md:text-6xl mb-6">Nothing here <span class="c-serif-i normal-case">yet.</span></h1>
+        <p class="v-spec text-ink-2 mb-10">The catalog is open.</p>
+        <a href="{% url 'product_list' %}" class="v-btn v-btn--secondary">View catalog</a>
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
-<style>
-    
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-    
-    
-    .lg\:sticky {
-        position: sticky;
-    }
-</style>
-
+{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        document.querySelectorAll('.increase-quantity, .decrease-quantity').forEach(button => {
-            button.addEventListener('click', function() {
-                const form = this.closest('form');
-                const input = form.querySelector('.quantity-display');
-                const updateBtn = form.querySelector('.update-btn');
-                
-                if (this.classList.contains('increase-quantity')) {
-                    input.value = parseInt(input.value) + 1;
-                } else if (parseInt(input.value) > 1) {
-                    input.value = parseInt(input.value) - 1;
-                }
-                
-                
-                if (updateBtn) {
-                    updateBtn.classList.remove('hidden');
-                    updateBtn.classList.add('animate-pulse');
-                }
-            });
-        });
-
-        
-        document.querySelectorAll('.update-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('form');
-                
-                
-                const originalText = this.textContent;
-                this.textContent = 'UPDATING...';
-                this.disabled = true;
-                
-                
-                const formData = new FormData(form);
-                
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Network response was not ok.');
-                })
-                .then(data => {
-                    if (data.success) {
-                        
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
-                        messageDiv.textContent = 'Cart updated!';
-                        document.body.appendChild(messageDiv);
-                        
-                        
-                        setTimeout(() => messageDiv.remove(), 2000);
-                        
-                        
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 500);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
-                    messageDiv.textContent = 'Update failed. Try again.';
-                    document.body.appendChild(messageDiv);
-                    
-                    setTimeout(() => messageDiv.remove(), 3000);
-                    
-                    
-                    this.textContent = originalText;
-                    this.disabled = false;
-                });
-            });
-        });
-
-        
-        document.querySelectorAll('form[action*="remove_from_cart"]').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (confirm('Remove this item from your cart?')) {
-                    
-                    const button = this.querySelector('button');
-                    const originalText = button.textContent;
-                    button.textContent = 'REMOVING...';
-                    button.disabled = true;
-                    
-                    
-                    const formData = new FormData(this);
-                    
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        }
-                        throw new Error('Network response was not ok.');
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            
-                            const messageDiv = document.createElement('div');
-                            messageDiv.className = 'fixed top-4 right-4 bg-[#10B981] text-white px-4 py-2 rounded shadow-lg z-50';
-                            messageDiv.textContent = 'Item removed!';
-                            document.body.appendChild(messageDiv);
-                            
-                            setTimeout(() => messageDiv.remove(), 2000);
-                            
-                            
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'fixed top-4 right-4 bg-[#EF4444] text-white px-4 py-2 rounded shadow-lg z-50';
-                        messageDiv.textContent = 'Remove failed. Try again.';
-                        document.body.appendChild(messageDiv);
-                        
-                        setTimeout(() => messageDiv.remove(), 3000);
-                        
-                        
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    });
-                }
-            });
-        });
-
-        
-        const interactiveElements = document.querySelectorAll('a, button, input[type="button"]');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                el.classList.add('transition-all', 'duration-300');
-            });
-        });
-    });
+// The per-row Update button is the no-JS path; with JS, quantity changes
+// post live (cart.js), so the button is hidden to keep the row quiet.
+document.querySelectorAll('[data-cart] .js-hide').forEach(function (el) {
+    if (window.fetch) el.classList.add('hidden');
+});
 </script>
 {% endblock %}

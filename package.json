@@ -1,33 +1,16 @@
 {
-  "name": "backend",
+  "name": "vulor-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Tailwind CSS v4 build pipeline for VULOR's Django templates.",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:css": "tailwindcss -i ./frontend/static_src/css/style.css -o ./frontend/static/css/dist/style.css --minify",
+    "watch:css": "tailwindcss -i ./frontend/static_src/css/style.css -o ./frontend/static/css/dist/style.css --watch",
+    "build": "npm run build:css"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "license": "UNLICENSED",
   "devDependencies": {
-    "autoprefixer": "^10.4.22",
-    "postcss": "^8.5.6",
+    "@tailwindcss/cli": "^4.1.17",
     "tailwindcss": "^4.1.17"
-  },
-  "dependencies": {
-    "baseline-browser-mapping": "^2.9.4",
-    "browserslist": "^4.28.1",
-    "caniuse-lite": "^1.0.30001759",
-    "electron-to-chromium": "^1.5.266",
-    "escalade": "^3.2.0",
-    "fraction.js": "^5.3.4",
-    "nanoid": "^3.3.11",
-    "node-releases": "^2.0.27",
-    "normalize-range": "^0.1.2",
-    "picocolors": "^1.1.1",
-    "postcss-value-parser": "^4.2.0",
-    "source-map-js": "^1.2.1",
-    "update-browserslist-db": "^1.2.2"
   }
 }

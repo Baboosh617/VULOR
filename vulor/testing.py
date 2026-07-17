@@ -32,6 +32,21 @@ class StoreTestCase(TestCase):
     locmem backend is mandatory."""
 
 
+def make_test_image_bytes(image_format="JPEG"):
+    """Real, minimal, valid image bytes — not the placeholder b"x" style
+    fixtures used elsewhere. Any test that submits a file through a form
+    with Pillow-based content verification (ReceiptUploadForm, ProductForm)
+    needs genuinely decodable image bytes, or that verification correctly
+    rejects it as invalid."""
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (1, 1), color=(200, 30, 30)).save(buf, format=image_format)
+    return buf.getvalue()
+
+
 def make_user(username="customer", **kwargs):
     from accounts.models import CustomUser
 

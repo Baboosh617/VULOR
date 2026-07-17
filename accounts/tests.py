@@ -1,3 +1,5 @@
+from django.urls import reverse
+from vulor.testing import StoreTestCase, make_user
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -40,3 +42,33 @@ class CustomUserModelTests(TestCase):
             email="str@example.com", username="struser", password="strongpass123"
         )
         self.assertEqual(str(user), "str@example.com")
+
+
+class AccountDeactivationTests(StoreTestCase):
+    """The profile danger-zone: deactivation is a soft-disable gated by a
+    typed-email confirmation, never a hard delete (orders must stay on file)."""
+
+    def setUp(self):
+        self.user = make_user("deact")
+        self.client.force_login(self.user)
+
+    def test_wrong_confirmation_keeps_account_active(self):
+        response = self.client.post(
+            reverse("deactivate_account"), {"confirm": "someoneelse@example.com"}
+        )
+        self.assertRedirects(response, reverse("profile_view"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_active)
+
+    def test_typed_email_deactivates_and_logs_out(self):
+        response = self.client.post(
+            reverse("deactivate_account"), {"confirm": "deact@example.com"}
+        )
+        self.assertRedirects(response, reverse("home"))
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_active)
+        # Session cleared: a protected page now bounces to login.
+        self.assertEqual(self.client.get(reverse("profile_view")).status_code, 302)
+
+    def test_get_is_not_allowed(self):
+        self.assertEqual(self.client.get(reverse("deactivate_account")).status_code, 405)

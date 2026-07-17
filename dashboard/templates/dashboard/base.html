@@ -1,39 +1,81 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard — VULOR{% endblock %}</title>
+    <meta name="theme-color" content="#1A1233">
+    <link rel="icon" type="image/png" sizes="64x64" href="{% static 'images/favicon-64.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+    <!-- Fonts are self-hosted (frontend/static/fonts), declared via
+         @font-face in the compiled stylesheet — no runtime CDN. -->
+    <link rel="preload" href="{% static 'fonts/archivo-var.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'css/dist/style.css' %}">
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-ground-950 text-ink-1 min-h-screen">
 
-<div class="flex h-screen">
+<div class="flex min-h-screen">
 
-    <!-- Sidebar -->
-    <div class="w-64 bg-gray-800 text-white p-6 flex flex-col">
-        <h1 class="text-2xl font-bold mb-6">Vulor Admin</h1>
+    <!-- Desktop rail -->
+    <nav class="hidden md:flex md:flex-col w-52 v-hairline-r shrink-0 px-4 py-6" aria-label="Dashboard">
+        <span class="v-display text-xl leading-none mb-10 px-2">VULOR</span>
+        <ol class="space-y-1">
+            <li>
+                <a href="{% url 'dashboard:dashboard_home' %}" class="v-spec block py-2 pl-3 {% if request.resolver_match.url_name == 'dashboard_home' %}v-current text-ink-1{% else %}text-ink-2 hover:text-ink-1{% endif %}">01&nbsp;&nbsp;OVERVIEW</a>
+            </li>
+            <li>
+                <a href="{% url 'dashboard:order_list' %}" class="v-spec block py-2 pl-3 {% if 'order' in request.resolver_match.url_name %}v-current text-ink-1{% else %}text-ink-2 hover:text-ink-1{% endif %}">
+                    02&nbsp;&nbsp;ORDERS
+                    {% if awaiting_verification %}<span class="v-badge v-badge--signal ml-1">{{ awaiting_verification }}</span>{% endif %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'dashboard:product_list' %}" class="v-spec block py-2 pl-3 {% if 'product' in request.resolver_match.url_name %}v-current text-ink-1{% else %}text-ink-2 hover:text-ink-1{% endif %}">03&nbsp;&nbsp;PRODUCTS</a>
+            </li>
+            <li>
+                <a href="{% url 'dashboard:customer_list' %}" class="v-spec block py-2 pl-3 {% if 'customer' in request.resolver_match.url_name %}v-current text-ink-1{% else %}text-ink-2 hover:text-ink-1{% endif %}">04&nbsp;&nbsp;CUSTOMERS</a>
+            </li>
+            <li>
+                <a href="{% url 'dashboard:review_list' %}" class="v-spec block py-2 pl-3 {% if 'review' in request.resolver_match.url_name %}v-current text-ink-1{% else %}text-ink-2 hover:text-ink-1{% endif %}">05&nbsp;&nbsp;REVIEWS</a>
+            </li>
+        </ol>
+        <div class="mt-auto pt-6 v-hairline-t">
+            <a href="{% url 'home' %}" class="v-label text-ink-3 hover:text-ink-1">&larr; STOREFRONT</a>
+        </div>
+    </nav>
 
-        <nav class="flex flex-col gap-3">
-            <a href="{% url 'dashboard:dashboard_home' %}" class="hover:bg-gray-700 p-2 rounded">Home</a>
-            <a href="{% url 'dashboard:order_list' %}" class="hover:bg-gray-700 p-2 rounded">Orders</a>
-            <a href="{% url 'dashboard:review_list' %}" class="hover:bg-gray-700 p-2 rounded">Reviews</a>
-            <a href="{% url 'dashboard:product_list' %}" class="hover:bg-gray-700 p-2 rounded">Products</a>
-            <a href="{% url 'dashboard:customer_list' %}" class="hover:bg-gray-700 p-2 rounded">Customers</a>
-        </nav>
+    <!-- Main -->
+    <div class="flex-1 min-w-0 pb-20 md:pb-0">
+        <div id="new-orders-banner" class="v-alert v-alert--signal hidden cursor-pointer" role="status" onclick="ackNewOrders()">
+            <span id="new-orders-text"></span> — TAP TO DISMISS
+        </div>
+
+        {% if messages %}
+        <div class="px-4 md:px-8 pt-6">
+            {% for message in messages %}
+            <div class="v-alert {% if 'error' in message.tags %}v-alert--error{% else %}v-alert--signal{% endif %} mb-3">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="px-4 md:px-8 py-6 md:py-8">
+            {% block content %}{% endblock %}
+        </div>
     </div>
-
-    <!-- Main content -->
-    <div class="flex-1 p-8 overflow-auto">
-        {% block content %}
-        {% endblock %}
-    </div>
-
-    <div id="new-orders-banner" class="hidden bg-green-600 text-white p-3 text-center cursor-pointer" onclick="ackNewOrders()">
-    <span id="new-orders-text"></span> — click to dismiss
-</div>
 </div>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Mobile bottom tab bar -->
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-ground-950 v-hairline-t grid grid-cols-5" aria-label="Dashboard">
+    <a href="{% url 'dashboard:dashboard_home' %}" class="v-label text-center py-3 {% if request.resolver_match.url_name == 'dashboard_home' %}text-ink-1{% else %}text-ink-3{% endif %}">HOME</a>
+    <a href="{% url 'dashboard:order_list' %}" class="v-label text-center py-3 relative {% if 'order' in request.resolver_match.url_name %}text-ink-1{% else %}text-ink-3{% endif %}">
+        ORDERS
+        {% if awaiting_verification %}<span class="absolute top-1 right-4 w-2 h-2 rounded-full" style="background: var(--signal);"></span>{% endif %}
+    </a>
+    <a href="{% url 'dashboard:product_list' %}" class="v-label text-center py-3 {% if 'product' in request.resolver_match.url_name %}text-ink-1{% else %}text-ink-3{% endif %}">STOCK</a>
+    <a href="{% url 'dashboard:customer_list' %}" class="v-label text-center py-3 {% if 'customer' in request.resolver_match.url_name %}text-ink-1{% else %}text-ink-3{% endif %}">USERS</a>
+    <a href="{% url 'dashboard:review_list' %}" class="v-label text-center py-3 {% if 'review' in request.resolver_match.url_name %}text-ink-1{% else %}text-ink-3{% endif %}">REVIEWS</a>
+</nav>
 
 <script>
 function pollNewOrders() {
@@ -43,7 +85,7 @@ function pollNewOrders() {
             const banner = document.getElementById('new-orders-banner');
             if (data.new_orders > 0) {
                 document.getElementById('new-orders-text').textContent =
-                    data.new_orders + ' new order' + (data.new_orders > 1 ? 's' : '');
+                    data.new_orders + ' NEW ORDER' + (data.new_orders > 1 ? 'S' : '') + ' SINCE YOU OPENED THIS PAGE';
                 banner.classList.remove('hidden');
             } else {
                 banner.classList.add('hidden');
@@ -59,6 +101,6 @@ function ackNewOrders() {
 pollNewOrders();
 setInterval(pollNewOrders, 30000);
 </script>
-
+{% block scripts %}{% endblock %}
 </body>
 </html>

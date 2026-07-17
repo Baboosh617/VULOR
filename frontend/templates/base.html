@@ -1,233 +1,139 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}VULOR - Premium Streetwear{% endblock %}</title>
-    <link rel="shortcut icon" href="{% static 'images/vul.jpg' %}" >
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=shopping_cart" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}VULOR — Issue 01{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}VULOR. Heavyweight streetwear in numbered editions. Hoodies, tees, cargo, sweatpants, tanks.{% endblock %}">
+    <meta name="theme-color" content="#1A1233">
+    <meta property="og:site_name" content="VULOR">
+    <meta property="og:title" content="{% block og_title %}VULOR — Issue 01{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Heavyweight streetwear in numbered editions.{% endblock %}">
+    <meta property="og:type" content="website">
+    {% block og_extra %}{% endblock %}
+    <link rel="icon" type="image/png" sizes="64x64" href="{% static 'images/favicon-64.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #000000;
-            color: #ffffff;
-        }
-        
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #111111;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #dc2626;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b91c1c;
-        }
+    <!-- Fonts are self-hosted (frontend/static/fonts) and declared via
+         @font-face in the compiled stylesheet — no runtime font CDN.
+         The display face is preloaded: the masthead is the brand. -->
+    <link rel="preload" href="{% static 'fonts/archivo-black-400.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/archivo-var.woff2' %}" as="font" type="font/woff2" crossorigin>
 
-        
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        .animate-bounce-delay {
-            animation: bounce 0.6s infinite ease-in-out;
-        }
-
-        
-        .material-symbols-outlined {
-            font-variation-settings:
-            'FILL' 0,
-            'wght' 400,
-            'GRAD' 0,
-            'opsz' 24;
-            color: inherit;
-        }
-    </style>
-
-    <style>
-        #scrollToTop:hover {
-            transform: scale(1.1);
-        }
-    </style>
-    
+    <!-- Compiled by Tailwind v4 (see package.json "build:css") from
+         frontend/static_src/css/style.css — @theme there is the only
+         token source; there is no runtime/CDN config. -->
+    <link rel="stylesheet" href="{% static 'css/dist/style.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col">
+<body class="bg-ground-950 text-ink-body min-h-screen flex flex-col">
 
-    <div id="preloader" class="fixed inset-0 bg-black flex items-center justify-center z-[9999] transition-opacity duration-500">
-        <div class="text-center">
+    <a href="#main" class="c-skip">Skip to content</a>
 
-            <div class="text-6xl md:text-7xl font-black tracking-tighter text-[#dc2626] mb-8">
-                VULOR
+    <!-- ================= HEADER ================= -->
+    <header class="sticky top-0 z-50 bg-ground-950 v-hairline-b">
+        <div class="c-gutter">
+            <div class="flex items-center justify-between h-16">
+                <a href="{% url 'home' %}" class="group inline-flex items-center py-1" aria-label="VULOR — home">
+                    <span class="relative block h-12 sm:h-14">
+                        <img src="{% static 'images/logo-mark.png' %}" alt="VULOR" class="h-full w-auto transition-opacity group-hover:opacity-0">
+                        <img src="{% static 'images/logo-mark-lime.png' %}" alt="" aria-hidden="true"
+                             class="absolute inset-0 h-full w-auto opacity-0 transition-opacity group-hover:opacity-100">
+                    </span>
+                </a>
+
+                {% block header_nav %}
+                <!-- Desktop nav: the current section wears the lime -->
+                {% with url_name=request.resolver_match.url_name %}
+                <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+                    <a href="{% url 'product_list' %}" {% if url_name == 'product_list' or url_name == 'product_detail' %}aria-current="page"{% endif %} class="c-reg-lg c-charge-link transition-colors {% if url_name == 'product_list' or url_name == 'product_detail' %}is-active text-lime{% else %}text-ink-2 hover:text-lime{% endif %}">Catalog</a>
+                    <a href="{% url 'about' %}" {% if url_name == 'about' %}aria-current="page"{% endif %} class="c-reg-lg c-charge-link transition-colors {% if url_name == 'about' %}is-active text-lime{% else %}text-ink-2 hover:text-lime{% endif %}">About</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'orders:order_history' %}" {% if url_name == 'order_history' or url_name == 'order_detail' %}aria-current="page"{% endif %} class="c-reg-lg c-charge-link transition-colors {% if url_name == 'order_history' or url_name == 'order_detail' %}is-active text-lime{% else %}text-ink-2 hover:text-lime{% endif %}">Orders</a>
+                        <a href="{% url 'profile_view' %}" {% if url_name == 'profile_view' %}aria-current="page"{% endif %} class="c-reg-lg c-charge-link transition-colors {% if url_name == 'profile_view' %}is-active text-lime{% else %}text-ink-2 hover:text-lime{% endif %}">Account</a>
+                        <a href="{% url 'view_cart' %}" class="c-reg-lg c-charge-link text-ink-1 hover:text-lime transition-colors">Cart&nbsp;(<span id="cart-count" class="text-lime">{{ cart_total_items|default:0 }}</span>)</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="c-reg-lg c-charge-link text-ink-2 hover:text-lime transition-colors">Sign in</a>
+                        <a href="{% url 'register' %}" class="v-btn v-btn--secondary v-btn--sm">Register</a>
+                    {% endif %}
+                </nav>
+                {% endwith %}
+
+                <!-- Mobile: cart + menu -->
+                <div class="flex md:hidden items-center gap-6">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'view_cart' %}" class="c-reg-lg text-ink-1 h-11 inline-flex items-center">Cart&nbsp;(<span id="cart-count-m" class="text-lime">{{ cart_total_items|default:0 }}</span>)</a>
+                    {% endif %}
+                    <button id="menu-open" class="c-burger" aria-expanded="false" aria-controls="mobile-menu">
+                        <span class="sr-only">Menu</span>
+                        <span class="bar" aria-hidden="true"></span>
+                        <span class="bar" aria-hidden="true"></span>
+                        <span class="bar" aria-hidden="true"></span>
+                    </button>
+                </div>
+                {% endblock %}
             </div>
-            
+        </div>
+    </header>
 
-            <div class="flex justify-center space-x-2">
-                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0s"></div>
-                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.1s"></div>
-                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.2s"></div>
-                <div class="w-3 h-3 bg-[#dc2626] rounded-full animate-bounce-delay" style="animation-delay: 0.3s"></div>
-            </div>
+    <!-- Mobile full-screen takeover — the campaign's loudest navigation -->
+    <div id="mobile-menu" class="c-menu fixed inset-0 z-[60] bg-ground-950 flex flex-col" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="flex items-center justify-between h-16 c-gutter v-hairline-b">
+            <span class="inline-flex items-center py-1">
+                <img src="{% static 'images/logo-mark-lime.png' %}" alt="VULOR" class="h-12 w-auto">
+            </span>
+            <button id="menu-close" class="c-burger is-open" aria-label="Close menu">
+                <span class="sr-only">Close menu</span>
+                <span class="bar" aria-hidden="true"></span>
+                <span class="bar" aria-hidden="true"></span>
+                <span class="bar" aria-hidden="true"></span>
+            </button>
+        </div>
+        <nav class="flex-1 overflow-y-auto c-gutter py-10 c-bleed" aria-label="Mobile">
+            <ol class="space-y-8">
+                <li>
+                    <span class="c-reg text-lime block mb-2">01</span>
+                    <a href="{% url 'product_list' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">Catalog</a>
+                </li>
+                <li>
+                    <span class="c-reg text-lime block mb-2">02</span>
+                    <a href="{% url 'about' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">About</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li>
+                    <span class="c-reg text-lime block mb-2">03</span>
+                    <a href="{% url 'orders:order_history' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">Orders</a>
+                </li>
+                <li>
+                    <span class="c-reg text-lime block mb-2">04</span>
+                    <a href="{% url 'profile_view' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">Account</a>
+                </li>
+                <li>
+                    <span class="c-reg text-lime block mb-2">05</span>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="c-monolith c-bleed-l text-6xl text-ink-3 block uppercase">Sign out</button>
+                    </form>
+                </li>
+                {% else %}
+                <li>
+                    <span class="c-reg text-lime block mb-2">03</span>
+                    <a href="{% url 'login' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">Sign in</a>
+                </li>
+                <li>
+                    <span class="c-reg text-lime block mb-2">04</span>
+                    <a href="{% url 'register' %}" class="c-monolith c-bleed-l text-6xl text-ink-1 block">Register</a>
+                </li>
+                {% endif %}
+            </ol>
+        </nav>
+        <div class="c-gutter py-6 v-hairline-t">
+            <p class="c-folio">VULOR — Issue 01</p>
         </div>
     </div>
 
-    
-    <nav class="bg-black border-b border-[#333333] sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex-shrink-0">
-                    <a href="{% url 'home' %}" class="flex items-center space-x-3 group">
-                        <img src="{% static 'images/photo_2025-06-30_12-29-30.jpg' %}" 
-                             alt="VULOR Logo" 
-                             class="h-10 w-auto transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
-                    </a>
-                </div>
-
-    
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="{% url 'product_list' %}" 
-                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
-                        SHOP
-                    </a>
-                    
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'profile_view' %}" 
-                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
-                            PROFILE
-                        </a>
-                        
-                        <a href="{% url 'orders:order_history' %}" 
-                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
-                            ORDERS
-                        </a>
-                        
-    
-                        <div class="relative">
-                            <a href="{% url 'view_cart' %}" 
-                               class="hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110">
-                                <span class="material-symbols-outlined text-lg">
-                                    shopping_cart
-                                </span>
-                                {% if cart_total_items > 0 %}
-                                    <span class="absolute -top-2 -right-2 bg-[#dc2626] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold border border-white">
-                                        {{ cart_total_items }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </div>
-
-                        <a href="/accounts/logout/" 
-                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
-                            LOGOUT
-                        </a>
-                        
-                    {% else %}
-                        <a href="{% url 'login' %}" 
-                           class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 text-sm tracking-wide font-medium hover:scale-105">
-                            LOGIN
-                        </a>
-                        <a href="{% url 'register' %}" 
-                           class="bg-[#dc2626] hover:bg-[#b91c1c] text-white px-6 py-2 text-sm tracking-wider font-bold transition-all duration-300 transform hover:scale-105">
-                            SIGN UP
-                        </a>
-                    {% endif %}
-                </div>
-
-    
-                <div class="md:hidden">
-                    <button id="mobile-menu-button" 
-                            class="text-[#dc2626] hover:text-white p-2 transition-all duration-300 relative w-10 h-10 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-lg border border-[#333333] hover:border-[#dc2626]">
-                        <span class="sr-only">Open menu</span>
-    
-                        <svg id="hamburger-icon" class="h-6 w-6 absolute transition-all duration-300" 
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-    
-                        <svg id="close-icon" class="h-6 w-6 absolute transition-all duration-300 opacity-0 rotate-90" 
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-    
-            <div id="mobile-menu" 
-                 class="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-t border-[#333333] overflow-hidden transition-all duration-300 ease-in-out"
-                 style="max-height: 0; opacity: 0;">
-                <div class="px-4 py-6 space-y-3 flex flex-col items-center">
-                    <a href="{% url 'product_list' %}" 
-                       class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                        SHOP
-                    </a>
-                    
-                    {% if user.is_authenticated %}
-    
-                        <div class="relative">
-                            <a href="{% url 'view_cart' %}" 
-                               class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                                CART
-                                {% if cart_total_items > 0 %}
-                                    <span class="ml-2 bg-[#dc2626] text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold border-2 border-white animate-pulse">
-                                        {{ cart_total_items }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </div>
-                        
-                        <a href="{% url 'profile_view' %}" 
-                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                            PROFILE
-                        </a>
-                        
-                        <a href="{% url 'orders:order_history' %}" 
-                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                            ORDERS
-                        </a>
-                        
-                        <a href="/accounts/logout/" 
-                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                            LOGOUT
-                        </a>
-                        
-                    {% else %}
-                        <a href="{% url 'login' %}" 
-                           class="w-auto px-8 py-3 text-[#cccccc] hover:text-[#dc2626] hover:bg-[#1a1a1a] rounded-lg transition-all duration-300 text-sm tracking-wide transform hover:translate-x-2 flex items-center justify-center min-w-[200px] border border-[#333333] hover:border-[#dc2626]">
-                            LOGIN
-                        </a>
-                        <a href="{% url 'register' %}" 
-                           class="w-auto px-8 py-3 bg-[#dc2626] text-white hover:bg-[#b91c1c] rounded-lg transition-all duration-300 text-sm tracking-wider font-bold text-center transform hover:scale-[1.02] min-w-[200px] flex items-center justify-center">
-                            SIGN UP
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    
-    
+    <!-- Django messages: consumed by toast.js -->
     {% if messages %}
         {% for message in messages %}
             <div data-django-message="{{ message }}"
@@ -237,261 +143,114 @@
         {% endfor %}
     {% endif %}
 
-    
-    <main class="flex-grow">
-        {% block content %}
-        {% endblock %}
+    <main id="main" class="flex-grow">
+        {% block content %}{% endblock %}
     </main>
 
-    
-    <footer class="bg-black border-t border-[#333333] mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Brand -->
-                <div class="space-y-4">
-                    <div>
-                        <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-white">VULOR</a>
-                        <p class="text-[#dc2626] text-xs mt-2 tracking-widest uppercase font-bold">PREMIUM STREETWEAR</p>
-                        <p class="text-[#666666] text-sm mt-3 max-w-xs">
-                            Redefining urban fashion with premium craftsmanship and bold design.
-                        </p>
-                    </div>
-                </div>
-
-    
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">SHOP</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{% url 'product_list' %}?category=hoodies" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Hoodies</a></li>
-                        <li><a href="{% url 'product_list' %}?category=tee-shirts" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">T-Shirts</a></li>
-                        <li><a href="{% url 'product_list' %}?category=tank-tops" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Tank Tops</a></li>
-                        <li><a href="{% url 'product_list' %}?category=cargo-jeans" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Cargo Jeans</a></li>
+    <!-- ================= FOOTER ================= -->
+    {% block footer %}
+    <footer class="v-hairline-t mt-24">
+        <!-- The signature wordmark leads the footer (swapped above the
+             link plate by owner request), rising out of its own edge -->
+        <div class="c-bleed px-[3px]" aria-hidden="true">
+            <p class="c-monolith text-ground-900 text-[clamp(6rem,27vw,30rem)] leading-none translate-y-[30%] select-none">VULOR</p>
+        </div>
+        <div class="v-hairline-t c-gutter py-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+                <div>
+                    <h3 class="c-reg text-ink-3 mb-5">Index</h3>
+                    <ul class="space-y-3">
+                        <li><a href="{% url 'product_list' %}?category=hoodies" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Hoodies</a></li>
+                        <li><a href="{% url 'product_list' %}?category=tee-shirts" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Tees</a></li>
+                        <li><a href="{% url 'product_list' %}?category=cargo-jeans" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Cargo</a></li>
+                        <li><a href="{% url 'product_list' %}?category=sweatpants" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Sweatpants</a></li>
+                        <li><a href="{% url 'product_list' %}?category=tank-tops" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Tanks</a></li>
                     </ul>
                 </div>
-
-    
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">COMPANY</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{% url 'about' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">About</a></li>
-                        <li><a href="{% url 'contact' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Contact</a></li>
-                        <li><a href="{% url 'size_guide' %}" class="text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1 block">Size Guide</a></li>
+                <div>
+                    <h3 class="c-reg text-ink-3 mb-5">Customer</h3>
+                    <ul class="space-y-3">
+                        <li><a href="{% url 'size_guide' %}" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Size guide</a></li>
+                        <li><a href="{% url 'contact' %}" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Contact</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'orders:order_history' %}" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Orders</a></li>
+                        {% endif %}
                     </ul>
                 </div>
-
-    
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold tracking-widest text-[#dc2626]">CONTACT</h3>
-                    <div class="space-y-3">
-                        <a href="mailto:info@vulor.com" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
-    
-                            info@vulor.com
-                        </a>
-                        <a href="https://wa.me/2348123456789" class="block text-sm text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 tracking-wide transform hover:translate-x-1">
-    
-                            +234 812 345 6789
-                        </a>
-                    </div>
+                <div>
+                    <h3 class="c-reg text-ink-3 mb-5">Label</h3>
+                    <ul class="space-y-3">
+                        <li><a href="{% url 'about' %}" class="v-spec text-ink-2 hover:text-ink-1 v-underline">About VULOR</a></li>
+                        <li><a href="https://instagram.com/vulor" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Instagram</a></li>
+                        <li><a href="https://twitter.com/vulor" class="v-spec text-ink-2 hover:text-ink-1 v-underline">Twitter / X</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="c-reg text-ink-3 mb-5">Contact</h3>
+                    <ul class="space-y-3">
+                        <li><a href="mailto:info@vulor.com" class="v-spec text-ink-2 hover:text-ink-1 v-underline">info@vulor.com</a></li>
+                        <li><a href="https://wa.me/2348123456789" class="v-spec text-ink-2 hover:text-ink-1 v-underline">+234 812 345 6789</a></li>
+                    </ul>
                 </div>
             </div>
-
-    
-            <div class="border-t border-[#333333] mt-8 pt-8">
-                <div class="flex justify-center space-x-6">
-                    <a href="https://instagram.com/vulor" 
-                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
-    
-                        Instagram
-                    </a>
-                    <a href="https://twitter.com/vulor" 
-                       class="text-[#cccccc] hover:text-[#dc2626] transition-all duration-300 transform hover:scale-110 flex items-center">
-    
-                        Twitter
-                    </a>
-                </div>
-            </div>
-
-    
-            <div class="border-t border-[#333333] mt-8 pt-8 text-center">
-                <p class="text-xs text-[#666666] tracking-wide">&copy; 2025 VULOR. All rights reserved.</p>
-                <p class="text-xs text-[#333333] mt-2">Designed with passion for urban fashion.</p>
+        </div>
+        <div class="v-hairline-t c-gutter py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <p class="c-folio">VULOR — Issue 01</p>
+                <p class="c-folio">&copy; 2026 VULOR. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
-    
-    <button id="scrollToTop" 
-            class="fixed bottom-8 right-8 bg-[#dc2626] text-white p-3 shadow-xl transition-all duration-300 opacity-0 transform translate-y-10 z-40 hover:bg-[#b91c1c] rounded-full">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-        </svg>
-        <span class="sr-only">Scroll to top</span>
-    </button>
+    {% endblock %}
 
     <script>
-    
-        window.addEventListener('load', function() {
-            const preloader = document.getElementById('preloader');
-            setTimeout(function() {
-                preloader.style.opacity = '0';
-                preloader.style.visibility = 'hidden';
-            }, 1500);
-        });
+        (function () {
+            var menu = document.getElementById('mobile-menu');
+            var openBtn = document.getElementById('menu-open');
+            var closeBtn = document.getElementById('menu-close');
+            if (!menu || !openBtn || !closeBtn) return;
 
-    
-        setTimeout(function() {
-            const preloader = document.getElementById('preloader');
-            if (preloader) {
-                preloader.style.opacity = '0';
-                preloader.style.visibility = 'hidden';
+            function focusables() {
+                return Array.prototype.slice.call(
+                    menu.querySelectorAll('a[href], button:not([disabled])')
+                ).filter(function (el) { return el.offsetParent !== null; });
             }
-        }, 3000);
 
-    
-        const scrollToTopButton = document.getElementById('scrollToTop');
-        
-    
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                scrollToTopButton.classList.remove('opacity-0', 'translate-y-10');
-                scrollToTopButton.classList.add('opacity-100', 'translate-y-0');
-            } else {
-                scrollToTopButton.classList.remove('opacity-100', 'translate-y-0');
-                scrollToTopButton.classList.add('opacity-0', 'translate-y-10');
+            function setOpen(open) {
+                menu.classList.toggle('is-open', open); // slow fade/slide via .c-menu
+                document.body.style.overflow = open ? 'hidden' : '';
+                openBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                openBtn.classList.toggle('is-open', open); // bars morph into the X
+                if (open) closeBtn.focus(); else openBtn.focus();
             }
-        });
+            openBtn.addEventListener('click', function () { setOpen(true); });
+            closeBtn.addEventListener('click', function () { setOpen(false); });
 
-    
-        scrollToTopButton.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+            document.addEventListener('keydown', function (e) {
+                if (!menu.classList.contains('is-open')) return;
+                if (e.key === 'Escape') { setOpen(false); return; }
+                if (e.key !== 'Tab') return;
+                // Focus trap (design system §31): keep Tab within the open menu.
+                var items = focusables();
+                if (!items.length) return;
+                var first = items[0], last = items[items.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                } else if (items.indexOf(document.activeElement) === -1) {
+                    e.preventDefault(); first.focus();
+                }
             });
-        });
+
+            menu.addEventListener('click', function (e) {
+                if (e.target.closest('a')) setOpen(false);
+            });
+        })();
     </script>
 
-    <script>
-    
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        const closeIcon = document.getElementById('close-icon');
-        let menuOpen = false;
-
-        mobileMenuButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            menuOpen = !menuOpen;
-            
-            if (menuOpen) {
-    
-                mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
-                mobileMenu.style.opacity = '1';
-                
-    
-                hamburgerIcon.style.opacity = '0';
-                hamburgerIcon.style.transform = 'rotate(-90deg)';
-                closeIcon.style.opacity = '1';
-                closeIcon.style.transform = 'rotate(0deg)';
-                
-    
-                const menuItems = mobileMenu.querySelectorAll('a, .relative');
-                menuItems.forEach((item, index) => {
-                    item.style.transitionDelay = (index * 0.05) + 's';
-                    item.style.opacity = '1';
-                    item.style.transform = 'translateY(0)';
-                });
-                
-            } else {
-    
-                mobileMenu.style.maxHeight = '0';
-                mobileMenu.style.opacity = '0';
-                
-    
-                hamburgerIcon.style.opacity = '1';
-                hamburgerIcon.style.transform = 'rotate(0deg)';
-                closeIcon.style.opacity = '0';
-                closeIcon.style.transform = 'rotate(90deg)';
-                
-    
-                const menuItems = mobileMenu.querySelectorAll('a, .relative');
-                menuItems.forEach(item => {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(-10px)';
-                    item.style.transitionDelay = '0s';
-                });
-            }
-        });
-
-    
-        document.addEventListener('click', function(event) {
-            if (menuOpen && 
-                !mobileMenu.contains(event.target) && 
-                !mobileMenuButton.contains(event.target)) {
-                
-                menuOpen = false;
-                mobileMenu.style.maxHeight = '0';
-                mobileMenu.style.opacity = '0';
-                
-    
-                hamburgerIcon.style.opacity = '1';
-                hamburgerIcon.style.transform = 'rotate(0deg)';
-                closeIcon.style.opacity = '0';
-                closeIcon.style.transform = 'rotate(90deg)';
-                
-    
-                const menuItems = mobileMenu.querySelectorAll('a, .relative');
-                menuItems.forEach(item => {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(-10px)';
-                    item.style.transitionDelay = '0s';
-                });
-            }
-        });
-
-    
-        mobileMenu.addEventListener('click', function(event) {
-            if (event.target.tagName === 'A' || event.target.closest('a')) {
-                setTimeout(() => {
-                    menuOpen = false;
-                    mobileMenu.style.maxHeight = '0';
-                    mobileMenu.style.opacity = '0';
-                    
-    
-                    hamburgerIcon.style.opacity = '1';
-                    hamburgerIcon.style.transform = 'rotate(0deg)';
-                    closeIcon.style.opacity = '0';
-                    closeIcon.style.transform = 'rotate(90deg)';
-                    
-    
-                    const menuItems = mobileMenu.querySelectorAll('a, .relative');
-                    menuItems.forEach(item => {
-                        item.style.opacity = '0';
-                        item.style.transform = 'translateY(-10px)';
-                        item.style.transitionDelay = '0s';
-                    });
-                }, 300);
-            }
-        });
-
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuItems = mobileMenu.querySelectorAll('a, .relative');
-            menuItems.forEach(item => {
-                item.style.opacity = '0';
-                item.style.transform = 'translateY(-10px)';
-                item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            });
-            
-            const interactiveElements = document.querySelectorAll('a, button, .hover\\:text-\\[\\#dc2626\\]');
-            interactiveElements.forEach(el => {
-                el.addEventListener('mouseenter', () => {
-                    el.classList.add('transition-all', 'duration-300');
-                });
-            });
-        });
-    </script>
-    
     <script src="{% static 'js/toast.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

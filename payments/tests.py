@@ -8,7 +8,13 @@ from django.urls import reverse
 
 from payments.forms import ReceiptUploadForm, RECEIPT_MAX_SIZE
 from payments.models import PaymentTransaction
-from vulor.testing import StoreTestCase, make_order, make_transaction, make_user
+from vulor.testing import (
+    StoreTestCase,
+    make_order,
+    make_test_image_bytes,
+    make_transaction,
+    make_user,
+)
 
 
 class PaymentTransactionTests(StoreTestCase):
@@ -40,7 +46,9 @@ class PaymentTransactionTests(StoreTestCase):
 
 
 class ReceiptUploadFormTests(TestCase):
-    def _form(self, filename="receipt.jpg", content=b"x", reference=""):
+    def _form(self, filename="receipt.jpg", content=None, reference=""):
+        if content is None:
+            content = make_test_image_bytes()
         return ReceiptUploadForm(
             data={"transaction_reference": reference},
             files={"receipt": SimpleUploadedFile(filename, content)},
@@ -75,6 +83,20 @@ class ReceiptUploadFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("receipt", form.errors)
 
+    def test_rejects_non_image_bytes_disguised_with_an_image_extension(self):
+        """Regression test: content_type/extension are client-supplied and
+        spoofable — a file that isn't actually a decodable image must be
+        rejected even though its name/extension look legitimate."""
+        form = self._form("receipt.jpg", content=b"this is not an image")
+        self.assertFalse(form.is_valid())
+        self.assertIn("receipt", form.errors)
+
+    def test_pdf_receipt_is_not_pillow_checked(self):
+        # PDFs intentionally skip the Pillow content check (extension+size
+        # only) — fake PDF bytes must still pass.
+        form = self._form("receipt.pdf", content=b"%PDF-fake-but-allowed")
+        self.assertTrue(form.is_valid(), form.errors)
+
 
 class BankTransferFlowTests(StoreTestCase):
     def setUp(self):
@@ -86,7 +108,7 @@ class BankTransferFlowTests(StoreTestCase):
         return self.client.post(
             reverse("payments:submit_receipt", args=[self.order.id]),
             {
-                "receipt": SimpleUploadedFile(filename, b"receipt-bytes"),
+                "receipt": SimpleUploadedFile(filename, make_test_image_bytes()),
                 "transaction_reference": reference,
             },
         )
@@ -167,11 +189,59 @@ class BankTransferFlowTests(StoreTestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_result_pages_render(self):
+    def test_legacy_result_pages_redirect_to_tracking(self):
+        # The legacy success/failed result URLs now redirect to the single
+        # canonical result screen (orders:order_detail) rather than rendering
+        # duplicate celebration templates. URLs are preserved so old links resolve.
+        tracking = reverse("orders:order_detail", args=[self.order.order_number])
         for name in ("payment_success", "payment_failed"):
             response = self.client.get(reverse(f"payments:{name}", args=[self.order.id]))
-            self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "3500.00")  # failed page shows grand total
+            self.assertRedirects(response, tracking)
+
+
+class DuplicateReceiptSubmissionRaceTests(StoreTestCase):
+    """Regression tests for the _get_or_create_pending_transaction race fix:
+    two requests racing to create the first pending transaction for an
+    order must not surface the DB's IntegrityError as a 500 — the loser
+    should transparently pick up the winner's transaction instead."""
+
+    def setUp(self):
+        self.user = make_user("racer")
+        self.client.force_login(self.user)
+        self.order = make_order(self.user)
+
+    def test_get_or_create_survives_concurrent_create_race(self):
+        from payments.views import _get_or_create_pending_transaction
+
+        # Simulate the exact race window: this call's first lookup finds
+        # nothing (side_effect's first value), then its own .create() hits
+        # the one_active_payment_per_order constraint because another
+        # request already committed the winning transaction in between —
+        # the second side_effect value stands in for the recovery re-fetch.
+        winner = make_transaction(self.order, status="pending")
+        with patch.object(
+            PaymentTransaction.objects, "latest_for", side_effect=[None, winner]
+        ):
+            result = _get_or_create_pending_transaction(self.order)
+
+        self.assertEqual(result.pk, winner.pk)
+        self.assertEqual(
+            PaymentTransaction.objects.filter(order=self.order, status="pending").count(), 1
+        )
+
+    def test_submit_receipt_view_does_not_500_on_create_race(self):
+        winner = make_transaction(self.order, status="pending")
+        with patch.object(
+            PaymentTransaction.objects, "latest_for", side_effect=[None, winner]
+        ):
+            response = self.client.post(
+                reverse("payments:submit_receipt", args=[self.order.id]),
+                {
+                    "receipt": SimpleUploadedFile("receipt.jpg", b"receipt-bytes"),
+                    "transaction_reference": "",
+                },
+            )
+        self.assertNotEqual(response.status_code, 500)
 
 
 class ReceiptAdminTests(StoreTestCase):

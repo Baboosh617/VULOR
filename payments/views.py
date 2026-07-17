@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db import IntegrityError, transaction
 from django.http import FileResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
@@ -34,12 +35,27 @@ def _closed_for_payment(request, order):
 def _get_or_create_pending_transaction(order):
     payment = PaymentTransaction.objects.latest_for(order, ['pending'])
     if payment is None:
-        payment = PaymentTransaction.objects.create(
-            order=order,
-            amount=order.grand_total,
-            reference=PaymentTransaction.generate_reference(),
-            status='pending',
-        )
+        try:
+            # Wrapped in its own atomic() so a constraint violation only
+            # rolls back this savepoint, not the whole request's
+            # transaction (ATOMIC_REQUESTS=True) — without the savepoint,
+            # catching IntegrityError here wouldn't actually leave the
+            # connection usable for the recovery query below.
+            with transaction.atomic():
+                payment = PaymentTransaction.objects.create(
+                    order=order,
+                    amount=order.grand_total,
+                    reference=PaymentTransaction.generate_reference(),
+                    status='pending',
+                )
+        except IntegrityError:
+            # Two requests raced to create the first pending transaction for
+            # this order (e.g. a double-tap on a slow connection) — the
+            # one_active_payment_per_order constraint let exactly one
+            # through. Re-fetch the winner instead of letting this 500.
+            payment = PaymentTransaction.objects.latest_for(
+                order, ['pending', 'pending_verification']
+            )
     return payment
 
 
@@ -117,13 +133,18 @@ def receipt_download(request, txn_id):
     )
 
 
+# Order Tracking (orders:order_detail) is the single canonical result screen —
+# it owns the confirmed celebration, the in-review state, and the rejected/retry
+# path (Design Review 01 §1.5: one moment, one screen). These legacy result URLs
+# are kept so any old link still resolves, but they now redirect to that page
+# instead of rendering duplicate celebration templates.
 @login_required
 def payment_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'payments/success.html', {'order': order})
+    return redirect('orders:order_detail', order_number=order.order_number)
 
 
 @login_required
 def payment_failed(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'payments/payment_failed.html', {'order': order})
+    return redirect('orders:order_detail', order_number=order.order_number)

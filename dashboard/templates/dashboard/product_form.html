@@ -1,543 +1,292 @@
 {% extends "dashboard/base.html" %}
-{% load static %}
+
+{% block title %}{{ title }} — Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto p-6">
-  <!-- Header -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
-    <p class="text-gray-600 mt-1">Fill in all required fields to {% if product %}update{% else %}add{% endif %} product</p>
-  </div>
+<span class="v-label text-ink-3 block mb-4">03 / PRODUCTS</span>
+<h1 class="v-display text-3xl md:text-4xl text-ink-1 mb-2">{{ title|upper }}</h1>
+<p class="v-spec text-ink-3 mb-8">Fill in all required fields to {% if product %}update{% else %}add{% endif %} this product.</p>
 
-  <!-- Messages -->
-  {% if messages %}
-    <div class="mb-6">
-      {% for m in messages %}
-        <div class="p-4 rounded-lg text-sm
-          {% if 'success' in m.tags %}bg-green-50 text-green-800 border border-green-200
-          {% elif 'error' in m.tags %}bg-red-50 text-red-800 border border-red-200
-          {% else %}bg-yellow-50 text-yellow-800 border border-yellow-200
-          {% endif %}">
-          {{ m }}
-        </div>
-      {% endfor %}
+{% if form.errors %}
+<div class="v-alert v-alert--error mb-8" role="alert">
+    <div>
+        <p class="mb-1">PLEASE CORRECT THE ERRORS BELOW:</p>
+        <ul>
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li>&bull; {{ field|title }}: {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
     </div>
-  {% endif %}
+</div>
+{% endif %}
 
-  <!-- Form Errors -->
-  {% if form.errors %}
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <h3 class="font-medium text-red-800">Please correct the errors below:</h3>
-      <ul class="mt-2 text-sm text-red-700">
-        {% for field, errors in form.errors.items %}
-          {% for error in errors %}
-            <li>• {{ field|title }}: {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
-
-  <form method="post" enctype="multipart/form-data" class="bg-white shadow-lg rounded-xl p-8 space-y-8">
+<form method="post" enctype="multipart/form-data" class="max-w-4xl space-y-12">
     {% csrf_token %}
 
-    <!-- SECTION 1: Basic Information -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Basic Information</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Name <span class="text-red-500">*</span>
-          </label>
-          {{ form.name }}
+    <!-- 01 BASICS -->
+    <section>
+        <span class="v-label text-ink-3 block mb-6">01 / BASICS</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="id_name" class="v-field-label">NAME *</label>
+                <input id="id_name" type="text" name="name" required class="v-input" value="{{ form.name.value|default:'' }}">
+            </div>
+            <div>
+                <label for="id_slug" class="v-field-label">SLUG (URL)</label>
+                <input id="id_slug" type="text" name="slug" readonly class="v-input opacity-60" value="{{ form.slug.value|default:'' }}">
+                <p class="v-label text-ink-3 mt-2">AUTO-GENERATED FROM THE NAME.</p>
+            </div>
+            <div class="md:col-span-2">
+                <label for="id_description" class="v-field-label">DESCRIPTION *</label>
+                <textarea id="id_description" name="description" rows="4" required class="v-textarea">{{ form.description.value|default:'' }}</textarea>
+            </div>
         </div>
-        <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-        Slug (URL)
-    </label>
-    {{ form.slug }}
-    {% if form.slug.help_text %}
-        <p class="mt-1 text-xs text-gray-500">{{ form.slug.help_text }}</p>
-    {% endif %}
-    <p class="mt-1 text-xs text-gray-500">
-        This will be auto-generated as: white-tee, white-tee-1, white-tee-2, etc.
-    </p>
-</div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Description <span class="text-red-500">*</span>
-          </label>
-          {{ form.description }}
-        </div>
-      </div>
     </section>
 
-    <!-- SECTION 2: Pricing -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Pricing</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Price <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
-            {{ form.price }}
-          </div>
+    <!-- 02 PRICING -->
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">02 / PRICING</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label for="id_price" class="v-field-label">PRICE (&#8358;) *</label>
+                <input id="id_price" type="number" step="0.01" name="price" required class="v-input" value="{{ form.price.value|default:'' }}">
+            </div>
+            <div>
+                <label for="id_compare_price" class="v-field-label">COMPARE PRICE (&#8358;)</label>
+                <input id="id_compare_price" type="number" step="0.01" name="compare_price" class="v-input" value="{{ form.compare_price.value|default:'' }}">
+            </div>
+            <div>
+                <span class="v-field-label">DISCOUNT</span>
+                <div id="discount-badge" class="v-badge">&mdash;</div>
+            </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Compare Price
-          </label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
-            {{ form.compare_price }}
-          </div>
-        </div>
-        <div>
-          <div class="block text-sm font-medium text-gray-700 mb-2">Discount</div>
-          <div id="discount-badge" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800">
-            <span class="mr-2">—</span>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- SECTION 3: Category & Inventory -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Category & Inventory</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Category <span class="text-red-500">*</span>
-          </label>
-          {{ form.category }}
+    <!-- 03 CATEGORY & STOCK -->
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">03 / CATEGORY &amp; STOCK</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label for="id_category" class="v-field-label">CATEGORY *</label>
+                <select id="id_category" name="category" required class="v-select">
+                    {% for value, label in form.category.field.choices %}
+                    <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="id_inventory_count" class="v-field-label">INVENTORY COUNT</label>
+                <input id="id_inventory_count" type="number" min="0" name="inventory_count" class="v-input" value="{{ form.inventory_count.value|default:'0' }}">
+            </div>
+            <div class="space-y-3 pt-7">
+                <label class="flex items-center gap-2 v-spec text-ink-2 cursor-pointer">
+                    <input id="id_is_active" type="checkbox" name="is_active" class="v-check" {% if form.is_active.value %}checked{% endif %}>
+                    ACTIVE
+                </label>
+                <label class="flex items-center gap-2 v-spec text-ink-2 cursor-pointer">
+                    <input id="id_featured" type="checkbox" name="featured" class="v-check" {% if form.featured.value %}checked{% endif %}>
+                    FEATURED ON HOMEPAGE
+                </label>
+            </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Inventory Count
-          </label>
-          {{ form.inventory_count }}
-        </div>
-        <div class="space-y-4">
-          <div class="flex items-center">
-            {{ form.is_active }}
-            <label for="{{ form.is_active.id_for_label }}" class="ml-2 text-sm text-gray-700">
-              Active
-            </label>
-          </div>
-          <div class="flex items-center">
-            {{ form.featured }}
-            <label for="{{ form.featured.id_for_label }}" class="ml-2 text-sm text-gray-700">
-              Featured on Homepage
-            </label>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- SECTION 4: Sizes -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Sizes</h2>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Available Sizes <span class="text-red-500">*</span>
-        </label>
-        {{ form.available_sizes }}
-        {% if form.available_sizes.help_text %}
-          <p class="mt-2 text-sm text-gray-500" id="size-help-text">{{ form.available_sizes.help_text }}</p>
-        {% endif %}
-        
-        <!-- Size Examples -->
-        <div class="mt-3">
-          <p class="text-sm font-medium text-gray-700 mb-1">Examples:</p>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="setSizeExample('S,M,L,XL')" class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
-              Hoodies/T-Shirts: S,M,L,XL
-            </button>
-            <button type="button" onclick="setSizeExample('28,30,32,34')" class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200">
-              Cargo/Sweatpants: 28,30,32,34
-            </button>
-          </div>
+    <!-- 04 SIZES -->
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">04 / SIZES</span>
+        <label for="id_available_sizes" class="v-field-label">AVAILABLE SIZES *</label>
+        <input id="id_available_sizes" type="text" name="available_sizes" required class="v-input" value="{{ form.available_sizes.value|default:'' }}">
+        <p id="size-help-text" class="v-label text-ink-3 mt-2">COMMA-SEPARATED SIZES (E.G. S,M,L,XL OR 28,30,32)</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+            <button type="button" onclick="setSizeExample('S,M,L,XL')" class="v-chip">HOODIES/TEES: S,M,L,XL</button>
+            <button type="button" onclick="setSizeExample('28,30,32,34')" class="v-chip">CARGO/SWEATS: 28,30,32,34</button>
         </div>
-      </div>
     </section>
 
-    <!-- SECTION 5: Colors -->
-    <section class="border-b pb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Colors</h2>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Available Colors <span class="text-red-500">*</span>
-        </label>
-        {{ form.available_colors }}
-        {% if form.available_colors.help_text %}
-          <p class="mt-2 text-sm text-gray-500">{{ form.available_colors.help_text }}</p>
-        {% endif %}
-        
-        <!-- Color Examples -->
-        <div class="mt-3">
-          <p class="text-sm font-medium text-gray-700 mb-1">Examples:</p>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="addColor('Black')" class="text-xs px-2 py-1 bg-gray-800 text-white rounded">Black</button>
-            <button type="button" onclick="addColor('White')" class="text-xs px-2 py-1 bg-white text-gray-800 border rounded">White</button>
-            <button type="button" onclick="addColor('Navy')" class="text-xs px-2 py-1 bg-blue-900 text-white rounded">Navy</button>
-            <button type="button" onclick="addColor('Gray')" class="text-xs px-2 py-1 bg-gray-500 text-white rounded">Gray</button>
-            <button type="button" onclick="addColor('Brown')" class="text-xs px-2 py-1 bg-yellow-900 text-white rounded">Brown</button>
-          </div>
+    <!-- 05 COLORS -->
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">05 / COLORS</span>
+        <label for="id_available_colors" class="v-field-label">AVAILABLE COLORS *</label>
+        <input id="id_available_colors" type="text" name="available_colors" required class="v-input" value="{{ form.available_colors.value|default:'' }}">
+        <div class="flex flex-wrap gap-2 mt-4">
+            <button type="button" onclick="addColor('Black')" class="v-chip">BLACK</button>
+            <button type="button" onclick="addColor('White')" class="v-chip">WHITE</button>
+            <button type="button" onclick="addColor('Navy')" class="v-chip">NAVY</button>
+            <button type="button" onclick="addColor('Gray')" class="v-chip">GRAY</button>
+            <button type="button" onclick="addColor('Brown')" class="v-chip">BROWN</button>
         </div>
-      </div>
     </section>
 
-    <!-- SECTION 6: Fit Type — replace existing fit-type-section -->
-<section id="fit-type-section" style="display: none;" class="border-b pb-8">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
-        Fit Type <span class="text-sm font-normal text-gray-500">(Cargo Jeans & Sweatpants only)</span>
-    </h2>
-    <div class="max-w-sm">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-            Fit Type <span class="text-red-500">*</span>
-        </label>
-        {{ form.fit_type }}
-        <p class="mt-2 text-sm text-gray-500">
-            <strong>Loose</strong> — relaxed, roomy cut. 
-            <strong>Fit</strong> — slim, tapered cut.
-        </p>
-    </div>
-</section>
+    <!-- 06 FIT TYPE (cargo/sweatpants only) -->
+    <section id="fit-type-section" class="v-hairline-t pt-10" style="display:none;">
+        <span class="v-label text-ink-3 block mb-6">06 / FIT TYPE — CARGO JEANS &amp; SWEATPANTS ONLY</span>
+        <div class="max-w-xs">
+            <label for="id_fit_type" class="v-field-label">FIT TYPE *</label>
+            <select id="id_fit_type" name="fit_type" class="v-select">
+                {% for value, label in form.fit_type.field.choices %}
+                <option value="{{ value }}" {% if form.fit_type.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <p class="v-label text-ink-3 mt-2">LOOSE — relaxed cut. FIT — slim, tapered cut.</p>
+        </div>
+    </section>
 
-<!-- SECTION 7: Measurements — replace existing measurements-section -->
-<section id="measurements-section" style="display: none;" class="border-b pb-8">
-    <h2 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b">
-        Detailed Measurements
-        <span class="text-sm font-normal text-gray-500">(Cargo Jeans & Sweatpants only)</span>
-    </h2>
+    <!-- 07 MEASUREMENTS (cargo/sweatpants only) -->
+    <section id="measurements-section" class="v-hairline-t pt-10" style="display:none;">
+        <span class="v-label text-ink-3 block mb-2">07 / DETAILED MEASUREMENTS — CARGO JEANS &amp; SWEATPANTS ONLY</span>
+        <div class="v-alert mb-6 mt-4">
+            ONE SIZE PER LINE, FORMAT <strong>SIZE: VALUE</strong> — E.G. <code>28: 28"</code> THEN <code>30: 30"</code>.
+        </div>
 
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-        <strong>How to enter measurements:</strong> One size per line in the format
-        <code class="bg-blue-100 px-1 rounded">SIZE: VALUE</code><br>
-        Example for waist: <code class="bg-blue-100 px-1 rounded">28: 28"</code> then new line
-        <code class="bg-blue-100 px-1 rounded">30: 30"</code> etc.<br>
-        These will display to customers as a size chart when they select their size.
-    </div>
-
-    <!-- Live preview table -->
-    <div id="measurement-preview" class="mb-6 hidden">
-        <h3 class="font-medium text-gray-900 mb-3">Preview — customers will see this:</h3>
-        <div class="overflow-x-auto">
-            <table id="measurement-table" class="min-w-full border border-gray-200 rounded-lg text-sm">
-                <thead class="bg-gray-50">
-                    <tr id="measurement-header"></tr>
-                </thead>
+        <div id="measurement-preview" class="mb-6 hidden">
+            <p class="v-label text-ink-3 mb-3">PREVIEW — CUSTOMERS WILL SEE THIS:</p>
+            <table id="measurement-table" class="v-table">
+                <thead><tr id="measurement-header"></tr></thead>
                 <tbody id="measurement-body"></tbody>
             </table>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Waist Measurements
-            </label>
-            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 28"</code></p>
-            {{ form.waist_measurements }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="id_waist_measurements" class="v-field-label">WAIST MEASUREMENTS</label>
+                <textarea id="id_waist_measurements" name="waist_measurements" rows="3" class="v-textarea">{{ form.waist_measurements.value|default:'' }}</textarea>
+            </div>
+            <div>
+                <label for="id_hip_measurements" class="v-field-label">HIP MEASUREMENTS</label>
+                <textarea id="id_hip_measurements" name="hip_measurements" rows="3" class="v-textarea">{{ form.hip_measurements.value|default:'' }}</textarea>
+            </div>
+            <div>
+                <label for="id_length_measurements" class="v-field-label">LENGTH MEASUREMENTS</label>
+                <textarea id="id_length_measurements" name="length_measurements" rows="3" class="v-textarea">{{ form.length_measurements.value|default:'' }}</textarea>
+            </div>
+            <div>
+                <label for="id_thigh_measurements" class="v-field-label">THIGH MEASUREMENTS</label>
+                <textarea id="id_thigh_measurements" name="thigh_measurements" rows="3" class="v-textarea">{{ form.thigh_measurements.value|default:'' }}</textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label for="id_rise_measurements" class="v-field-label">RISE MEASUREMENTS</label>
+                <textarea id="id_rise_measurements" name="rise_measurements" rows="3" class="v-textarea">{{ form.rise_measurements.value|default:'' }}</textarea>
+            </div>
         </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Hip Measurements
-            </label>
-            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 34"</code></p>
-            {{ form.hip_measurements }}
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Length Measurements
-            </label>
-            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 40"</code></p>
-            {{ form.length_measurements }}
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Thigh Measurements
-            </label>
-            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 22"</code></p>
-            {{ form.thigh_measurements }}
-        </div>
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Rise Measurements
-            </label>
-            <p class="text-xs text-gray-500 mb-2">e.g. <code>28: 10"</code></p>
-            {{ form.rise_measurements }}
-        </div>
-    </div>
-</section>
+    </section>
 
-    <!-- SECTION 8: Media -->
-<section class="border-b pb-8">
-    <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Media</h2>
+    <!-- 08 MEDIA -->
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">08 / MEDIA</span>
 
-    <div class="flex flex-col md:flex-row gap-8 items-start">
-        <!-- Main product image -->
-        <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                Main Product Image <span class="text-red-500">*</span>
-            </label>
-            {{ form.image }}
-            <p class="mt-2 text-sm text-gray-500">
-                This is the primary image used across the store.
-            </p>
+        <div class="flex flex-col md:flex-row gap-8 items-start mb-10">
+            <div class="flex-1">
+                <label for="id_image" class="v-field-label">MAIN PRODUCT IMAGE *</label>
+                <input id="id_image" type="file" name="image" accept="image/*" class="v-spec text-ink-1 w-full file:v-btn-label file:mr-4 file:h-11 file:px-4 file:border file:border-line-dark-strong file:bg-transparent file:text-ink-1 file:cursor-pointer">
+                <p class="v-label text-ink-3 mt-2">PRIMARY IMAGE USED ACROSS THE STORE.</p>
+            </div>
+            <div class="v-plate w-40 h-40 shrink-0 overflow-hidden flex items-center justify-center">
+                {% if product and product.image %}
+                <img id="image-preview" src="{{ product.image.url }}" class="w-full h-full object-cover">
+                {% else %}
+                <img id="image-preview" src="" style="display:none;" class="w-full h-full object-cover">
+                <div id="no-image" class="v-label text-ink-3">NO IMAGE</div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Preview -->
-        <div class="w-48 h-48 bg-gray-100 rounded-xl overflow-hidden shadow-md">
-            {% if product and product.image %}
-                <img id="image-preview" src="{{ product.image.url }}" class="object-cover w-full h-full" />
-            {% else %}
-                <img id="image-preview" src="" style="display:none;" class="object-cover w-full h-full" />
-                <div id="no-image" class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                    No image
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Existing Alternate Images -->
-    <div class="mt-10">
-        <h3 class="font-semibold mb-4">Alternate Product Images</h3>
-        
         {% if alternate_images %}
+        <div class="mb-10">
+            <p class="v-label text-ink-3 mb-4">ALTERNATE IMAGES</p>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {% for img in alternate_images %}
-                    <div class="border rounded-lg p-2 text-center group relative">
-                        <img src="{{ img.image.url }}" 
-                             alt="{{ img.alt_text|default:product.name }}" 
-                             class="h-24 w-full object-cover rounded mb-2">
-                        
-                        <div class="text-xs">
-                            <p class="text-gray-600 truncate">{{ img.alt_text|default:"No description" }}</p>
-                            {% if img.is_main %}
-                                <span class="text-green-600 font-medium">✓ Main</span>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Hover Actions -->
-                        <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center space-x-2">
-                            {% if not img.is_main %}
-                                <a href="{% url 'dashboard:set_main_alternate_image' product.id img.id %}" 
-                                   class="text-white bg-blue-600 hover:bg-blue-700 p-2 rounded-full"
-                                   title="Set as Main">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                </a>
-                            {% endif %}
-                            <a href="{% url 'dashboard:delete_alternate_image' product.id img.id %}" 
-                               class="text-white bg-red-600 hover:bg-red-700 p-2 rounded-full"
-                               onclick="return confirm('Delete this image?')"
-                               title="Delete">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </a>
-                        </div>
+                <div class="v-plate p-2 text-center group relative">
+                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" class="h-24 w-full object-cover mb-2">
+                    <p class="v-label text-ink-3 truncate">{{ img.alt_text|default:"NO DESCRIPTION" }}</p>
+                    {% if img.is_main %}<p class="v-label text-signal">MAIN</p>{% endif %}
+                    <div class="absolute inset-0 v-scrim opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center gap-2">
+                        {% if not img.is_main %}
+                        <a href="{% url 'dashboard:set_main_alternate_image' product.id img.id %}" class="v-btn v-btn--sm v-btn--secondary" title="Set as main">MAIN</a>
+                        {% endif %}
+                        <a href="{% url 'dashboard:delete_alternate_image' product.id img.id %}" class="v-btn v-btn--sm v-btn--destructive" onclick="return confirm('Delete this image?')" title="Delete">DEL</a>
                     </div>
+                </div>
                 {% endfor %}
             </div>
-        {% else %}
-            <p class="text-sm text-gray-500">No alternate images yet. Add some below.</p>
+        </div>
         {% endif %}
-    </div>
 
-    <!-- Add Alternate Images -->
-    <div class="mt-10 border-t pt-6">
-        <h3 class="font-semibold mb-4">Add Alternate Images</h3>
-        <p class="text-sm text-gray-600 mb-4">Upload different angles or views of the product to show customers.</p>
+        <div class="v-hairline-t pt-8">
+            <p class="v-label text-ink-3 mb-2">ADD ALTERNATE IMAGES</p>
+            <p class="v-spec text-ink-2 mb-4">Upload different angles or views of the product.</p>
 
-        <div class="space-y-6">
-            <!-- File Upload -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Images
-                </label>
-                <input type="file" 
-                       name="alternate_images" 
-                       accept="image/*"
-                       multiple
-                       class="block w-full text-sm border rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                <p class="mt-1 text-xs text-gray-500">You can select multiple images (JPG, PNG, WebP).</p>
-            </div>
+            <label for="alt-images-input" class="v-field-label">UPLOAD IMAGES</label>
+            <input id="alt-images-input" type="file" name="alternate_images" accept="image/*" multiple
+                   class="v-spec text-ink-1 w-full file:v-btn-label file:mr-4 file:h-11 file:px-4 file:border file:border-line-dark-strong file:bg-transparent file:text-ink-1 file:cursor-pointer">
+            <p class="v-label text-ink-3 mt-2">SELECT MULTIPLE (JPG, PNG, WEBP).</p>
 
-            <!-- Dynamic Alt Text Fields -->
-            <div id="altTextContainer">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Image Descriptions (Optional)
-                </label>
-                <p class="text-xs text-gray-500 mb-3">Add descriptions for each image in the same order as uploaded.</p>
-                
-                <!-- Placeholder for dynamic fields -->
+            <div id="altTextContainer" class="mt-6">
+                <p class="v-field-label">IMAGE DESCRIPTIONS — OPTIONAL</p>
                 <div id="dynamicAltFields"></div>
             </div>
 
-            <!-- Set Main Image -->
-            <div id="mainImageContainer" class="hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Set Main Alternate Image
-                </label>
-                <p class="text-xs text-gray-500 mb-3">Which alternate image should be marked as the main view?</p>
+            <div id="mainImageContainer" class="hidden mt-6">
+                <p class="v-field-label">SET MAIN ALTERNATE IMAGE</p>
                 <div id="mainImageOptions" class="space-y-2"></div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-    <!-- SECTION 9: Timestamps (Read-only for edit) -->
     {% if product %}
-    <section>
-      <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b">Timestamps</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Created At
-          </label>
-          <input type="text" value="{{ product.created_at|date:'Y-m-d H:i:s' }}" 
-                 class="border rounded-lg p-3 w-full bg-gray-50 text-gray-700" readonly />
+    <section class="v-hairline-t pt-10">
+        <span class="v-label text-ink-3 block mb-6">TIMESTAMPS</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><label class="v-field-label">CREATED</label><input type="text" value="{{ product.created_at|date:'Y-m-d H:i:s' }}" readonly class="v-input opacity-60"></div>
+            <div><label class="v-field-label">UPDATED</label><input type="text" value="{{ product.updated_at|date:'Y-m-d H:i:s' }}" readonly class="v-input opacity-60"></div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Updated At
-          </label>
-          <input type="text" value="{{ product.updated_at|date:'Y-m-d H:i:s' }}" 
-                 class="border rounded-lg p-3 w-full bg-gray-50 text-gray-700" readonly />
-        </div>
-      </div>
     </section>
     {% endif %}
 
-    <!-- FORM ACTIONS -->
-    <div class="pt-6 border-t flex justify-between items-center">
-      <div class="text-sm text-gray-500">
-        Fields marked with <span class="text-red-500">*</span> are required
-      </div>
-      <div class="flex gap-3">
-        <a href="{% url 'dashboard:product_list' %}" 
-           class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-          Cancel
-        </a>
-        <button type="submit" 
-                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors font-medium">
-          {% if product %}Update Product{% else %}Add Product{% endif %}
-        </button>
-      </div>
+    <div class="v-hairline-t pt-8 flex items-center justify-between">
+        <p class="v-label text-ink-3">* REQUIRED</p>
+        <div class="flex gap-4">
+            <a href="{% url 'dashboard:product_list' %}" class="v-btn v-btn--secondary">CANCEL</a>
+            <button type="submit" class="v-btn v-btn--primary">{% if product %}UPDATE PRODUCT{% else %}ADD PRODUCT{% endif %}</button>
+        </div>
     </div>
-  </form>
-</div>
+</form>
+{% endblock %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const alternateImagesInput = document.querySelector('input[name="alternate_images"]');
-    const dynamicAltFields = document.getElementById('dynamicAltFields');
-    const mainImageContainer = document.getElementById('mainImageContainer');
-    const mainImageOptions = document.getElementById('mainImageOptions');
-    
-    if (alternateImagesInput) {
-        alternateImagesInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            dynamicAltFields.innerHTML = '';
-            mainImageOptions.innerHTML = '';
-            
-            if (files.length > 0) {
-                mainImageContainer.classList.remove('hidden');
-                
-                // Create fields for each file
-                Array.from(files).forEach((file, index) => {
-                    // Create alt text input
-                    const altDiv = document.createElement('div');
-                    altDiv.className = 'mb-3';
-                    altDiv.innerHTML = `
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
-                            Image ${index + 1}: ${file.name}
-                        </label>
-                        <input type="text" 
-                               name="alternate_alt_text" 
-                               placeholder="Describe this view (e.g., Back detail, Side angle)"
-                               class="w-full border rounded p-2 text-sm"
-                               value="${file.name.split('.')[0].replace(/[_-]/g, ' ')}">
-                    `;
-                    dynamicAltFields.appendChild(altDiv);
-                    
-                    // Create main image radio option
-                    const radioDiv = document.createElement('div');
-                    radioDiv.className = 'flex items-center';
-                    radioDiv.innerHTML = `
-                        <input type="radio" 
-                               id="main_${index}" 
-                               name="alternate_is_main" 
-                               value="${index}"
-                               class="h-4 w-4 text-blue-600">
-                        <label for="main_${index}" class="ml-2 text-sm text-gray-700">
-                            Image ${index + 1}${index === 0 ? ' (First image)' : ''}
-                        </label>
-                    `;
-                    mainImageOptions.appendChild(radioDiv);
-                    
-                    // Auto-select first image as main
-                    if (index === 0) {
-                        radioDiv.querySelector('input').checked = true;
-                    }
-                });
-            } else {
-                mainImageContainer.classList.add('hidden');
-            }
-        });
-    }
-    
-    // Keep your existing JavaScript functions...
-    // ... rest of your existing JavaScript code ...
-});
-</script>
-
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ── Category toggle ──────────────────────────────────────────────────────
-    const categorySelect    = document.getElementById('id_category');
-    const fitTypeSection    = document.getElementById('fit-type-section');
-    const measureSection    = document.getElementById('measurements-section');
-    const sizeHelpText      = document.getElementById('size-help-text');
-    const fitTypeInput      = document.getElementById('id_fit_type');
+    // ── Category toggle ──────────────────────────────────────────────
+    const categorySelect = document.getElementById('id_category');
+    const fitTypeSection = document.getElementById('fit-type-section');
+    const measureSection = document.getElementById('measurements-section');
+    const sizeHelpText    = document.getElementById('size-help-text');
+    const fitTypeInput    = document.getElementById('id_fit_type');
 
     function updateCategoryUI() {
-        const cat      = categorySelect ? categorySelect.value : '';
+        const cat = categorySelect ? categorySelect.value : '';
         const needsMeasure = (cat === 'cargo-jeans' || cat === 'sweatpants');
 
-        // Show/hide fit type
         if (fitTypeSection) {
             fitTypeSection.style.display = needsMeasure ? 'block' : 'none';
             if (fitTypeInput) fitTypeInput.required = needsMeasure;
         }
-
-        // Show/hide measurements
-        if (measureSection) {
-            measureSection.style.display = needsMeasure ? 'block' : 'none';
-        }
-
-        // Update size help text
+        if (measureSection) measureSection.style.display = needsMeasure ? 'block' : 'none';
         if (sizeHelpText) {
             sizeHelpText.textContent = needsMeasure
-                ? 'Comma-separated waist sizes (e.g. 28,30,32,34)'
-                : 'Comma-separated sizes (e.g. S,M,L,XL)';
+                ? 'COMMA-SEPARATED WAIST SIZES (E.G. 28,30,32,34)'
+                : 'COMMA-SEPARATED SIZES (E.G. S,M,L,XL)';
         }
-
         if (needsMeasure) buildMeasurementPreview();
     }
-
     if (categorySelect) {
         categorySelect.addEventListener('change', updateCategoryUI);
-        updateCategoryUI(); // run once on load
+        updateCategoryUI();
     }
 
-    // ── Measurement preview table ────────────────────────────────────────────
+    // ── Measurement preview table ────────────────────────────────────
     const measureFields = {
         'Waist':  document.getElementById('id_waist_measurements'),
         'Hip':    document.getElementById('id_hip_measurements'),
@@ -545,13 +294,9 @@ document.addEventListener('DOMContentLoaded', function () {
         'Thigh':  document.getElementById('id_thigh_measurements'),
         'Rise':   document.getElementById('id_rise_measurements'),
     };
-
-    Object.values(measureFields).forEach(el => {
-        if (el) el.addEventListener('input', buildMeasurementPreview);
-    });
+    Object.values(measureFields).forEach(el => { if (el) el.addEventListener('input', buildMeasurementPreview); });
 
     function parseMeasurements(text) {
-        // Parses "28: 28\", 30: 30\"" or multiline "28: 28\"\n30: 30\""
         const result = {};
         if (!text) return result;
         const lines = text.replace(/,\s*/g, '\n').split('\n');
@@ -568,49 +313,33 @@ document.addEventListener('DOMContentLoaded', function () {
         const body    = document.getElementById('measurement-body');
         if (!preview || !header || !body) return;
 
-        // Collect all sizes from waist (primary)
         const waistEl   = measureFields['Waist'];
         const waistData = parseMeasurements(waistEl ? waistEl.value : '');
         const sizes     = Object.keys(waistData);
 
-        if (sizes.length === 0) {
-            preview.classList.add('hidden');
-            return;
-        }
+        if (sizes.length === 0) { preview.classList.add('hidden'); return; }
 
-        // Build header row
-        header.innerHTML = `<th class="px-4 py-2 border border-gray-200 bg-gray-50 text-left font-semibold">Size</th>` +
+        header.innerHTML = `<th>SIZE</th>` +
             Object.keys(measureFields)
-                .filter(name => {
-                    const el = measureFields[name];
-                    return el && el.value.trim();
-                })
-                .map(name => `<th class="px-4 py-2 border border-gray-200 bg-gray-50 text-left font-semibold">${name}</th>`)
+                .filter(name => measureFields[name] && measureFields[name].value.trim())
+                .map(name => `<th>${name.toUpperCase()}</th>`)
                 .join('');
 
-        // Build data rows
         body.innerHTML = sizes.map(size => {
             const cells = Object.entries(measureFields)
                 .filter(([, el]) => el && el.value.trim())
-                .map(([name, el]) => {
-                    const data = parseMeasurements(el.value);
-                    return `<td class="px-4 py-2 border border-gray-200">${data[size] || '—'}</td>`;
-                })
+                .map(([name, el]) => `<td>${parseMeasurements(el.value)[size] || '—'}</td>`)
                 .join('');
-            return `<tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2 border border-gray-200 font-semibold">${size}</td>
-                        ${cells}
-                    </tr>`;
+            return `<tr><td class="text-ink-1">${size}</td>${cells}</tr>`;
         }).join('');
 
         preview.classList.remove('hidden');
     }
 
-    // ── Image preview ────────────────────────────────────────────────────────
-    const imageInput   = document.querySelector('input[type="file"][name="image"]');
+    // ── Image preview ────────────────────────────────────────────────
+    const imageInput   = document.getElementById('id_image');
     const imagePreview = document.getElementById('image-preview');
     const noImage      = document.getElementById('no-image');
-
     if (imageInput) {
         imageInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -625,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── Price discount calculator ────────────────────────────────────────────
+    // ── Price discount calculator ────────────────────────────────────
     const priceInput        = document.getElementById('id_price');
     const comparePriceInput = document.getElementById('id_compare_price');
     const discountBadge     = document.getElementById('discount-badge');
@@ -634,24 +363,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!priceInput || !comparePriceInput || !discountBadge) return;
         const price   = parseFloat(priceInput.value) || 0;
         const compare = parseFloat(comparePriceInput.value) || 0;
-
         if (compare > price && price > 0) {
             const diff = (compare - price).toFixed(2);
             const pct  = Math.round(((compare - price) / compare) * 100);
-            discountBadge.innerHTML = `<span class="mr-1">🎉</span><span>${pct}% off (Save ₦${diff})</span>`;
-            discountBadge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-800';
+            discountBadge.textContent = pct + '% OFF (SAVE ₦' + diff + ')';
+            discountBadge.classList.add('v-badge--signal');
         } else {
-            discountBadge.innerHTML = '<span>No discount set</span>';
-            discountBadge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800';
+            discountBadge.textContent = 'NO DISCOUNT SET';
+            discountBadge.classList.remove('v-badge--signal');
         }
     }
-
-    if (priceInput)        priceInput.addEventListener('input', calcDiscount);
+    if (priceInput) priceInput.addEventListener('input', calcDiscount);
     if (comparePriceInput) comparePriceInput.addEventListener('input', calcDiscount);
     calcDiscount();
 
-    // ── Alternate images ─────────────────────────────────────────────────────
-    const alternateInput   = document.querySelector('input[name="alternate_images"]');
+    // ── Alternate images: dynamic alt-text + main-image radios ──────
+    const alternateInput   = document.getElementById('alt-images-input');
     const dynamicAltFields = document.getElementById('dynamicAltFields');
     const mainImgContainer = document.getElementById('mainImageContainer');
     const mainImgOptions   = document.getElementById('mainImageOptions');
@@ -661,111 +388,69 @@ document.addEventListener('DOMContentLoaded', function () {
             const files = e.target.files;
             if (!dynamicAltFields || !mainImgOptions) return;
             dynamicAltFields.innerHTML = '';
-            mainImgOptions.innerHTML  = '';
+            mainImgOptions.innerHTML = '';
 
-            if (files.length > 0 && mainImgContainer) {
-                mainImgContainer.classList.remove('hidden');
-            } else if (mainImgContainer) {
-                mainImgContainer.classList.add('hidden');
-            }
+            if (files.length > 0 && mainImgContainer) mainImgContainer.classList.remove('hidden');
+            else if (mainImgContainer) mainImgContainer.classList.add('hidden');
 
             Array.from(files).forEach((file, index) => {
                 const altDiv = document.createElement('div');
                 altDiv.className = 'mb-3';
                 altDiv.innerHTML = `
-                    <label class="block text-xs font-medium text-gray-700 mb-1">
-                        Image ${index + 1}: ${file.name}
-                    </label>
-                    <input type="text"
-                           name="alternate_alt_text"
-                           placeholder="Describe this view (e.g. Side detail, Back view)"
-                           class="w-full border rounded p-2 text-sm"
+                    <label class="v-label text-ink-3 block mb-1">IMAGE ${index + 1}: ${file.name}</label>
+                    <input type="text" name="alternate_alt_text" placeholder="DESCRIBE THIS VIEW"
+                           class="v-input !h-10 !text-[13px]"
                            value="${file.name.split('.')[0].replace(/[_-]/g, ' ')}">
                 `;
                 dynamicAltFields.appendChild(altDiv);
 
-                const radioDiv = document.createElement('div');
-                radioDiv.className = 'flex items-center mb-1';
+                const radioDiv = document.createElement('label');
+                radioDiv.className = 'flex items-center gap-2 v-spec text-ink-2 cursor-pointer mb-1';
                 radioDiv.innerHTML = `
-                    <input type="radio" id="main_${index}" name="alternate_is_main" value="${index}"
-                           class="h-4 w-4 text-blue-600" ${index === 0 ? 'checked' : ''}>
-                    <label for="main_${index}" class="ml-2 text-sm text-gray-700">
-                        Image ${index + 1}${index === 0 ? ' (default)' : ''}
-                    </label>
+                    <input type="radio" name="alternate_is_main" value="${index}" class="v-check" ${index === 0 ? 'checked' : ''}>
+                    IMAGE ${index + 1}${index === 0 ? ' (DEFAULT)' : ''}
                 `;
                 mainImgOptions.appendChild(radioDiv);
             });
         });
     }
 
-    // ── Helper functions (used by onclick in HTML) ───────────────────────────
     window.setSizeExample = function (example) {
         const el = document.getElementById('id_available_sizes');
-        if (el) { el.value = example; }
+        if (el) el.value = example;
     };
-
     window.addColor = function (color) {
         const el = document.getElementById('id_available_colors');
         if (!el) return;
         const current = el.value.split(',').map(c => c.trim()).filter(Boolean);
-        if (!current.includes(color)) {
-            current.push(color);
-            el.value = current.join(', ');
-        }
+        if (!current.includes(color)) { current.push(color); el.value = current.join(', '); }
     };
-});
-</script>
 
-<!-- Replace the last <script> block in product_form.html -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+    // ── Slug preview ──────────────────────────────────────────────────
     const nameInput = document.getElementById('id_name');
     const slugInput = document.getElementById('id_slug');
+    if (nameInput && slugInput) {
+        const isNewProduct = slugInput.value.trim() === '';
+        const slugPreview = document.createElement('p');
+        slugPreview.className = 'v-label mt-2';
+        slugPreview.style.color = 'var(--signal)';
+        slugInput.parentNode.appendChild(slugPreview);
 
-    if (!nameInput || !slugInput) return;
-
-    // Is this a new product (no existing slug) or an edit?
-    const isNewProduct = slugInput.value.trim() === '';
-
-    // Create preview element
-    const slugPreview = document.createElement('div');
-    slugPreview.className = 'mt-1 text-xs text-blue-500';
-    slugInput.parentNode.appendChild(slugPreview);
-
-    function slugify(text) {
-        return text
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '-')       // spaces to hyphens
-            .replace(/[^\w-]+/g, '')    // remove non-word chars
-            .replace(/--+/g, '-')       // collapse double hyphens
-            .replace(/^-+|-+$/g, '');   // trim leading/trailing hyphens
-    }
-
-    function updateSlug() {
-        const name     = nameInput.value;
-        const baseSlug = slugify(name);
-
-        if (!name) {
-            slugPreview.textContent = '';
-            if (isNewProduct) slugInput.value = '';
-            return;
+        function slugify(text) {
+            return text.toString().toLowerCase().trim()
+                .replace(/\s+/g, '-').replace(/[^\w-]+/g, '')
+                .replace(/--+/g, '-').replace(/^-+|-+$/g, '');
         }
-
-        slugPreview.textContent = `URL slug: ${baseSlug}`;
-
-        // ── FIXED: always update for new products, never for edits ──
-        if (isNewProduct) {
-            slugInput.value = baseSlug;
+        function updateSlug() {
+            const name = nameInput.value;
+            if (!name) { slugPreview.textContent = ''; if (isNewProduct) slugInput.value = ''; return; }
+            const baseSlug = slugify(name);
+            slugPreview.textContent = 'URL SLUG: ' + baseSlug;
+            if (isNewProduct) slugInput.value = baseSlug;
         }
+        nameInput.addEventListener('input', updateSlug);
+        updateSlug();
     }
-
-    // Fire on every keystroke — not just when field is empty
-    nameInput.addEventListener('input', updateSlug);
-
-    // Run once on load in case name is pre-filled (edit page)
-    updateSlug();
 });
 </script>
 {% endblock %}

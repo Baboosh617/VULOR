@@ -1,24 +1,11 @@
-from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
 from products.models import Product, Review, Category, ProductImage
 from accounts.models import CustomUser
+from vulor.testing import StoreTestCase, make_product
 
 
-def make_product(name="Test Product", **kwargs):
-    data = {
-        "name": name,
-        "description": "A test product",
-        "price": 1000,
-        "category": "hoodies",
-        "image": SimpleUploadedFile("product.jpg", b"fake-image-bytes"),
-        "inventory_count": 10,
-    }
-    data.update(kwargs)
-    return Product.objects.create(**data)
-
-
-class ProductModelTests(TestCase):
+class ProductModelTests(StoreTestCase):
     def test_slug_is_auto_generated_from_name(self):
         product = make_product(name="Cool Hoodie")
         self.assertEqual(product.slug, "cool-hoodie")
@@ -54,8 +41,15 @@ class ProductModelTests(TestCase):
         product = make_product(category="hoodies", available_sizes="S,M")
         self.assertEqual(product.get_formatted_sizes(), ["S", "M"])
 
+    def test_inventory_count_cannot_go_negative_at_db_level(self):
+        """DB-level backstop (product_inventory_count_non_negative) — even a
+        direct .update() bypassing all application logic must be rejected."""
+        product = make_product(inventory_count=2)
+        with self.assertRaises(IntegrityError):
+            Product.objects.filter(pk=product.pk).update(inventory_count=-1)
 
-class ProductRatingTests(TestCase):
+
+class ProductRatingTests(StoreTestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(
             email="reviewer@example.com", username="reviewer", password="strongpass123"
@@ -63,8 +57,14 @@ class ProductRatingTests(TestCase):
         self.product = make_product()
 
     def _add_review(self, rating, approved=True):
+        # There's a one-review-per-user-per-product unique constraint, so each
+        # review a test stacks up needs its own reviewer.
+        n = Review.objects.count()
+        user = CustomUser.objects.create_user(
+            email=f"reviewer{n}@example.com", username=f"reviewer{n}", password="strongpass123"
+        )
         return Review.objects.create(
-            user=self.user,
+            user=user,
             product=self.product,
             rating=rating,
             comment="Nice",
@@ -90,14 +90,16 @@ class ProductRatingTests(TestCase):
         self.assertEqual(self.product.total_reviews, 1)
 
     def test_one_review_per_user_per_product(self):
-        self._add_review(5, approved=True)
+        Review.objects.create(
+            user=self.user, product=self.product, rating=5, comment="Nice", approved=True
+        )
         with self.assertRaises(IntegrityError):
             Review.objects.create(
                 user=self.user, product=self.product, rating=3, comment="Again"
             )
 
 
-class CategoryAndImageTests(TestCase):
+class CategoryAndImageTests(StoreTestCase):
     def test_category_str(self):
         category = Category.objects.create(name="Hoodies", slug="hoodies")
         self.assertEqual(str(category), "Hoodies")
@@ -111,3 +113,21 @@ class CategoryAndImageTests(TestCase):
             ProductImage.objects.create(
                 product=product, image=SimpleUploadedFile("b.jpg", b"x"), is_main=True
             )
+
+
+class SecurityHeadersTests(StoreTestCase):
+    """CSP is deployed in Report-Only mode (see CONTENT_SECURITY_POLICY_REPORT_ONLY
+    in settings) — it must report, and must not enforce, until a separate,
+    deliberate change turns enforcement on."""
+
+    def test_csp_report_only_header_present_and_enforcing_header_absent(self):
+        response = self.client.get("/")
+        self.assertIn("Content-Security-Policy-Report-Only", response)
+        self.assertNotIn("Content-Security-Policy", response)
+
+    def test_csp_report_only_policy_allows_known_external_sources(self):
+        response = self.client.get("/")
+        policy = response["Content-Security-Policy-Report-Only"]
+        self.assertIn("default-src 'self'", policy)
+        self.assertIn("https://fonts.googleapis.com", policy)  # base.html <link>
+        self.assertIn("https://cdn.jsdelivr.net", policy)  # dashboard Chart.js
