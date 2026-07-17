@@ -83,16 +83,25 @@ class BrokenEmailBackend(BaseEmailBackend):
         raise TimeoutError(110, "Connection timed out")
 
 
+# Allauth's confirm_email cooldown lives in the default cache; the dev cache
+# is file-based and outlives both test isolation and whole test runs, so it
+# would silently skip the verification send on reruns. LocMemCache is fresh
+# per process; distinct emails per test keep the cooldown from crossing tests.
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+)
 class RegistrationEmailTests(StoreTestCase):
-    SIGNUP_DATA = {
-        "username": "newbuyer",
-        "email": "newbuyer@example.com",
-        "password1": "strongpass123!",
-        "password2": "strongpass123!",
-    }
+    @staticmethod
+    def signup_data(username):
+        return {
+            "username": username,
+            "email": f"{username}@example.com",
+            "password1": "strongpass123!",
+            "password2": "strongpass123!",
+        }
 
     def test_register_sends_verification_email(self):
-        response = self.client.post(reverse("register"), self.SIGNUP_DATA)
+        response = self.client.post(reverse("register"), self.signup_data("newbuyer"))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(CustomUser.objects.filter(email="newbuyer@example.com").exists())
         self.assertEqual(len(mail.outbox), 1)
@@ -104,6 +113,6 @@ class RegistrationEmailTests(StoreTestCase):
         row is committed — the resilient adapter logs and lets the flow finish;
         allauth re-sends verification on the next login attempt."""
         with self.assertLogs("accounts.adapter", level="ERROR"):
-            response = self.client.post(reverse("register"), self.SIGNUP_DATA)
+            response = self.client.post(reverse("register"), self.signup_data("outagebuyer"))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(CustomUser.objects.filter(email="newbuyer@example.com").exists())
+        self.assertTrue(CustomUser.objects.filter(email="outagebuyer@example.com").exists())
