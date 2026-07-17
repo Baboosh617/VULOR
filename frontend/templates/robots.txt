@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /cart/
+Disallow: /orders/
+Disallow: /payments/
+Disallow: /accounts/
+Disallow: /dashboard/
+Disallow: /services/
+Disallow: /error-pages/
+Disallow: /login/
+Disallow: /logout/

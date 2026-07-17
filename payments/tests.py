@@ -1,16 +1,18 @@
+import importlib
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
-from django.urls import reverse
+from django.test import TestCase, override_settings
+from django.urls import clear_url_caches, reverse
 
 from payments.forms import ReceiptUploadForm, RECEIPT_MAX_SIZE
 from payments.models import PaymentTransaction
 from vulor.testing import (
     StoreTestCase,
     make_order,
+    make_product,
     make_test_image_bytes,
     make_transaction,
     make_user,
@@ -314,3 +316,38 @@ class ReceiptDownloadTests(StoreTestCase):
             reverse("payments:receipt_download", args=[bare_txn.pk])
         )
         self.assertEqual(response.status_code, 404)
+
+
+class ProductionMediaServingTests(StoreTestCase):
+    """The production URLconf (vulor/urls.py, DEBUG=False branch) serves
+    media directly since WhiteNoise only covers STATIC_ROOT — but payment
+    receipts must stay unreachable there; they're only ever served through
+    the staff-gated payments:receipt_download view.
+
+    The DEBUG branching in vulor/urls.py happens at module import time, so
+    changing settings.DEBUG alone doesn't change which urlpatterns exist —
+    the urlconf module has to be reloaded under the override for the
+    non-DEBUG branch to actually get built.
+    """
+
+    def setUp(self):
+        self.product = make_product()
+
+    def _reload_urlconf(self):
+        import vulor.urls as urlconf
+
+        importlib.reload(urlconf)
+        clear_url_caches()
+
+    @override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"])
+    def test_payment_receipts_404_but_product_media_is_served(self):
+        self._reload_urlconf()
+        self.addCleanup(self._reload_urlconf)
+
+        receipt_response = self.client.get(
+            "/media/payment_receipts/2026/07/anything.jpg"
+        )
+        self.assertEqual(receipt_response.status_code, 404)
+
+        product_response = self.client.get(f"/media/{self.product.image.name}")
+        self.assertEqual(product_response.status_code, 200)

@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'error_pages',
     'payments',
     'dashboard',
+    'services',
     'django_recaptcha',
     'csp',
 ]
@@ -194,10 +195,14 @@ if DEBUG:
         "https://*.ngrok-free.dev",
     ]
 else:
+    # Django's wildcard subdomain matching (https://*.example.com) never
+    # matches the apex host itself, so a wildcard-only list here silently
+    # fails CSRF for the bare production domain. Read the real origin(s)
+    # from env instead.
     CSRF_TRUSTED_ORIGINS = [
-        "https://*.vulor.onrender.com",
-        "https://*.vulor.com",
-        "https://*.vulor-1.onrender.com",
+        origin.strip()
+        for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+        if origin.strip()
     ]
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -279,7 +284,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID', default=''),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET', default=''),
+            # GOOGLE_SECRET_KEY is the legacy name this var had in the Render
+            # environment before 2026-07; keep it as a fallback so OAuth
+            # survives a deploy where the rename hasn't happened yet.
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET') or os.getenv('GOOGLE_SECRET_KEY', ''),
             'key': ''
         }
     }
@@ -299,9 +307,10 @@ SOCIALACCOUNT_FORMS = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 587)
-EMAIL_USE_TLS = True  # IMPORTANT
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "")
@@ -331,19 +340,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
-
-# Custom error handlers
-if not DEBUG:
-    # Production error handlers
-    handler404 = 'error_pages.views.custom_404'  
-    handler500 = 'error_pages.views.custom_500'
-    handler403 = 'error_pages.views.custom_403'
-    handler400 = 'error_pages.views.custom_400'
 
 #Logging
 LOGGING = {
@@ -382,11 +383,21 @@ if DEBUG:
             'LOCATION': BASE_DIR / 'django_cache',
         }
     }
-else:
+elif os.getenv('REDIS_URL'):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379'),
+            'LOCATION': os.getenv('REDIS_URL'),
+        }
+    }
+else:
+    # No Redis is deployed today, and django-ratelimit reads this cache too
+    # — hardcoding RedisCache here made register/login/checkout/receipt
+    # upload all 500 in production. LocMemCache makes rate limits
+    # per-process rather than global, which is accepted at current scale.
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         }
     }
 
