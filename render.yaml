@@ -8,28 +8,53 @@ services:
       npm run build:css &&
       python manage.py collectstatic --noinput --clear &&
       python manage.py migrate --noinput
-    startCommand: gunicorn vulor.wsgi:application
+    startCommand: gunicorn vulor.wsgi:application --timeout 120 --worker-class gthread --threads 2 --workers 1
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
       - key: PORT
         value: "10000"
-      - key: WEB_CONCURRENCY
-        value: "2"
-      - key: GUNICORN_CMD_ARGS
-        # gthread rather than more sync workers: cheaper on memory (threads
-        # share one process) and specifically helps here because the app's
-        # slowest requests are I/O-bound (synchronous SMTP calls in the
-        # order/payment signal chain), which release the GIL while waiting.
-        # NOTE: 2 workers x 2 threads is a conservative starting point, not
-        # a measured figure — confirm against the actual Render instance's
-        # memory/CPU plan before relying on it under real load.
-        value: "--timeout 120 --worker-class gthread --threads 2"
       - key: ON_RENDER
         value: "True"
       - key: DEBUG
         value: "False"
-databases:
-  - name: vulor-db
-    databaseName: vulor
-    user: vulor_user
+      - key: ALLOWED_HOSTS
+        value: "vulor.onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://vulor.onrender.com"
+      - key: SITE_URL
+        value: "https://vulor.onrender.com"
+      - key: EMAIL_ASYNC_ENABLED
+        value: "False"
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: BANK_TRANSFER_BANK_NAME
+        sync: false
+      - key: BANK_TRANSFER_ACCOUNT_NAME
+        sync: false
+      - key: BANK_TRANSFER_ACCOUNT_NUMBER
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+    disk:
+      name: receipts
+      mountPath: /app/media/payment_receipts
+      sizeGB: 1
