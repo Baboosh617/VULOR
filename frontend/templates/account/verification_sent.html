@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Check your inbox — VULOR{% endblock %}
+
+{% block content %}
+<div class="px-4 py-16 min-h-[calc(100svh-4rem)] flex items-center justify-center">
+    <div class="w-full max-w-md v-plate v-fade-in">
+        <div class="p-8 sm:p-10">
+            <p class="c-reg text-ink-3 mb-3">Access</p>
+            <h1 class="c-monolith text-4xl mb-3">Check your <span class="c-serif-i normal-case">inbox.</span></h1>
+            <p class="v-spec text-ink-3 mb-8">
+                We sent a confirmation link to your email address.
+                Click it to activate your account — you'll be signed in automatically.
+            </p>
+
+            <div class="v-alert mb-8" role="status">
+                Nothing arrived? Check spam, or sign in below and we'll send a fresh link.
+            </div>
+
+            <a href="{% url 'account_login' %}" class="v-btn v-btn--secondary v-btn--lg w-full">Back to sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

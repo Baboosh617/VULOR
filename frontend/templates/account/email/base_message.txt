@@ -1,0 +1,6 @@
+{% autoescape off %}Hello from VULOR,
+
+{% block content %}{% endblock content %}
+
+— The VULOR team
+{% endautoescape %}

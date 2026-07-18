@@ -126,11 +126,28 @@ def receipt_download(request, txn_id):
     txn = get_object_or_404(PaymentTransaction, id=txn_id)
     if not txn.receipt:
         raise Http404("No receipt uploaded for this transaction.")
-    return FileResponse(
+    # Receipts are confidential bank documents — keep an audit trail of who
+    # viewed which one, mirroring the upload log in submit_receipt.
+    logger.info(
+        f"Receipt for transaction {txn.reference} (order {txn.order.order_number}) "
+        f"accessed by staff {request.user.email}"
+    )
+    is_pdf = txn.receipt.name.lower().endswith('.pdf')
+    response = FileResponse(
         txn.receipt.open('rb'),
-        as_attachment='download' in request.GET,
+        # PDFs never render inline: receipts are attacker-supplied input and
+        # the verification workflow requires staff to open every one — force
+        # the download so it opens in a viewer they chose (the browser's
+        # sandboxed one, ideally), never automatically in the tab.
+        as_attachment=is_pdf or 'download' in request.GET,
         filename=os.path.basename(txn.receipt.name),
     )
+    # Uploaded content must never script, fetch, or get cached. django-csp
+    # only sets its header when none is present, so this per-response
+    # lockdown wins over the site-wide policy.
+    response['Content-Security-Policy'] = "sandbox; default-src 'none'"
+    response['Cache-Control'] = 'private, no-store'
+    return response
 
 
 # Order Tracking (orders:order_detail) is the single canonical result screen —

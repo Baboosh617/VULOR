@@ -6,7 +6,7 @@ from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 from django.views.static import serve
 from products import views as product_views
 from accounts.views import register
@@ -31,7 +31,9 @@ def serve_media_excluding_receipts(request, path, document_root=None, show_index
 urlpatterns = [
     path(os.getenv('ADMIN_URL', 'admin/'), admin.site.urls),
 
-    path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
+    # One sign-in door: allauth's login enforces the email-verification gate,
+    # so /login/ (the name templates reverse) just forwards there, keeping ?next.
+    path('login/', RedirectView.as_view(pattern_name='account_login', query_string=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
 
     path('accounts/', include('accounts.urls')),

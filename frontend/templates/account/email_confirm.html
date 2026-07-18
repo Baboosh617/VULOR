@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm your email — VULOR{% endblock %}
+
+{% block content %}
+<div class="px-4 py-16 min-h-[calc(100svh-4rem)] flex items-center justify-center">
+    <div class="w-full max-w-md v-plate v-fade-in">
+        <div class="p-8 sm:p-10">
+            <p class="c-reg text-ink-3 mb-3">Access</p>
+
+            {% if confirmation %}
+            <h1 class="c-monolith text-4xl mb-3">One last <span class="c-serif-i normal-case">step.</span></h1>
+            <p class="v-spec text-ink-3 mb-8">
+                Confirm that <span class="text-ink-1">{{ confirmation.email_address.email }}</span> is your email address.
+            </p>
+
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                {% csrf_token %}
+                <button type="submit" class="v-btn v-btn--primary v-btn--lg w-full">Confirm email</button>
+            </form>
+            {% else %}
+            <h1 class="c-monolith text-4xl mb-3">Link <span class="c-serif-i normal-case">expired.</span></h1>
+            <p class="v-spec text-ink-3 mb-8">
+                This confirmation link is invalid or has expired.
+                Sign in with your email and password and we'll send you a fresh one.
+            </p>
+
+            <a href="{% url 'account_login' %}" class="v-btn v-btn--primary v-btn--lg w-full">Sign in</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

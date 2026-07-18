@@ -9,6 +9,14 @@ services:
       python manage.py collectstatic --noinput --clear &&
       python manage.py migrate --noinput
     startCommand: gunicorn vulor.wsgi:application
+    # Render's service filesystem is ephemeral — without this disk every
+    # deploy/restart deletes uploaded payment receipts, which are financial
+    # records. Trade-off accepted: attaching a disk disables zero-downtime
+    # deploys and horizontal scaling (single-instance store).
+    disk:
+      name: vulor-media
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: vulor.settings
@@ -27,6 +35,8 @@ services:
         value: "--timeout 120 --worker-class gthread --threads 2"
       - key: ON_RENDER
         value: "True"
+      - key: MEDIA_ROOT
+        value: /var/data/media
       - key: DEBUG
         value: "False"
 databases:

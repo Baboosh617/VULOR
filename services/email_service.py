@@ -3,6 +3,7 @@ import mimetypes
 import os
 from django.core.mail import EmailMessage, send_mail
 from django.conf import settings
+from django.urls import reverse
 from .tasks import send_html, send_html_email_task, send_templated_email
 
 logger = logging.getLogger(__name__)
@@ -253,7 +254,13 @@ def send_admin_payment_verification(order, txn):
         f"Shipping: ₦{order.shipping_fee}\n"
         f"Total due: ₦{order.grand_total}\n\n"
         f"Customer transaction reference: {txn.transaction_reference or '—'}\n\n"
-        f"Verify the attached receipt, then confirm or reject the payment "
+        # The gated link is the preferred way to view the receipt — it forces
+        # a staff login and serves under locked-down headers. The attachment
+        # below stays only until durable media storage (Render disk) is
+        # confirmed live; drop it after that.
+        f"Receipt (staff login required): "
+        f"{settings.SITE_URL + reverse('payments:receipt_download', args=[txn.pk])}\n\n"
+        f"Verify the receipt, then confirm or reject the payment "
         f"in the dashboard."
     )
 

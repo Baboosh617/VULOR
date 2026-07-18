@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load socialaccount %}
 
 {% block title %}Register — VULOR{% endblock %}
 
@@ -9,7 +8,7 @@
         <div class="p-8 sm:p-10">
             <p class="c-reg text-ink-3 mb-3">Access</p>
             <h1 class="c-monolith text-4xl mb-3">Get your <span class="c-serif-i normal-case">number.</span></h1>
-            <p class="v-spec text-ink-3 mb-8">Track orders. Save pieces. Nothing else.</p>
+            <p class="v-spec text-ink-3 mb-8">Email and a password. Nothing else.</p>
 
             {% if form.non_field_errors %}
             <div class="v-alert v-alert--error mb-6" role="alert">{{ form.non_field_errors.0 }}</div>
@@ -19,41 +18,25 @@
                 {% csrf_token %}
 
                 <div>
-                    <label for="id_username" class="v-field-label">Username</label>
-                    <input id="id_username" type="text" name="username" required class="v-input {% if form.username.errors %}has-error{% endif %}"
-                           value="{{ form.username.value|default:'' }}" autocomplete="username">
-                    {% if form.username.errors %}<p class="v-field-error">{{ form.username.errors.0 }}</p>{% endif %}
-                </div>
-
-                <div>
                     <label for="id_email" class="v-field-label">Email</label>
                     <input id="id_email" type="email" name="email" required class="v-input {% if form.email.errors %}has-error{% endif %}"
-                           value="{{ form.email.value|default:'' }}" autocomplete="email">
+                           value="{{ form.email.value|default:'' }}" autocomplete="email" autofocus>
                     {% if form.email.errors %}<p class="v-field-error">{{ form.email.errors.0 }}</p>{% endif %}
                 </div>
 
                 <div>
                     <label for="id_password1" class="v-field-label">Password</label>
                     <input id="id_password1" type="password" name="password1" required class="v-input {% if form.password1.errors %}has-error{% endif %}"
-                           autocomplete="new-password">
+                           autocomplete="new-password" minlength="8">
                     {% if form.password1.errors %}<p class="v-field-error">{{ form.password1.errors.0 }}</p>{% endif %}
-                </div>
-
-                <div>
-                    <label for="id_password2" class="v-field-label">Confirm password</label>
-                    <input id="id_password2" type="password" name="password2" required class="v-input {% if form.password2.errors %}has-error{% endif %}"
-                           autocomplete="new-password">
-                    {% if form.password2.errors %}<p class="v-field-error">{{ form.password2.errors.0 }}</p>{% endif %}
+                    <label class="flex items-center gap-2 v-spec text-ink-2 cursor-pointer mt-2 hidden" id="show-password-wrap">
+                        <input type="checkbox" class="v-check" id="show-password">
+                        Show password
+                    </label>
                 </div>
 
                 <button type="submit" class="v-btn v-btn--primary v-btn--lg w-full">Create account</button>
             </form>
-
-            <div class="v-hairline-t my-8"></div>
-
-            <a href="{% provider_login_url 'google' %}" class="v-btn v-btn--secondary v-btn--lg w-full">
-                Continue with Google
-            </a>
 
             <p class="v-spec text-ink-3 mt-8 text-center">
                 Already have an account? <a href="{% url 'login' %}" class="v-underline text-ink-1">Sign in</a>
@@ -61,4 +44,21 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    // Progressive enhancement: the toggle only appears when JS runs.
+    (function () {
+        var wrap = document.getElementById('show-password-wrap');
+        var box = document.getElementById('show-password');
+        var field = document.getElementById('id_password1');
+        if (!wrap || !box || !field) return;
+        wrap.classList.remove('hidden');
+        box.addEventListener('change', function () {
+            field.type = box.checked ? 'text' : 'password';
+        });
+    })();
+</script>
 {% endblock %}

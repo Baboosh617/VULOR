@@ -1,0 +1,7 @@
+{% extends "account/email/base_message.txt" %}
+
+{% block content %}You're one step from your VULOR account. Confirm this email address by opening the link below:
+
+{{ activate_url }}
+
+Once confirmed you'll be signed in automatically. If you didn't create this account, you can ignore this email.{% endblock content %}

@@ -72,10 +72,8 @@ INSTALLED_APPS = [
     # Third-party
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 
-    
+
     # Local apps
     'products',
     'accounts',
@@ -90,6 +88,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'vulor.middleware.BodySizeLimitMiddleware',
     'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -112,10 +111,8 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_TYPE_NOSNIFF =True
 
 # Content-Security-Policy — Report-Only for now: violations are logged by
 # the browser (visible in devtools) but nothing is blocked. This lets the
@@ -221,25 +218,23 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+# Signup is two fields (email + password): allauth auto-generates the
+# username and the confirm-password field is dropped.
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+# Clicking the verification link logs the user in (same browser) — no
+# re-typing credentials after confirming.
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_UNIQUE_EMAIL = True
-# Registration is intentionally open — /accounts/register/ is a custom view
-# (accounts.views.register), not allauth's own signup view, and it never
-# reads ACCOUNT_ALLOW_REGISTRATION. That setting used to sit here implying
-# registration was closed when it never actually was; removed rather than
-# left as misleading dead config.
+# Registration is intentionally open. /accounts/register/ is the single
+# signup door (accounts.views.RegisterView, a thin subclass of allauth's
+# SignupView on the project template); allauth's own /accounts/signup/ URL
+# redirects there.
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[VULOR] '
 # Allauth emails (verification, password reset) are sent synchronously inside
 # the request; the resilient adapter logs SMTP failures instead of 500ing the
 # signup/reset flow after the user row is already committed.
 ACCOUNT_ADAPTER = 'accounts.adapter.ResilientAccountAdapter'
-
-#social account settings
-SOCIALACCOUNT_QUERY_EMAIL = True
-SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_STORE_TOKENS = False
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
 
 #login/logout redirects
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'
@@ -272,28 +267,6 @@ BANK_TRANSFER_ACCOUNT_NAME = os.getenv('BANK_TRANSFER_ACCOUNT_NAME', '')
 BANK_TRANSFER_ACCOUNT_NUMBER = os.getenv('BANK_TRANSFER_ACCOUNT_NUMBER', '')
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 
-# Google OAuth Configuration
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'OAUTH_PKCE_ENABLED': True,
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID', default=''),
-            # GOOGLE_SECRET_KEY is the legacy name this var had in the Render
-            # environment before 2026-07; keep it as a fallback so OAuth
-            # survives a deploy where the rename hasn't happened yet.
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET') or os.getenv('GOOGLE_SECRET_KEY', ''),
-            'key': ''
-        }
-    }
-}
-
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -301,10 +274,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_FORMS = {
-    'signup': 'accounts.forms.CustomUserCreationForm',
-}
-SOCIALACCOUNT_FORMS = {
-    'signup': 'accounts.forms.CustomSocialSignupForm',
+    'signup': 'accounts.forms.SignupForm',
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

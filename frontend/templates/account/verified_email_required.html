@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Verify your email — VULOR{% endblock %}
+
+{% block content %}
+<div class="px-4 py-16 min-h-[calc(100svh-4rem)] flex items-center justify-center">
+    <div class="w-full max-w-md v-plate v-fade-in">
+        <div class="p-8 sm:p-10">
+            <p class="c-reg text-ink-3 mb-3">Access</p>
+            <h1 class="c-monolith text-4xl mb-3">Verify your <span class="c-serif-i normal-case">email.</span></h1>
+            <p class="v-spec text-ink-3 mb-8">
+                This page needs a verified email address. Check your inbox for the
+                confirmation link — or sign in again and we'll send a fresh one.
+            </p>
+
+            <a href="{% url 'account_login' %}" class="v-btn v-btn--primary v-btn--lg w-full">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

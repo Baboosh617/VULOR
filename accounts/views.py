@@ -2,33 +2,25 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib import messages
-from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
-from .forms import CustomUserCreationForm, ContactForm, ProfileForm
+from .forms import ContactForm, ProfileForm
 from orders.models import Order
 from django_ratelimit.decorators import ratelimit
-from allauth.account.utils import complete_signup, setup_user_email
-from allauth.account import app_settings as allauth_settings
+from allauth.account.views import SignupView
 from services.email_service import send_admin_contact_message
 
-UserCreationForm = CustomUserCreationForm
 
-@ratelimit(key='ip', rate='5/m', block=True)
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            setup_user_email(request, user, [])  # registers user.email as the primary EmailAddress
-            return complete_signup(
-                request, user, allauth_settings.EMAIL_VERIFICATION, reverse('home')
-            )
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = UserCreationForm()
+@method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
+class RegisterView(SignupView):
+    """Allauth's signup flow (EmailAddress setup, mandatory verification,
+    redirects) on the project's own template and URL — the single signup door;
+    /accounts/signup/ redirects here."""
 
-    return render(request, 'account/register.html', {'form': form, 'title': 'Sign Up'})
+    template_name = 'account/register.html'
+
+
+register = RegisterView.as_view()
 
 @login_required
 def profile_view(request):

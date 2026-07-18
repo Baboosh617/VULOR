@@ -1,6 +1,9 @@
 import importlib
+import io
 from decimal import Decimal
 from unittest.mock import patch
+
+from PIL import Image
 
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -61,7 +64,9 @@ class ReceiptUploadFormTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_valid_pdf_with_reference(self):
-        form = self._form("receipt.pdf", reference="TRF/2026/0001")
+        form = self._form(
+            "receipt.pdf", content=b"%PDF-1.4 minimal", reference="TRF/2026/0001"
+        )
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["transaction_reference"], "TRF/2026/0001")
 
@@ -93,11 +98,49 @@ class ReceiptUploadFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("receipt", form.errors)
 
-    def test_pdf_receipt_is_not_pillow_checked(self):
-        # PDFs intentionally skip the Pillow content check (extension+size
-        # only) — fake PDF bytes must still pass.
-        form = self._form("receipt.pdf", content=b"%PDF-fake-but-allowed")
+    def test_rejects_file_renamed_to_pdf_without_magic_bytes(self):
+        # PDFs skip the Pillow check but must carry the %PDF- magic prefix —
+        # an arbitrary file renamed .pdf is the cheapest way to smuggle
+        # something the staff member is then required to open.
+        form = self._form("receipt.pdf", content=b"MZ\x90 definitely not a pdf")
+        self.assertFalse(form.is_valid())
+        self.assertIn("receipt", form.errors)
+
+    def test_image_is_reencoded_to_jpeg(self):
+        # Images are never stored as the customer's original bytes — they're
+        # decoded and re-saved, so the stored file is always a fresh JPEG.
+        form = self._form("receipt.png", content=make_test_image_bytes("PNG"))
         self.assertTrue(form.is_valid(), form.errors)
+        cleaned = form.cleaned_data["receipt"]
+        self.assertTrue(cleaned.name.endswith(".jpg"))
+        self.assertEqual(Image.open(cleaned).format, "JPEG")
+
+    def test_reencode_strips_exif_and_appended_payload(self):
+        # A valid JPEG can still carry camera EXIF (GPS/device metadata that
+        # staff would then download and email around) and appended bytes (an
+        # image+archive polyglot). Neither may survive the re-encode.
+        exif = Image.Exif()
+        exif[0x0110] = "SpyPhone 3000"  # camera Model tag
+        buf = io.BytesIO()
+        Image.new("RGB", (4, 4), color=(10, 20, 30)).save(buf, format="JPEG", exif=exif)
+        payload = b"PK\x03\x04-smuggled-archive-payload"
+
+        form = self._form("receipt.jpg", content=buf.getvalue() + payload)
+        self.assertTrue(form.is_valid(), form.errors)
+        cleaned_bytes = form.cleaned_data["receipt"].read()
+        self.assertNotIn(b"smuggled", cleaned_bytes)
+        self.assertEqual(dict(Image.open(io.BytesIO(cleaned_bytes)).getexif()), {})
+
+    def test_rejects_image_exceeding_pixel_cap(self):
+        # The cap is enforced from the header-declared dimensions before any
+        # full decode — a decompression bomb never gets decoded at all.
+        buf = io.BytesIO()
+        Image.new("RGB", (4, 4)).save(buf, format="PNG")
+        with patch("payments.forms.RECEIPT_MAX_PIXELS", 8):
+            form = self._form("receipt.png", content=buf.getvalue())
+            valid = form.is_valid()
+        self.assertFalse(valid)
+        self.assertIn("receipt", form.errors)
 
 
 class BankTransferFlowTests(StoreTestCase):
@@ -155,6 +198,12 @@ class BankTransferFlowTests(StoreTestCase):
         self.assertEqual(admin_emails[0].to, ["admin@vulor.test"])
         self.assertEqual(len(admin_emails[0].attachments), 1)
         self.assertIn(self.order.order_number, admin_emails[0].body)
+        # The email must carry the staff-gated download link, never a direct
+        # media URL.
+        self.assertIn(
+            reverse("payments:receipt_download", args=[txn.pk]),
+            admin_emails[0].body,
+        )
 
     def test_submit_invalid_receipt_keeps_order_pending(self):
         response = self._submit_receipt(filename="receipt.exe")
@@ -316,6 +365,59 @@ class ReceiptDownloadTests(StoreTestCase):
             reverse("payments:receipt_download", args=[bare_txn.pk])
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_pdf_receipt_is_always_forced_download(self):
+        # PDFs are attacker-supplied files staff are required to open — they
+        # must download (into a viewer the staff member chooses) rather than
+        # render inline, even without the ?download flag.
+        pdf_txn = make_transaction(
+            make_order(make_user("pdfowner")),
+            status="pending_verification",
+            receipt=SimpleUploadedFile("receipt.pdf", b"%PDF-1.4"),
+        )
+        self.client.force_login(self.staff)
+        response = self.client.get(
+            reverse("payments:receipt_download", args=[pdf_txn.pk])
+        )
+        self.assertIn("attachment", response["Content-Disposition"])
+
+    def test_response_headers_lock_down_receipt_content(self):
+        # The per-response CSP must win over django-csp's site-wide policy,
+        # and confidential bank documents must never be cached.
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url)
+        self.assertEqual(
+            response["Content-Security-Policy"], "sandbox; default-src 'none'"
+        )
+        self.assertEqual(response["Cache-Control"], "private, no-store")
+
+
+class BodySizeLimitTests(StoreTestCase):
+    """BodySizeLimitMiddleware matters most on Render, where no nginx sits in
+    front to enforce client_max_body_size — an oversized body must be
+    rejected from its Content-Length before Django reads any of it, not
+    after the 5 MB form check has already paid for the full upload."""
+
+    def setUp(self):
+        self.user = make_user("bigposter")
+        self.client.force_login(self.user)
+        self.order = make_order(self.user)
+
+    def test_oversized_body_is_rejected_before_processing(self):
+        response = self.client.post(
+            reverse("payments:submit_receipt", args=[self.order.id]),
+            {"receipt": SimpleUploadedFile("receipt.jpg", make_test_image_bytes())},
+            CONTENT_LENGTH=str(7 * 1024 * 1024),
+        )
+        self.assertEqual(response.status_code, 413)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "pending")
+
+    def test_normal_sized_body_passes(self):
+        response = self.client.get(
+            reverse("payments:transfer_instructions", args=[self.order.id])
+        )
+        self.assertEqual(response.status_code, 200)
 
 
 class ProductionMediaServingTests(StoreTestCase):

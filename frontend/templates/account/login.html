@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load socialaccount %}
 
 {% block title %}Sign in — VULOR{% endblock %}
 
@@ -40,12 +39,6 @@
 
                 <button type="submit" class="v-btn v-btn--primary v-btn--lg w-full">Sign in</button>
             </form>
-
-            <div class="v-hairline-t my-8"></div>
-
-            <a href="{% provider_login_url 'google' %}" class="v-btn v-btn--secondary v-btn--lg w-full">
-                Continue with Google
-            </a>
 
             <p class="v-spec text-ink-3 mt-8 text-center">
                 No account? <a href="{% url 'register' %}" class="v-underline text-ink-1">Register</a>
