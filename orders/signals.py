@@ -19,11 +19,17 @@ HIGH_VALUE_THRESHOLD = 100000
 @receiver(post_save, sender=Order)
 def order_created(sender, instance, created, **kwargs):
     if created and not instance.admin_notified_new:
+        # Independent try/except per call: these are two unrelated
+        # notifications (customer confirmation, admin alert), so a failure
+        # in one must not prevent the other from being attempted.
         try:
             send_order_confirmation(instance.user, instance)
+        except Exception:
+            logger.error(f"Failed to send order confirmation for order {instance.id}", exc_info=True)
+        try:
             send_admin_new_order(instance)
         except Exception:
-            logger.error(f"Failed to send new-order notifications for order {instance.id}", exc_info=True)
+            logger.error(f"Failed to send admin new-order notification for order {instance.id}", exc_info=True)
         instance.admin_notified_new = True
         instance.save(update_fields=["admin_notified_new"])
 

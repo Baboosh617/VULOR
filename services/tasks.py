@@ -10,7 +10,12 @@ logger = logging.getLogger(__name__)
 
 def send_html(subject, template, context, to_email):
     """Render and send one HTML email; the text alternative is derived from
-    the same render. The single email builder for the whole project."""
+    the same render. The single email builder for the whole project.
+
+    print()+logs the attempt/outcome (mirroring accounts.adapter's
+    [email-workflow] pattern) so a silent SMTP failure is always visible in
+    the console, then re-raises — callers already catch and flag-set on
+    failure, so behavior is unchanged, only visibility is added."""
     html_content = render_to_string(template, context)
 
     msg = EmailMultiAlternatives(
@@ -20,7 +25,18 @@ def send_html(subject, template, context, to_email):
         to=[to_email],
     )
     msg.attach_alternative(html_content, "text/html")
-    msg.send()
+
+    print(f"[email-workflow] sending '{subject}' to {to_email}...")
+    logger.info(f"[email-workflow] sending '{subject}' to {to_email}")
+    try:
+        msg.send()
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {to_email} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {to_email}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {to_email}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {to_email}")
 
 
 def build_order_email_context(user, order):

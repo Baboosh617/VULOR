@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -10,6 +12,8 @@ from django_ratelimit.decorators import ratelimit
 from allauth.account.views import SignupView
 from services.email_service import send_admin_contact_message
 
+logger = logging.getLogger(__name__)
+
 
 @method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
 class RegisterView(SignupView):
@@ -18,6 +22,16 @@ class RegisterView(SignupView):
     /accounts/signup/ redirects here."""
 
     template_name = 'account/register.html'
+
+    def form_valid(self, form):
+        email = form.cleaned_data.get('email')
+        msg = f"[email-workflow] signup form valid for {email} — handing off to allauth (user create + email pipeline)"
+        print(msg)
+        logger.info(msg)
+        response = super().form_valid(form)
+        print(f"[email-workflow] allauth signup pipeline finished for {email}")
+        logger.info(f"[email-workflow] allauth signup pipeline finished for {email}")
+        return response
 
 
 register = RegisterView.as_view()

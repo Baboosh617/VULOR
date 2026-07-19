@@ -163,16 +163,26 @@ def send_low_stock_alert(product):
     if not ADMIN_EMAIL:
         logger.warning("ADMIN_EMAIL not set — skipping low stock alert")
         return
-    send_mail(
-        subject=f"Low Stock Alert – {product.name}",
-        message=(
-            f"{product.name} is running low.\n"
-            f"Current stock: {product.inventory_count}\n"
-            f"Threshold: {product.low_stock_email_sent}"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[ADMIN_EMAIL],
-    )
+    subject = f"Low Stock Alert – {product.name}"
+    print(f"[email-workflow] sending '{subject}' to {ADMIN_EMAIL}...")
+    try:
+        send_mail(
+            subject=subject,
+            message=(
+                f"{product.name} is running low.\n"
+                f"Current stock: {product.inventory_count}\n"
+                f"Threshold: {product.low_stock_email_sent}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+        )
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {ADMIN_EMAIL}")
 
 
 def send_admin_contact_message(full_name, email, subject, message):
@@ -181,49 +191,79 @@ def send_admin_contact_message(full_name, email, subject, message):
         return
     # EmailMessage (not send_mail) so we can set reply_to — a staff member
     # replying to this notification should land in the customer's inbox.
-    EmailMessage(
-        subject=f"[Contact] {subject} — {full_name}",
-        body=(
-            f"From: {full_name} <{email}>\n"
-            f"Subject: {subject}\n\n"
-            f"{message}"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[ADMIN_EMAIL],
-        reply_to=[email],
-    ).send()
+    full_subject = f"[Contact] {subject} — {full_name}"
+    print(f"[email-workflow] sending '{full_subject}' to {ADMIN_EMAIL}...")
+    try:
+        EmailMessage(
+            subject=full_subject,
+            body=(
+                f"From: {full_name} <{email}>\n"
+                f"Subject: {subject}\n\n"
+                f"{message}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[ADMIN_EMAIL],
+            reply_to=[email],
+        ).send()
+    except Exception:
+        print(f"[email-workflow] FAILED '{full_subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{full_subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{full_subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{full_subject}' to {ADMIN_EMAIL}")
 
 
 def send_admin_new_order(order):
     if not ADMIN_EMAIL:
         return
-    send_mail(
-        subject=f"New Order #{order.order_number}",
-        message=(
-            f"New order received.\n"
-            f"Order: {order.order_number}\n"
-            f"Customer: {order.user.email}\n"
-            f"Total: ₦{order.total_amount}"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[ADMIN_EMAIL],
-    )
+    subject = f"New Order #{order.order_number}"
+    print(f"[email-workflow] sending '{subject}' to {ADMIN_EMAIL}...")
+    try:
+        send_mail(
+            subject=subject,
+            message=(
+                f"New order received.\n"
+                f"Order: {order.order_number}\n"
+                f"Customer: {order.user.email}\n"
+                f"Total: ₦{order.total_amount}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+        )
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {ADMIN_EMAIL}")
 
 
 def send_admin_high_value_order(order):
     if not ADMIN_EMAIL:
         return
-    send_mail(
-        subject=f"High-Value Order Alert – #{order.order_number}",
-        message=(
-            f"High-value order received!\n"
-            f"Order: {order.order_number}\n"
-            f"Customer: {order.user.email}\n"
-            f"Total: ₦{order.total_amount}"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[ADMIN_EMAIL],
-    )
+    subject = f"High-Value Order Alert – #{order.order_number}"
+    print(f"[email-workflow] sending '{subject}' to {ADMIN_EMAIL}...")
+    try:
+        send_mail(
+            subject=subject,
+            message=(
+                f"High-value order received!\n"
+                f"Order: {order.order_number}\n"
+                f"Customer: {order.user.email}\n"
+                f"Total: ₦{order.total_amount}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+        )
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {ADMIN_EMAIL}")
 
 
 def send_admin_payment_verification(order, txn):
@@ -264,8 +304,9 @@ def send_admin_payment_verification(order, txn):
         f"in the dashboard."
     )
 
+    subject = f"Verify payment – Order #{order.order_number}"
     msg = EmailMessage(
-        subject=f"Verify payment – Order #{order.order_number}",
+        subject=subject,
         body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[ADMIN_EMAIL],
@@ -275,19 +316,39 @@ def send_admin_payment_verification(order, txn):
             content = f.read()
         mimetype = mimetypes.guess_type(txn.receipt.name)[0] or "application/octet-stream"
         msg.attach(os.path.basename(txn.receipt.name), content, mimetype)
-    msg.send()
+
+    print(f"[email-workflow] sending '{subject}' to {ADMIN_EMAIL}...")
+    try:
+        msg.send()
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {ADMIN_EMAIL}")
 
 
 def send_admin_order_cancellation(order):
     if not ADMIN_EMAIL:
         return
-    send_mail(
-        subject=f"Order #{order.order_number} Cancelled",
-        message=(
-            f"Order {order.order_number} was cancelled.\n"
-            f"Customer: {order.user.email}\n"
-            f"Total: ₦{order.total_amount}"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[ADMIN_EMAIL],
-    )
+    subject = f"Order #{order.order_number} Cancelled"
+    print(f"[email-workflow] sending '{subject}' to {ADMIN_EMAIL}...")
+    try:
+        send_mail(
+            subject=subject,
+            message=(
+                f"Order {order.order_number} was cancelled.\n"
+                f"Customer: {order.user.email}\n"
+                f"Total: ₦{order.total_amount}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+        )
+    except Exception:
+        print(f"[email-workflow] FAILED '{subject}' to {ADMIN_EMAIL} — see traceback below")
+        logger.error(f"[email-workflow] Failed to send '{subject}' to {ADMIN_EMAIL}", exc_info=True)
+        raise
+    else:
+        print(f"[email-workflow] SENT '{subject}' to {ADMIN_EMAIL}")
+        logger.info(f"[email-workflow] Sent '{subject}' to {ADMIN_EMAIL}")
