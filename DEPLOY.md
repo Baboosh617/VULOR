@@ -162,7 +162,7 @@ STEP 5 — Verification Checklist
   [ ] Homepage loads: https://vulordynasty.com
   [ ] Products display (images load from git-tracked media)
   [ ] Django Admin: /admin/ — log in with superuser
-  [ ] Staff Dashboard: /dashboard/ — accessible for staff users
+  [ ] Staff Dashboard: /vulorimam/ — accessible for staff users
   [ ] Register a test user account
   [ ] Browse products, add to cart, go through checkout
   [ ] Upload a test payment receipt

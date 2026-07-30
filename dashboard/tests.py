@@ -32,7 +32,7 @@ class DashboardAccessTests(StoreTestCase):
         )
 
     def test_dashboard_home_url_resolves(self):
-        self.assertEqual(reverse("dashboard:dashboard_home"), "/dashboard/")
+        self.assertEqual(reverse("dashboard:dashboard_home"), "/vulorimam/")
 
     def test_dashboard_home_is_protected_from_anonymous(self):
         response = self.client.get(reverse("dashboard:dashboard_home"))
