@@ -104,9 +104,9 @@ STEP 3 — Deploy to Render
        PORT                    → 10000
        ON_RENDER               → True
        DEBUG                   → False
-       ALLOWED_HOSTS           → vulor.onrender.com
-       CSRF_TRUSTED_ORIGINS    → https://vulor.onrender.com
-       SITE_URL                → https://vulor.onrender.com
+       ALLOWED_HOSTS           → vulordynasty.com,www.vulordynasty.com
+       CSRF_TRUSTED_ORIGINS    → https://vulordynasty.com,https://www.vulordynasty.com
+       SITE_URL                → https://vulordynasty.com
        EMAIL_PORT              → 587
        EMAIL_USE_TLS           → True
        EMAIL_ASYNC_ENABLED     → False
@@ -143,7 +143,7 @@ STEP 4 — Post-Deploy Setup
 from django.contrib.sites.models import Site
 Site.objects.update_or_create(
     id=1,
-    defaults={'domain': 'vulor.onrender.com', 'name': 'VULOR'}
+    defaults={'domain': 'vulordynasty.com', 'name': 'VULOR'}
 )
 "
 
@@ -152,14 +152,14 @@ Site.objects.update_or_create(
   In your Google Cloud Console, add this to the authorized redirect
   URIs:
 
-    https://vulor.onrender.com/accounts/google/login/callback/
+    https://vulordynasty.com/accounts/google/login/callback/
 
 ---
 
 STEP 5 — Verification Checklist
 ---------------------------------
 
-  [ ] Homepage loads: https://vulor.onrender.com
+  [ ] Homepage loads: https://vulordynasty.com
   [ ] Products display (images load from git-tracked media)
   [ ] Django Admin: /admin/ — log in with superuser
   [ ] Staff Dashboard: /dashboard/ — accessible for staff users

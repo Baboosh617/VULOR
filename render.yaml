@@ -31,11 +31,11 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "vulor.onrender.com"
+        value: "vulordynasty.com,www.vulordynasty.com"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://vulor.onrender.com"
+        value: "https://vulordynasty.com,https://www.vulordynasty.com"
       - key: SITE_URL
-        value: "https://vulor.onrender.com"
+        value: "https://vulordynasty.com"
       - key: EMAIL_ASYNC_ENABLED
         value: "False"
       - key: SECRET_KEY
