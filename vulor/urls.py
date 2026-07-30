@@ -46,7 +46,7 @@ urlpatterns = [
     path('payments/', include('payments.urls', namespace='payments')),
     path('error-pages/', include('error_pages.urls')),
     path('services/', include('services.urls')),  
-    path('dashboard/', include('dashboard.urls', namespace='dashboard')),  
+    path('vulorimam/', include('dashboard.urls', namespace='dashboard')),  
 ]
 
 if settings.DEBUG:
