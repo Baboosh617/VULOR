@@ -37,6 +37,32 @@ class OrderModelTests(StoreTestCase):
         self.assertTrue(order.order_number)
         self.assertNotEqual(order.order_number, "")
 
+    def test_generated_order_number_fits_its_column(self):
+        """The suite runs on SQLite, which ignores VARCHAR limits — so a
+        too-long order_number passed every test while making every real
+        PostgreSQL checkout fail with StringDataRightTruncation. Assert the
+        length explicitly rather than relying on the backend to enforce it."""
+        max_length = Order._meta.get_field("order_number").max_length
+        order = make_order(self.user)
+        self.assertLessEqual(
+            len(order.order_number),
+            max_length,
+            f"order_number {order.order_number!r} is {len(order.order_number)} "
+            f"chars but the column holds {max_length}",
+        )
+
+    def test_order_number_column_has_growth_headroom(self):
+        """The generated length is not fixed forever: user.id is padded to 6
+        digits but grows past that, and the epoch gains a digit. Fitting
+        exactly today would mean breaking again later, so require slack."""
+        max_length = Order._meta.get_field("order_number").max_length
+        order = make_order(self.user)
+        self.assertGreaterEqual(
+            max_length - len(order.order_number),
+            4,
+            "order_number has no room to grow; widen the column",
+        )
+
     def test_default_status_and_payment_status(self):
         order = make_order(self.user)
         self.assertEqual(order.status, "pending")

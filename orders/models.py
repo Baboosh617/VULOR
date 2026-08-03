@@ -31,7 +31,12 @@ class Order(models.Model):
 
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="orders_made")
-    order_number = models.CharField(max_length=20, unique=True)
+    # 32, not 20: save() builds "VU" + user id (6) + epoch (10) + uuid suffix
+    # (4) = 22 chars, which silently fit under SQLite (it ignores VARCHAR
+    # limits) but made every checkout fail on PostgreSQL with
+    # StringDataRightTruncation. The headroom also covers user ids past the
+    # :06d padding and a longer epoch.
+    order_number = models.CharField(max_length=32, unique=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     inventory_adjusted = models.BooleanField(default=False)
@@ -63,7 +68,10 @@ class Order(models.Model):
 
     
     customer_email = models.EmailField()
-    customer_phone = models.CharField(max_length=20, blank=True, default='')
+    # 32 for the same reason as order_number: a formatted Nigerian number
+    # ("+234 (0) 803 123 4567") is 21 chars and would have truncated-errored
+    # on PostgreSQL while passing every SQLite test.
+    customer_phone = models.CharField(max_length=32, blank=True, default='')
     order_notes = models.TextField(blank=True, default='')
 
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
