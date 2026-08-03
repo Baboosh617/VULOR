@@ -277,7 +277,12 @@ ACCOUNT_FORMS = {
     'signup': 'accounts.forms.SignupForm',
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+EMAIL_BACKEND = (
+    "services.brevo_email_backend.BrevoAPIEmailBackend"
+    if BREVO_API_KEY
+    else "django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 587)
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
