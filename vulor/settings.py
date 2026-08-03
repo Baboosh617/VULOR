@@ -344,11 +344,27 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'error_console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django.security.login': {
             'handlers': ['auth_console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        # Django's default config sends django.request through a console
+        # handler filtered by require_debug_true, plus mail_admins. With
+        # DEBUG=False and no ADMINS set, that means every unhandled 500
+        # traceback went nowhere: the custom error page rendered and the
+        # cause was lost. Log unconditionally to stdout so production
+        # failures are visible wherever the host aggregates logs.
+        'django.request': {
+            'handlers': ['error_console'],
+            'level': 'ERROR',
             'propagate': False,
         },
     },
