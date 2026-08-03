@@ -4,6 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 
+.gitignore
+
 # Virtual environments
 venv/
 env/
@@ -64,3 +66,4 @@ django_cache/
 docs/
 CLAUDE.md
 *.CLAUDE.md
+/.claude/

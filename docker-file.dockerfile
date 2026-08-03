@@ -56,9 +56,11 @@ COPY --from=frontend-build /app/frontend/static/css/dist /app/frontend/static/cs
 ARG SECRET_KEY=build-time-placeholder-not-used-at-runtime
 RUN SECRET_KEY=${SECRET_KEY} python manage.py collectstatic --noinput
 
+RUN chmod +x entrypoint.sh
+
 # Create non-root user
 RUN useradd -m -r vulor && chown -R vulor /app
 USER vulor
 
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "vulor.wsgi:application"]
+# Run migrations, then gunicorn, binding to Railway's $PORT
+CMD ["./entrypoint.sh"]
