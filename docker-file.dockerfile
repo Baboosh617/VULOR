@@ -58,9 +58,12 @@ RUN SECRET_KEY=${SECRET_KEY} python manage.py collectstatic --noinput
 
 RUN chmod +x entrypoint.sh
 
-# Create non-root user
+# Create the non-root runtime user. Note there is no `USER vulor` here: the
+# container must start as root so entrypoint.sh can take ownership of the
+# root-owned mounted media volume, which it does before dropping to this user
+# via setpriv. The app itself never runs as root.
 RUN useradd -m -r vulor && chown -R vulor /app
-USER vulor
 
-# Run migrations, then gunicorn, binding to Railway's $PORT
+# Take ownership of the volume, drop privileges, migrate, then run gunicorn
+# bound to Railway's $PORT
 CMD ["./entrypoint.sh"]
