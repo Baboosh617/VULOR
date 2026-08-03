@@ -131,3 +131,20 @@ class SecurityHeadersTests(StoreTestCase):
         self.assertIn("default-src 'self'", policy)
         self.assertIn("https://fonts.googleapis.com", policy)  # base.html <link>
         self.assertIn("https://cdn.jsdelivr.net", policy)  # dashboard Chart.js
+
+
+class SitemapTests(StoreTestCase):
+    def test_sitemap_returns_active_product_and_static_pages(self):
+        active = make_product(name="Active Hoodie")
+        inactive = make_product(name="Retired Hoodie", is_active=False)
+
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn(f"https://vulordynasty.com/products/{active.slug}/", body)
+        self.assertNotIn(f"/products/{inactive.slug}/", body)
+        self.assertIn("https://vulordynasty.com/products/</loc>", body)
+        self.assertIn("https://vulordynasty.com/accounts/about/", body)
+        self.assertIn("https://vulordynasty.com/accounts/contact/", body)
+        self.assertIn("https://vulordynasty.com/accounts/size-guide/", body)

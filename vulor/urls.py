@@ -8,7 +8,9 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView, TemplateView
 from django.views.static import serve
+from django.contrib.sitemaps.views import sitemap
 from products import views as product_views
+from products.sitemaps import StaticViewSitemap, ProductSitemap
 from accounts.views import register
 
 import os
@@ -28,6 +30,11 @@ def serve_media_excluding_receipts(request, path, document_root=None, show_index
         raise Http404("Not found")
     return serve(request, path, document_root=document_root, show_indexes=show_indexes)
 
+sitemaps = {
+    'static': StaticViewSitemap,
+    'products': ProductSitemap,
+}
+
 urlpatterns = [
     path(os.getenv('ADMIN_URL', 'admin/'), admin.site.urls),
 
@@ -40,6 +47,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', product_views.home, name='home'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('products/', include('products.urls')),
     path('cart/', include('cart.urls')),
     path('orders/', include('orders.urls')),

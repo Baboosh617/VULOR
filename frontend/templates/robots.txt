@@ -3,8 +3,13 @@ Disallow: /cart/
 Disallow: /orders/
 Disallow: /payments/
 Disallow: /accounts/
-Disallow: /dashboard/
+Allow: /accounts/about/
+Allow: /accounts/contact/
+Allow: /accounts/size-guide/
+Disallow: /vulorimam/
 Disallow: /services/
 Disallow: /error-pages/
 Disallow: /login/
 Disallow: /logout/
+
+Sitemap: https://vulordynasty.com/sitemap.xml
