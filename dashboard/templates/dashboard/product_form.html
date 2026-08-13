@@ -176,61 +176,53 @@
     <section class="v-hairline-t pt-10">
         <span class="v-label text-ink-3 block mb-6">08 / MEDIA</span>
 
-        <div class="flex flex-col md:flex-row gap-8 items-start mb-10">
-            <div class="flex-1">
-                <label for="id_image" class="v-field-label">MAIN PRODUCT IMAGE *</label>
-                <input id="id_image" type="file" name="image" accept="image/*" class="v-spec text-ink-1 w-full file:v-btn-label file:mr-4 file:h-11 file:px-4 file:border file:border-line-dark-strong file:bg-transparent file:text-ink-1 file:cursor-pointer">
-                <p class="v-label text-ink-3 mt-2">PRIMARY IMAGE USED ACROSS THE STORE.</p>
-            </div>
-            <div class="v-plate w-40 h-40 shrink-0 overflow-hidden flex items-center justify-center">
+        <div class="mb-10">
+            <p class="v-field-label">MAIN PRODUCT PHOTO *</p>
+            <p class="v-spec text-ink-2 mb-4">This is the photo customers see everywhere — in the shop, the cart and emails. Click the box to {% if product and product.image %}change it{% else %}add one{% endif %}.</p>
+            <div id="main-image-tile" class="v-plate w-44 h-44 relative overflow-hidden cursor-pointer group" role="button" tabindex="0" aria-label="Upload main product image">
                 {% if product and product.image %}
                 <img id="image-preview" src="{{ product.image.url }}" class="w-full h-full object-cover">
                 {% else %}
                 <img id="image-preview" src="" style="display:none;" class="w-full h-full object-cover">
-                <div id="no-image" class="v-label text-ink-3">NO IMAGE</div>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if alternate_images %}
-        <div class="mb-10">
-            <p class="v-label text-ink-3 mb-4">ALTERNATE IMAGES</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {% for img in alternate_images %}
-                <div class="v-plate p-2 text-center group relative">
-                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" class="h-24 w-full object-cover mb-2">
-                    <p class="v-label text-ink-3 truncate">{{ img.alt_text|default:"NO DESCRIPTION" }}</p>
-                    {% if img.is_main %}<p class="v-label text-signal">MAIN</p>{% endif %}
-                    <div class="absolute inset-0 v-scrim opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center gap-2">
-                        {% if not img.is_main %}
-                        <a href="{% url 'dashboard:set_main_alternate_image' product.id img.id %}" class="v-btn v-btn--sm v-btn--secondary" title="Set as main">MAIN</a>
-                        {% endif %}
-                        <a href="{% url 'dashboard:delete_alternate_image' product.id img.id %}" class="v-btn v-btn--sm v-btn--destructive" onclick="return confirm('Delete this image?')" title="Delete">DEL</a>
-                    </div>
+                <div id="no-image" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-ink-3">
+                    <span class="text-2xl leading-none">+</span>
+                    <span class="v-label">UPLOAD IMAGE</span>
                 </div>
-                {% endfor %}
+                {% endif %}
+                <div class="absolute inset-0 v-scrim opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center">
+                    <span class="v-btn v-btn--sm v-btn--secondary">{% if product and product.image %}CHANGE{% else %}UPLOAD{% endif %}</span>
+                </div>
             </div>
+            <input id="id_image" type="file" name="image" accept="image/*" class="hidden">
+            <p id="main-image-name" class="v-label text-ink-3 mt-2"></p>
         </div>
-        {% endif %}
 
         <div class="v-hairline-t pt-8">
-            <p class="v-label text-ink-3 mb-2">ADD ALTERNATE IMAGES</p>
-            <p class="v-spec text-ink-2 mb-4">Upload different angles or views of the product.</p>
+            <p class="v-field-label">GALLERY — MORE PHOTOS OF THIS PRODUCT</p>
+            <p class="v-spec text-ink-2 mb-6">Add photos showing different angles and details. Move your mouse over a photo to see its buttons.</p>
 
-            <label for="alt-images-input" class="v-field-label">UPLOAD IMAGES</label>
-            <input id="alt-images-input" type="file" name="alternate_images" accept="image/*" multiple
-                   class="v-spec text-ink-1 w-full file:v-btn-label file:mr-4 file:h-11 file:px-4 file:border file:border-line-dark-strong file:bg-transparent file:text-ink-1 file:cursor-pointer">
-            <p class="v-label text-ink-3 mt-2">SELECT MULTIPLE (JPG, PNG, WEBP).</p>
+            <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 items-start">
+                {% for img in alternate_images %}
+                <div class="group">
+                    <div class="v-plate relative overflow-hidden aspect-square">
+                        <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 v-scrim opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center gap-2">
+                            <a href="{% url 'dashboard:delete_alternate_image' product.id img.id %}" class="v-btn v-btn--sm v-btn--destructive" onclick="return confirm('Delete this photo?')" title="Delete">DEL</a>
+                        </div>
+                    </div>
+                    <p class="v-label text-ink-3 truncate mt-2">{{ img.alt_text|default:"NO DESCRIPTION" }}</p>
+                </div>
+                {% endfor %}
 
-            <div id="altTextContainer" class="mt-6">
-                <p class="v-field-label">IMAGE DESCRIPTIONS — OPTIONAL</p>
-                <div id="dynamicAltFields"></div>
+                <button type="button" id="add-photo-tile"
+                        class="aspect-square border border-dashed border-line-dark-strong text-ink-3 hover:text-ink-1 hover:border-ink-1 transition-colors duration-fast flex flex-col items-center justify-center gap-2 cursor-pointer">
+                    <span class="text-2xl leading-none">+</span>
+                    <span class="v-label">ADD PHOTO</span>
+                </button>
             </div>
 
-            <div id="mainImageContainer" class="hidden mt-6">
-                <p class="v-field-label">SET MAIN ALTERNATE IMAGE</p>
-                <div id="mainImageOptions" class="space-y-2"></div>
-            </div>
+            <input id="alt-images-input" type="file" name="alternate_images" accept="image/*" multiple class="hidden">
+            <p class="v-label text-ink-3 mt-4">JPG, PNG OR WEBP. YOU CAN KEEP ADDING PHOTOS — NEW ONES ARE MARKED "NEW" AND UPLOADED WHEN YOU SAVE THE PRODUCT.</p>
         </div>
     </section>
 
@@ -337,9 +329,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ── Image preview ────────────────────────────────────────────────
-    const imageInput   = document.getElementById('id_image');
-    const imagePreview = document.getElementById('image-preview');
-    const noImage      = document.getElementById('no-image');
+    const imageInput    = document.getElementById('id_image');
+    const imagePreview  = document.getElementById('image-preview');
+    const noImage       = document.getElementById('no-image');
+    const mainTile      = document.getElementById('main-image-tile');
+    const mainImageName = document.getElementById('main-image-name');
+    if (mainTile && imageInput) {
+        mainTile.addEventListener('click', () => imageInput.click());
+        mainTile.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); imageInput.click(); }
+        });
+    }
     if (imageInput) {
         imageInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -351,6 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (noImage) noImage.style.display = 'none';
             };
             reader.readAsDataURL(file);
+            if (mainImageName) mainImageName.textContent = 'SELECTED: ' + file.name;
         });
     }
 
@@ -377,41 +378,70 @@ document.addEventListener('DOMContentLoaded', function () {
     if (comparePriceInput) comparePriceInput.addEventListener('input', calcDiscount);
     calcDiscount();
 
-    // ── Alternate images: dynamic alt-text + main-image radios ──────
-    const alternateInput   = document.getElementById('alt-images-input');
-    const dynamicAltFields = document.getElementById('dynamicAltFields');
-    const mainImgContainer = document.getElementById('mainImageContainer');
-    const mainImgOptions   = document.getElementById('mainImageOptions');
+    // ── Gallery: queued alternate images ─────────────────────────────
+    const alternateInput = document.getElementById('alt-images-input');
+    const galleryGrid    = document.getElementById('gallery-grid');
+    const addPhotoTile   = document.getElementById('add-photo-tile');
 
-    if (alternateInput) {
-        alternateInput.addEventListener('change', function (e) {
-            const files = e.target.files;
-            if (!dynamicAltFields || !mainImgOptions) return;
-            dynamicAltFields.innerHTML = '';
-            mainImgOptions.innerHTML = '';
+    if (alternateInput && galleryGrid && addPhotoTile) {
+        // Browsers replace a file input's selection on every picker session, so
+        // we keep our own list and rebuild input.files from it — letting staff
+        // add photos across several rounds without losing earlier picks.
+        let pendingFiles = [];
 
-            if (files.length > 0 && mainImgContainer) mainImgContainer.classList.remove('hidden');
-            else if (mainImgContainer) mainImgContainer.classList.add('hidden');
+        addPhotoTile.addEventListener('click', () => alternateInput.click());
 
-            Array.from(files).forEach((file, index) => {
-                const altDiv = document.createElement('div');
-                altDiv.className = 'mb-3';
-                altDiv.innerHTML = `
-                    <label class="v-label text-ink-3 block mb-1">IMAGE ${index + 1}: ${file.name}</label>
-                    <input type="text" name="alternate_alt_text" placeholder="DESCRIBE THIS VIEW"
-                           class="v-input !h-10 !text-[13px]"
-                           value="${file.name.split('.')[0].replace(/[_-]/g, ' ')}">
+        function syncInputFiles() {
+            const dt = new DataTransfer();
+            pendingFiles.forEach(p => dt.items.add(p.file));
+            alternateInput.files = dt.files;
+        }
+
+        function removePendingFile(index) {
+            URL.revokeObjectURL(pendingFiles[index].previewUrl);
+            pendingFiles.splice(index, 1);
+            syncInputFiles();
+            renderPendingTiles();
+        }
+
+        function renderPendingTiles() {
+            galleryGrid.querySelectorAll('[data-pending]').forEach(el => el.remove());
+
+            pendingFiles.forEach((pending, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'group';
+                tile.dataset.pending = '1';
+                tile.innerHTML = `
+                    <div class="v-plate relative overflow-hidden aspect-square">
+                        <img src="${pending.previewUrl}" alt="" class="w-full h-full object-cover">
+                        <span class="absolute top-2 left-2 v-label text-ink-3">NEW</span>
+                        <div class="absolute inset-0 v-scrim opacity-0 group-hover:opacity-100 transition-opacity duration-fast flex items-center justify-center gap-2">
+                            <button type="button" data-action="remove" class="v-btn v-btn--sm v-btn--destructive" title="Remove this photo">DEL</button>
+                        </div>
+                    </div>
+                    <input type="text" name="alternate_alt_text" placeholder="WHAT DOES THIS PHOTO SHOW?"
+                           class="v-input !h-9 !text-[12px] mt-2">
                 `;
-                dynamicAltFields.appendChild(altDiv);
-
-                const radioDiv = document.createElement('label');
-                radioDiv.className = 'flex items-center gap-2 v-spec text-ink-2 cursor-pointer mb-1';
-                radioDiv.innerHTML = `
-                    <input type="radio" name="alternate_is_main" value="${index}" class="v-check" ${index === 0 ? 'checked' : ''}>
-                    IMAGE ${index + 1}${index === 0 ? ' (DEFAULT)' : ''}
-                `;
-                mainImgOptions.appendChild(radioDiv);
+                const altInput = tile.querySelector('input[type="text"]');
+                altInput.value = pending.altText;
+                altInput.addEventListener('input', ev => { pending.altText = ev.target.value; });
+                tile.querySelector('[data-action="remove"]').addEventListener('click', () => removePendingFile(index));
+                galleryGrid.insertBefore(tile, addPhotoTile);
             });
+        }
+
+        alternateInput.addEventListener('change', function (e) {
+            Array.from(e.target.files).forEach(file => {
+                const duplicate = pendingFiles.some(p => p.file.name === file.name && p.file.size === file.size);
+                if (duplicate) return;
+                pendingFiles.push({
+                    file: file,
+                    altText: file.name.split('.')[0].replace(/[_-]/g, ' '),
+                    previewUrl: URL.createObjectURL(file),
+                });
+            });
+            syncInputFiles();
+            renderPendingTiles();
         });
     }
 
