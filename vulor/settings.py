@@ -280,7 +280,9 @@ ACCOUNT_FORMS = {
 }
 
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
-EMAIL_BACKEND = (
+# Explicit EMAIL_BACKEND wins (e.g. console backend for local dev);
+# otherwise Brevo API when a key is present, plain SMTP as the fallback.
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND") or (
     "services.brevo_email_backend.BrevoAPIEmailBackend"
     if BREVO_API_KEY
     else "django.core.mail.backends.smtp.EmailBackend"
