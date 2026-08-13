@@ -90,26 +90,21 @@ def edit_product(request, product_id):
 
 
 def _handle_alternate_images(request, product):
-    """Extract alternate image upload logic to avoid repetition."""
+    """Save uploaded gallery images."""
     if not request.FILES.get('alternate_images'):
         return
 
     files = request.FILES.getlist('alternate_images')
     alt_texts = request.POST.getlist('alternate_alt_text')
-    is_main_index = request.POST.get('alternate_is_main')
 
     for i, image_file in enumerate(files):
         if not image_file:
             continue
         alt_text = alt_texts[i] if i < len(alt_texts) else ''
-        is_main = str(i) == is_main_index
-        if is_main:
-            ProductImage.objects.filter(product=product).update(is_main=False)
         ProductImage.objects.create(
             product=product,
             image=image_file,
             alt_text=alt_text,
-            is_main=is_main
         )
 
 
@@ -122,18 +117,6 @@ def delete_alternate_image(request, product_id, image_id):
     image.delete()
     logger.info(f'Alternate image {image_id} deleted by {request.user.username}.')
     messages.success(request, 'Image deleted.')
-    return redirect('dashboard:edit_product', product_id=product_id)
-
-
-@staff_member_required
-def set_main_alternate_image(request, product_id, image_id):
-    product = get_object_or_404(Product, id=product_id)
-    ProductImage.objects.filter(product=product).update(is_main=False)
-    image = get_object_or_404(ProductImage, id=image_id)
-    image.is_main = True
-    image.save()
-    logger.info(f'Image {image_id} set as main for product {product_id} by {request.user.username}.')
-    messages.success(request, 'Main image updated.')
     return redirect('dashboard:edit_product', product_id=product_id)
 
 

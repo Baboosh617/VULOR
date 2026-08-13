@@ -12,7 +12,6 @@ from .products import (
     edit_product,
     delete_product,
     delete_alternate_image,
-    set_main_alternate_image,
 )
 from .customers import customer_list, edit_customer, toggle_user_active
 
@@ -32,7 +31,6 @@ __all__ = [
     "edit_product",
     "delete_product",
     "delete_alternate_image",
-    "set_main_alternate_image",
     "customer_list",
     "edit_customer",
     "toggle_user_active",
