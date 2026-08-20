@@ -280,10 +280,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (needsMeasure) buildMeasurementPreview();
     }
-    if (categorySelect) {
-        categorySelect.addEventListener('change', updateCategoryUI);
-        updateCategoryUI();
-    }
 
     // ── Measurement preview table ────────────────────────────────────
     const measureFields = {
@@ -333,6 +329,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
 
         preview.classList.remove('hidden');
+    }
+
+    // Wire up after measureFields exists — calling updateCategoryUI sooner
+    // crashes the whole script on cargo/sweatpants products.
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateCategoryUI);
+        updateCategoryUI();
     }
 
     // ── Image preview ────────────────────────────────────────────────
