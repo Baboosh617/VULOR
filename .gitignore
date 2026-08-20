@@ -66,4 +66,4 @@ django_cache/
 docs/
 CLAUDE.md
 *.CLAUDE.md
-/.claude/
+frontend/static/js/deploy-stamp.js

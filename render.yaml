@@ -6,6 +6,7 @@ services:
       pip install -r requirements.txt &&
       npm ci &&
       npm run build:css &&
+      TZ=Africa/Lagos date '+console.log("Deployed at: %Y-%m-%d %H:%M WAT");' > frontend/static/js/deploy-stamp.js &&
       python manage.py collectstatic --noinput --clear &&
       python manage.py migrate --noinput
     startCommand: gunicorn vulor.wsgi:application --timeout 120 --worker-class gthread --threads 2 --workers 1

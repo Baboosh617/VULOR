@@ -22,7 +22,7 @@
 </div>
 {% endif %}
 
-<form method="post" enctype="multipart/form-data" class="max-w-4xl space-y-12">
+<form id="product-form" method="post" enctype="multipart/form-data" class="max-w-4xl space-y-12">
     {% csrf_token %}
 
     <!-- 01 BASICS -->
@@ -214,14 +214,21 @@
                 </div>
                 {% endfor %}
 
-                <button type="button" id="add-photo-tile"
-                        class="aspect-square border border-dashed border-line-dark-strong text-ink-3 hover:text-ink-1 hover:border-ink-1 transition-colors duration-fast flex flex-col items-center justify-center gap-2 cursor-pointer">
+                <!-- A label, not a button: the browser opens the file chooser
+                     natively, so this works even before the page script loads. -->
+                <label for="alt-images-picker" id="add-photo-tile" role="button" tabindex="0"
+                       class="aspect-square border border-dashed border-line-dark-strong text-ink-3 hover:text-ink-1 hover:border-ink-1 transition-colors duration-fast flex flex-col items-center justify-center gap-2 cursor-pointer">
                     <span class="text-2xl leading-none">+</span>
                     <span class="v-label">ADD PHOTO</span>
-                </button>
+                </label>
             </div>
 
+            <!-- The named input carries the queued files on submit; the picker is a
+                 throwaway that gets reset before every open so its change event
+                 always fires, even when the same file is picked twice. -->
             <input id="alt-images-input" type="file" name="alternate_images" accept="image/*" multiple class="hidden">
+            <input id="alt-images-picker" type="file" accept="image/*" multiple class="hidden">
+            <p id="gallery-hint" class="v-label text-signal mt-4 hidden" aria-live="polite"></p>
             <p class="v-label text-ink-3 mt-4">JPG, PNG OR WEBP. YOU CAN KEEP ADDING PHOTOS — NEW ONES ARE MARKED "NEW" AND UPLOADED WHEN YOU SAVE THE PRODUCT.</p>
         </div>
     </section>
@@ -380,16 +387,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Gallery: queued alternate images ─────────────────────────────
     const alternateInput = document.getElementById('alt-images-input');
+    const pickerInput    = document.getElementById('alt-images-picker');
     const galleryGrid    = document.getElementById('gallery-grid');
     const addPhotoTile   = document.getElementById('add-photo-tile');
+    const galleryHint    = document.getElementById('gallery-hint');
+    let hintTimer;
 
-    if (alternateInput && galleryGrid && addPhotoTile) {
+    function showGalleryHint(text) {
+        if (!galleryHint) return;
+        galleryHint.textContent = text;
+        galleryHint.classList.remove('hidden');
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(() => galleryHint.classList.add('hidden'), 4000);
+    }
+
+    if (alternateInput && pickerInput && galleryGrid && addPhotoTile) {
         // Browsers replace a file input's selection on every picker session, so
-        // we keep our own list and rebuild input.files from it — letting staff
-        // add photos across several rounds without losing earlier picks.
+        // we keep our own list and rebuild the named input's files from it —
+        // letting staff add photos across several rounds without losing earlier picks.
         let pendingFiles = [];
 
-        addPhotoTile.addEventListener('click', () => alternateInput.click());
+        // Reset before the chooser opens so picking the same photo twice still registers.
+        pickerInput.addEventListener('click', () => { pickerInput.value = ''; });
+        addPhotoTile.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickerInput.click(); }
+        });
 
         function syncInputFiles() {
             const dt = new DataTransfer();
@@ -430,18 +452,42 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        alternateInput.addEventListener('change', function (e) {
+        pickerInput.addEventListener('change', function (e) {
+            let skipped = 0;
             Array.from(e.target.files).forEach(file => {
                 const duplicate = pendingFiles.some(p => p.file.name === file.name && p.file.size === file.size);
-                if (duplicate) return;
+                if (duplicate) { skipped++; return; }
                 pendingFiles.push({
                     file: file,
                     altText: file.name.split('.')[0].replace(/[_-]/g, ' '),
                     previewUrl: URL.createObjectURL(file),
                 });
             });
+            pickerInput.value = '';
             syncInputFiles();
             renderPendingTiles();
+            if (skipped > 0) {
+                showGalleryHint(skipped === 1
+                    ? 'THAT PHOTO IS ALREADY IN THE LIST, SO IT WAS NOT ADDED AGAIN.'
+                    : skipped + ' PHOTOS WERE ALREADY IN THE LIST, SO THEY WERE NOT ADDED AGAIN.');
+            }
+        });
+    }
+
+    // ── Saving state: disable buttons while the form uploads ─────────
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        const submitBtn = productForm.querySelector('button[type="submit"]');
+        let submitting = false;
+        productForm.addEventListener('submit', function (e) {
+            if (submitting) { e.preventDefault(); return; }
+            submitting = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-60');
+                submitBtn.textContent = 'SAVING… PLEASE WAIT';
+            }
+            if (addPhotoTile) addPhotoTile.classList.add('pointer-events-none', 'opacity-60');
         });
     }
 
